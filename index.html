@@ -1,0 +1,2405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEFL iBT® Practice</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #1a2744;
+    --blue: #2c4a9e;
+    --accent: #c8951a;
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --border: #ddd;
+    --text: #222;
+    --muted: #666;
+    --green: #2a7a4f;
+    --red: #b53b3b;
+  }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  #topbar { background: var(--navy); color: #fff; display: none; align-items: center; justify-content: space-between; padding: 10px 24px; position: sticky; top: 0; z-index: 100; }
+  #topbar.shown { display: flex; }
+  #topbar .logo { font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; }
+  #topbar .section-label { font-size: 0.82rem; opacity: 0.75; }
+  #topbar .timer { font-size: 1rem; font-weight: 600; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 4px; }
+  #progressbar { height: 4px; background: #ddd; }
+  #progressfill { height: 4px; background: var(--accent); transition: width 0.3s; width: 0%; }
+  .content-wrap { max-width: 820px; margin: 0 auto; padding: 40px 20px 120px; }
+  #startScreen h1 { font-size: 2rem; color: var(--navy); margin-bottom: 8px; }
+  #startScreen .subtitle { color: var(--muted); margin-bottom: 32px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .info-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .info-card h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+  .info-card p { font-size: 1rem; font-weight: 600; color: var(--navy); }
+  .mode-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .mode-option { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 18px 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+  .mode-option:hover { border-color: var(--blue); }
+  .mode-option.active { border-color: var(--blue); background: #eef2fb; }
+  .mode-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 6px; }
+  .mode-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+  .explanation-box { background: #f0f4ff; border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 16px; font-size: 0.9rem; color: var(--text); line-height: 1.5; }
+  .explanation-box strong { color: var(--navy); display: block; margin-bottom: 4px; }
+  .ctw-completed { background: #f0f4ff; border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-top: 16px; font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+  .ctw-completed strong { color: var(--navy); display: block; margin-bottom: 8px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .ctw-completed .filled-word { color: var(--blue); font-weight: 700; }
+  .btn { display: inline-block; background: var(--blue); color: #fff; border: none; padding: 12px 32px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .btn:hover { background: var(--navy); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn-outline { background: transparent; color: var(--blue); border: 2px solid var(--blue); }
+  .btn-outline:hover { background: var(--blue); color: #fff; }
+  #introScreen, #transitionScreen { text-align: center; }
+  #introScreen h2, #transitionScreen h2 { font-size: 1.6rem; color: var(--navy); margin-bottom: 12px; }
+  #introScreen p, #transitionScreen p { color: var(--muted); margin-bottom: 24px; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .path-badge { display: inline-block; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; margin-bottom: 16px; }
+  .path-hard { background: #fdecea; color: #b53b3b; }
+  .path-standard { background: #e8f4f0; color: #2a7a4f; }
+  .q-header { margin-bottom: 18px; }
+  .q-num { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .q-section-label { font-size: 1.1rem; font-weight: 600; color: var(--navy); margin-top: 4px; }
+  .ctw-instruction { background: #eef2ff; border-left: 4px solid var(--blue); padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 18px; font-size: 0.9rem; color: var(--navy); }
+  .ctw-paragraph { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; line-height: 2.1; font-size: 1rem; }
+  /* CTW per-letter inputs */
+  .ctw-blank { display: inline-flex; gap: 4px; vertical-align: baseline; }
+  .ctw-letter { width: 16px; border: none; border-bottom: 2px solid var(--blue); background: transparent; font-size: 1rem; font-family: inherit; color: var(--navy); outline: none; padding: 0; text-align: center; caret-color: var(--accent); transition: border-color 0.15s; }
+  .ctw-letter:focus { border-color: var(--accent); }
+  .ctw-letter.correct { border-color: var(--green); color: var(--green); }
+  .ctw-letter.wrong { border-color: var(--red); color: var(--red); }
+  .ctw-letter:disabled { cursor: default; opacity: 0.9; }
+
+  #pauseBtn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 6px 14px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600; margin-left: 12px; transition: background 0.2s; }
+  #pauseBtn:hover { background: rgba(255,255,255,0.28); }
+  .passage-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; font-size: 0.95rem; line-height: 1.75; margin-bottom: 18px; max-height: 280px; overflow-y: auto; }
+  .passage-box h4 { font-size: 1rem; margin-bottom: 10px; color: var(--navy); }
+  .q-text { font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn { background: var(--card); border: 2px solid var(--border); border-radius: 6px; padding: 12px 16px; text-align: left; font-size: 0.95rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; width: 100%; }
+  .option-btn:hover:not(:disabled) { border-color: var(--blue); }
+  .option-btn.selected { border-color: var(--blue); background: #eef2ff; }
+  .option-btn.correct { border-color: var(--green); background: #e8f4f0; color: var(--green); font-weight: 600; }
+  .option-btn.wrong { border-color: var(--red); background: #fdecea; color: var(--red); }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.selected-only { border-color: var(--blue); background: #eef2ff; }
+  #feedbackBar { position: fixed; bottom: 62px; left: 0; right: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem; text-align: center; display: none; z-index: 50; }
+  #feedbackBar.correct { background: #e8f4f0; color: var(--green); border-top: 1px solid #b2d8c5; }
+  #feedbackBar.wrong { background: #fdecea; color: var(--red); border-top: 1px solid #f0b8b8; }
+  #navBar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: none; justify-content: space-between; align-items: center; padding: 10px 24px; z-index: 100; }
+  #navBar.shown { display: flex; }
+  .q-counter { font-size: 0.85rem; color: var(--muted); }
+  #resultsScreen h2 { font-size: 1.8rem; color: var(--navy); margin-bottom: 8px; }
+  .score-row { display: flex; gap: 16px; margin: 24px 0; }
+  .score-card { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; text-align: center; }
+  .score-card .big { font-size: 2.4rem; font-weight: 700; color: var(--blue); }
+  .score-card .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 4px; }
+  .score-card-main { border-color: var(--blue); border-width: 2px; }
+  .score-card-main .big { font-size: 3rem; color: var(--navy); }
+  .cefr-label { font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-top: 4px; }
+  .review-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .review-item { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 0.88rem; }
+  .ri-top { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 4px; }
+  .ri-badge { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; margin-top: 2px; }
+  .ri-badge.ok { background: #e8f4f0; color: var(--green); }
+  .ri-badge.miss { background: #fdecea; color: var(--red); }
+  .ri-q { flex: 1; }
+  .ri-answer { font-size: 0.8rem; color: var(--muted); }
+  .ri-answer .corr { color: var(--green); font-weight: 600; }
+  .ri-answer .wrong2 { color: var(--red); font-weight: 600; }
+  .section-card { background:var(--card); border:2px solid var(--border); border-radius:12px; padding:22px 16px; text-align:center; cursor:pointer; transition:border-color 0.15s, box-shadow 0.15s; }
+  .section-card:hover { border-color:var(--blue); box-shadow:0 2px 12px rgba(44,74,158,0.12); }
+  .section-card-icon  { font-size:2rem; margin-bottom:8px; }
+  .section-card-title { font-size:1.05rem; font-weight:700; color:var(--navy); margin-bottom:4px; }
+  .section-card-sub   { font-size:0.8rem; color:var(--muted); }
+  .back-link { background:none; border:none; color:var(--blue); font-size:0.88rem; cursor:pointer; padding:0; margin-bottom:16px; display:inline-block; font-weight:600; }
+  .back-link:hover { text-decoration:underline; }
+  .spk-scenario { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin-bottom:16px; font-size:0.93rem; line-height:1.65; color:var(--text); }
+  .spk-sentence  { background:#f0f4ff; border-left:4px solid var(--blue); border-radius:0 8px 8px 0; padding:14px 18px; font-size:1.05rem; font-weight:600; color:var(--navy); margin-bottom:16px; line-height:1.6; }
+  .spk-controls  { display:flex; flex-direction:column; align-items:center; gap:14px; margin:20px 0; }
+  .spk-mic-btn   { width:72px; height:72px; border-radius:50%; border:none; font-size:2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s, transform 0.1s; box-shadow:0 3px 10px rgba(0,0,0,0.15); }
+  .spk-mic-btn.idle      { background:var(--navy); color:#fff; }
+  .spk-mic-btn.listening { background:#c0392b; color:#fff; animation:pulse 1.2s infinite; }
+  .spk-mic-btn.done      { background:var(--green); color:#fff; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+  .spk-status    { font-size:0.88rem; color:var(--muted); text-align:center; min-height:20px; }
+  .spk-countdown { font-size:1.8rem; font-weight:800; color:var(--accent); }
+  .spk-transcript-box { background:#f8f8f6; border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin-top:12px; font-size:0.93rem; line-height:1.65; }
+  .spk-transcript-box .label { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.8px; color:var(--muted); margin-bottom:6px; }
+  .spk-diff-correct { color:var(--green); font-weight:600; }
+  .spk-diff-wrong   { color:var(--red); text-decoration:line-through; }
+  .spk-diff-missing { color:var(--red); font-style:italic; }
+  .spk-score-row { display:flex; gap:16px; align-items:center; margin-top:12px; flex-wrap:wrap; }
+  .spk-score-pill { background:var(--navy); color:#fff; border-radius:20px; padding:6px 18px; font-size:1rem; font-weight:700; }
+  .spk-interview-q { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin-bottom:14px; }
+  .spk-interview-q .interviewer { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--blue); margin-bottom:6px; }
+  .spk-interview-q .question    { font-size:0.97rem; line-height:1.6; color:var(--text); }
+  .spk-ai-feedback { background:#f0f4ff; border:1px solid #c5d4f5; border-radius:10px; padding:16px 18px; margin-top:14px; }
+  .spk-ai-feedback h4 { color:var(--navy); margin-bottom:8px; font-size:0.92rem; }
+  .spk-band-row { display:flex; align-items:baseline; gap:8px; margin-bottom:8px; }
+  .spk-band-num { font-size:2rem; font-weight:800; color:var(--navy); }
+  .spk-band-label { font-size:0.88rem; color:var(--muted); }
+  .spk-feedback-text { font-size:0.87rem; line-height:1.6; color:var(--text); white-space:pre-wrap; }
+  .bas-context { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin-bottom:18px; font-size:1rem; font-weight:600; color:var(--navy); }
+  .bas-sentence-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px; }
+  .bas-affix { font-size:1rem; font-weight:600; color:var(--navy); white-space:nowrap; }
+  .bas-slots { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; min-height:44px; }
+  .bas-slot { min-width:72px; height:38px; background:#fff; border:2px solid var(--blue); border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:0.9rem; color:var(--navy); cursor:pointer; padding:0 10px; transition:background 0.12s, border-color 0.12s; user-select:none; white-space:nowrap; }
+  .bas-slot.empty { background:#f0f4ff; border-style:dashed; color:var(--muted); cursor:default; }
+  .bas-slot.filled:hover { background:#dce8ff; }
+  .bas-slot.drag-over { background:#c5d4f5; border-style:solid; border-color:var(--accent); }
+  .bas-slot-ph { color:#bbb; font-size:0.85rem; }
+  .bas-slot-gap { width:2px; }
+  .bas-slot.correct-slot { background:#e8f4f0; border-color:var(--green); color:var(--green); border-style:solid; }
+  .bas-slot.wrong-slot  { background:#fdecea; border-color:var(--red);   color:var(--red);   border-style:solid; }
+  .bas-tiles  { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; padding:12px; background:#f8f8f6; border-radius:8px; border:1px solid var(--border); }
+  .bas-tile   { background:var(--navy); color:#fff; border:none; border-radius:5px; padding:8px 14px; font-size:0.9rem; cursor:grab; transition:opacity 0.15s, background 0.15s; user-select:none; white-space:nowrap; }
+  .bas-tile:hover   { background:var(--blue); }
+  .bas-tile.used    { opacity:0.22; cursor:not-allowed; pointer-events:none; }
+  .bas-answer-row { font-size:0.88rem; margin-top:10px; padding:8px 12px; background:#f0f4ff; border-radius:6px; }
+  /* ── WRITING – EMAIL ── */
+  .email-scenario { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin-bottom:16px; font-size:0.93rem; line-height:1.65; }
+  .email-bullets  { margin:10px 0 0 18px; }
+  .email-bullets li { margin-bottom:4px; }
+  .email-header   { background:#f0f4ff; border:1px solid #c5d4f5; border-radius:8px; padding:10px 16px; margin-bottom:10px; font-size:0.88rem; }
+  .email-header span { font-weight:700; color:var(--navy); margin-right:6px; }
+  .writing-area   { width:100%; min-height:180px; border:1.5px solid var(--border); border-radius:8px; padding:12px 14px; font-size:0.95rem; font-family:inherit; resize:vertical; line-height:1.6; }
+  .writing-area:focus { outline:none; border-color:var(--blue); }
+  .wc-bar { font-size:0.8rem; color:var(--muted); margin-top:6px; }
+  .wc-bar span { font-weight:700; color:var(--navy); }
+  /* ── WRITING – DISCUSSION ── */
+  .discussion-prompt { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin-bottom:14px; }
+  .prof-post  { display:flex; gap:14px; align-items:flex-start; margin-bottom:6px; }
+  .prof-avatar{ width:52px; height:52px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
+  .prof-text  { font-size:0.93rem; line-height:1.65; }
+  .student-posts { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .student-post  { background:#f8f8f8; border-left:3px solid var(--blue); border-radius:0 8px 8px 0; padding:12px 14px; display:flex; gap:12px; }
+  .student-avatar{ width:38px; height:38px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+  .student-text  { font-size:0.88rem; line-height:1.6; }
+  /* ── WRITING – AI FEEDBACK ── */
+  .ai-feedback-box { background:#f0f4ff; border:1px solid #c5d4f5; border-radius:10px; padding:18px 20px; margin-top:16px; }
+  .ai-feedback-box h4 { color:var(--navy); margin-bottom:10px; font-size:0.95rem; }
+  .band-display { font-size:2rem; font-weight:800; color:var(--navy); }
+  .band-display span { font-size:1rem; font-weight:400; color:var(--muted); }
+  .ai-feedback-text { font-size:0.88rem; line-height:1.65; color:var(--text); margin-top:8px; white-space:pre-wrap; }
+  .scoring-btn { background:var(--accent); color:#fff; border:none; border-radius:6px; padding:10px 22px; font-size:0.9rem; font-weight:600; cursor:pointer; margin-top:10px; }
+  .scoring-btn:disabled { opacity:0.6; cursor:default; }
+  /* ── WRITING RESULTS ── */
+  .writing-results-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:16px 0; }
+  .wr-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px; text-align:center; }
+  .wr-card .big { font-size:1.8rem; font-weight:800; color:var(--navy); }
+  .wr-card .label { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+  .audio-player { background: var(--navy); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; color: #fff; }
+  .audio-play-btn { background: var(--accent); border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .audio-play-btn:hover { background: #a87618; }
+  .audio-play-btn:disabled { background: #555; cursor: default; }
+  .audio-info { flex: 1; }
+  .audio-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 3px; }
+  .audio-subtitle { font-size: 0.8rem; opacity: 0.7; }
+  .audio-status { font-size: 0.8rem; opacity: 0.8; min-width: 70px; text-align: right; }
+  .transcript-box { background: #f8f8f6; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-size: 0.92rem; line-height: 1.7; color: var(--text); }
+  .transcript-box .speaker { font-weight: 700; color: var(--blue); }
+  .transcript-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
+  .listen-choose-options { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .locked-msg { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 12px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div>
+    <div class="logo">TOEFL iBT® Practice</div>
+    <div class="section-label" id="topbarSectionLabel">Reading Section</div>
+  </div>
+  <div style="display:flex;align-items:center">
+    <div id="timerDisplay" class="timer">36:00</div>
+    <button id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
+  </div>
+</div>
+
+<div id="progressbar"><div id="progressfill"></div></div>
+
+<!-- HOME: section picker only -->
+<div id="startScreen" class="screen active content-wrap">
+  <h1>TOEFL iBT® Practice</h1>
+  <p class="subtitle">Select a section to begin</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">
+    <div class="section-card" onclick="goToDetail('reading')">
+      <div class="section-card-icon">📖</div>
+      <div class="section-card-title">Reading</div>
+      <div class="section-card-sub">2 adaptive modules</div>
+    </div>
+    <div class="section-card" onclick="goToDetail('listening')">
+      <div class="section-card-icon">🎧</div>
+      <div class="section-card-title">Listening</div>
+      <div class="section-card-sub">2 adaptive modules</div>
+    </div>
+    <div class="section-card" onclick="goToDetail('writing')">
+      <div class="section-card-icon">✍️</div>
+      <div class="section-card-title">Writing</div>
+      <div class="section-card-sub">12 questions · 30 min</div>
+    </div>
+    <div class="section-card" onclick="goToDetail('speaking')">
+      <div class="section-card-icon">🎤</div>
+      <div class="section-card-title">Speaking</div>
+      <div class="section-card-sub">11 questions · 20 min</div>
+    </div>
+  </div>
+  <button onclick="testTTS()" style="margin-top:20px;background:#444;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:0.9rem;">🔊 Test TTS</button>
+  <div id="ttsTestResult" style="margin-top:8px;font-size:0.85rem;color:var(--muted);min-height:20px;"></div>
+</div>
+
+<!-- DETAIL: info + mode + begin -->
+<div id="detailScreen" class="screen content-wrap">
+  <button class="back-link" onclick="showScreen('startScreen')">← All sections</button>
+  <div id="detailIcon" style="font-size:2.8rem;margin:10px 0 4px;"></div>
+  <h2 id="detailTitle" style="color:var(--navy);margin-bottom:4px;"></h2>
+  <p id="detailSub" style="color:var(--muted);font-size:0.9rem;margin-bottom:20px;"></p>
+  <div class="info-grid" id="detailInfoGrid" style="margin-bottom:20px;"></div>
+  <p id="detailAdaptiveNote" style="color:var(--muted);font-size:0.88rem;margin-bottom:20px;display:none;">
+    Score ≥70% on Module 1 to unlock the Advanced path in Module 2.
+  </p>
+  <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;font-weight:600;">Mode</p>
+  <div class="mode-selector" style="margin-bottom:24px;">
+    <div class="mode-option active" id="modeOptPractice" onclick="selectMode('practice')">
+      <div class="mode-title">📝 Practice</div>
+      <div class="mode-desc">Feedback after each answer.</div>
+    </div>
+    <div class="mode-option" id="modeOptTest" onclick="selectMode('test')">
+      <div class="mode-title">🎯 Test</div>
+      <div class="mode-desc">Results at the end only.</div>
+    </div>
+  </div>
+  <button class="btn" onclick="startTest()">Begin →</button>
+</div>
+
+<!-- INTRO -->
+<div id="introScreen" class="screen content-wrap">
+  <h2 id="introTitle">Module 1</h2>
+  <p id="introDesc">Answer all questions. You have 36 minutes.</p>
+  <button class="btn" onclick="startModule()">Start Module</button>
+</div>
+
+<!-- QUESTION -->
+<div id="questionScreen" class="screen content-wrap">
+  <div class="q-header">
+    <div class="q-num" id="qNum"></div>
+    <div class="q-section-label" id="qSection"></div>
+  </div>
+  <div id="qBody"></div>
+</div>
+
+<!-- TRANSITION -->
+<div id="transitionScreen" class="screen content-wrap">
+  <h2>Module 1 Complete</h2>
+  <div id="transitionScore" style="font-size:1.05rem;margin-bottom:16px;color:var(--text)"></div>
+  <div id="pathBadge" style="margin-bottom:12px"></div>
+  <p id="transitionMsg"></p>
+  <button class="btn" onclick="beginModule2()">Continue to Module 2 →</button>
+</div>
+
+<!-- RESULTS -->
+<div id="resultsScreen" class="screen content-wrap">
+  <h2>Test Complete</h2>
+  <div class="score-row">
+    <div class="score-card score-card-main"><div class="big" id="totalScore">—</div><div class="label">TOEFL Band</div><div class="cefr-label" id="cefrLabel">—</div></div>
+    <div class="score-card"><div class="big" id="m1Score">—</div><div class="label">Module 1</div></div>
+    <div class="score-card"><div class="big" id="m2Score">—</div><div class="label">Module 2</div></div>
+  </div>
+  <div id="pathTakenBadge" style="text-align:center;margin:8px 0 16px;"></div>
+  <div id="bandNote" style="text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto;"></div>
+  <button class="btn" onclick="restartTest()">Restart Test</button>
+  <h3 style="margin-top:28px;color:var(--navy);">Answer Review</h3>
+  <div class="review-list" id="reviewList"></div>
+</div>
+
+<div id="feedbackBar"></div>
+<div id="navBar">
+  <button class="btn btn-outline" id="backBtn" onclick="goBack()">← Back</button>
+  <span class="q-counter" id="qCounter"></span>
+  <button class="btn" id="nextBtn" onclick="goNext()">Next →</button>
+</div>
+
+<script>
+// ── TTS DIAGNOSTIC ────────────────────────────────────────────────────────────
+function testTTS() {
+  const el = document.getElementById('ttsTestResult');
+  const set = msg => { el.textContent = msg; console.log('[TTS test]', msg); };
+
+  set('Checking speechSynthesis...');
+  if (!window.speechSynthesis) { set('❌ speechSynthesis not available'); return; }
+  set('✓ speechSynthesis exists. Calling speak()...');
+
+  const utt = new SpeechSynthesisUtterance('Testing. One two three.');
+  utt.lang  = 'en-US';
+  utt.rate  = 1;
+  utt.onstart = () => set('✅ onstart — audio is playing!');
+  utt.onend   = () => set('✅ onend — finished.');
+  utt.onerror = e => set('❌ onerror: ' + e.error);
+  window.speechSynthesis.speak(utt);
+  set('speak() called. pending=' + window.speechSynthesis.pending + ' speaking=' + window.speechSynthesis.speaking + ' paused=' + window.speechSynthesis.paused);
+}
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const M1 = {
+  ctw: {
+    type:'ctw', sectionLabel:'Complete the Words',
+    instruction:'Complete each word in the paragraph. The first letter(s) are shown. Type the missing letters — one letter per box.',
+    completedParagraph:`Urban <span class="filled-word">planning</span> has transformed the way cities grow and function. Effective city <span class="filled-word">design</span> takes into account the needs of residents, providing them with essential <span class="filled-word">services</span> such as clean water, reliable <span class="filled-word">transport</span>, and accessible medical <span class="filled-word">facilities</span>. Parks and green <span class="filled-word">spaces</span> play an important role in improving <span class="filled-word">quality</span> of life, giving citizens a place to <span class="filled-word">relax</span> and connect with nature. Modern <span class="filled-word">cities</span> also face challenges related to <span class="filled-word">population</span> growth and housing <span class="filled-word">shortages</span>. As more people move from rural <span class="filled-word">areas</span> to cities, local <span class="filled-word">governments</span> must find sustainable <span class="filled-word">solutions</span> to manage this inflow and ensure that infrastructure <span class="filled-word">remains</span> adequate for all.`,
+    // text: array of segments. Each segment is either a string or a blank object {id, prefix, answer, suffix}
+    segments:[
+      'Urban ',
+      {id:'b1',prefix:'pl',answer:'anning',suffix:''},
+      ' has transformed the way cities grow and function. Effective city ',
+      {id:'b2',prefix:'de',answer:'si',suffix:'gn'},
+      ' takes into account the needs of residents, providing them with essential ',
+      {id:'b3',prefix:'ser',answer:'vi',suffix:'ces'},
+      ' such as clean water, reliable ',
+      {id:'b4',prefix:'tr',answer:'ans',suffix:'port'},
+      ', and accessible medical ',
+      {id:'b5',prefix:'fa',answer:'cili',suffix:'ties'},
+      '. Parks and green ',
+      {id:'b6',prefix:'sp',answer:'a',suffix:'ces'},
+      ' play an important role in improving ',
+      {id:'b7',prefix:'qual',answer:'i',suffix:'ty'},
+      ' of life, giving citizens a place to ',
+      {id:'b8',prefix:'re',answer:'la',suffix:'x'},
+      ' and connect with nature. Modern ',
+      {id:'b9',prefix:'ci',answer:'ti',suffix:'es'},
+      ' also face challenges related to ',
+      {id:'b10',prefix:'pop',answer:'ul',suffix:'ation'},
+      ' growth and housing ',
+      {id:'b11',prefix:'sh',answer:'ort',suffix:'ages'},
+      '. As more people move from rural ',
+      {id:'b12',prefix:'ar',answer:'e',suffix:'as'},
+      ' to cities, local ',
+      {id:'b13',prefix:'gov',answer:'ern',suffix:'ments'},
+      ' must find sustainable ',
+      {id:'b14',prefix:'so',answer:'lu',suffix:'tions'},
+      ' to manage this inflow and ensure that infrastructure ',
+      {id:'b15',prefix:'re',answer:'ma',suffix:'ins'},
+      ' adequate for all.',
+    ]
+  },
+  email1:{
+    type:'email', sectionLabel:'Read in Daily Life — Email',
+    passage:`<b>From:</b> Lisa Carter &lt;l.carter@greenvalleyhoa.org&gt;<br><b>To:</b> Residents, Green Valley Community<br><b>Subject:</b> Upcoming Road Resurfacing — Action Required<br><br>Dear Residents,<br><br>I am writing to inform you that the scheduled road resurfacing project will begin on Monday, March 16. The work will affect Oak Lane and Birch Street and is expected to last approximately five days.<br><br>During this period, parking on those streets will not be permitted between 7 a.m. and 6 p.m. Residents who normally park there should make alternative arrangements. A temporary parking area will be available at the community center lot on Maple Avenue.<br><br>The construction crew will also need access to the drainage covers along these roads. Please do not place any objects near drainage openings before or during the project.<br><br>If you have any questions, please contact the HOA office at office@greenvalleyhoa.org.<br><br>Regards,<br>Lisa Carter<br>Community Manager, Green Valley HOA`,
+    questions:[
+      {q:'What is the main purpose of this email?',options:['To announce a road safety emergency','To inform residents about upcoming construction work','To remind residents to pay HOA fees','To request volunteers for a neighborhood cleanup'],answer:1,
+        explanation:'The email opens by stating that a road resurfacing project will begin on March 16. The entire email provides logistics about the construction — parking, drainage access, and contact info. There is no emergency, fee reminder, or volunteer request.'},
+      {q:'Where can residents park during the project?',options:['On Birch Street','At a nearby shopping center','At the community center lot on Maple Avenue','On any other street they choose'],answer:2,
+        explanation:'The email explicitly states: "A temporary parking area will be available at the community center lot on Maple Avenue." Birch Street is one of the affected roads where parking is banned, not an alternative.'},
+      {q:'What are residents asked NOT to do?',options:['Drive on Oak Lane','Contact the HOA office','Place objects near drainage covers','Use the community center lot'],answer:2,
+        explanation:'The email says "Please do not place any objects near drainage openings before or during the project." The HOA office is actually where residents are encouraged to direct questions, and the community center lot is the suggested parking alternative.'},
+    ]
+  },
+  email2:{
+    type:'email', sectionLabel:'Read in Daily Life — Email',
+    passage:`<b>From:</b> Daniel Nwosu &lt;d.nwosu@brightstart.edu&gt;<br><b>To:</b> Sarah Yamamoto &lt;s.yamamoto@brightstart.edu&gt;<br><b>Subject:</b> Re: Library Catalogue System Upgrade<br><br>Hi Sarah,<br><br>Thank you for sending the summary of the proposed catalogue system upgrade. I agree that the new system would improve search functionality for both students and staff.<br><br>However, I have concerns about the rollout timeline. The proposed switch date of April 1 falls during mid-term exam week — one of our busiest periods. Migrating the catalogue then could disrupt students' access to research materials when they need them most.<br><br>I'd suggest postponing the migration to the week of April 14, when exams are finished and usage is typically lower. This would also give the IT team more time to test the system and train library staff.<br><br>Please let me know if you're available to discuss this on Thursday or Friday.<br><br>Best,<br>Daniel Nwosu<br>Head Librarian, Brightstart Academy`,
+    questions:[
+      {q:"What is Daniel's main concern?",options:['The new system is too expensive','The rollout is scheduled during a busy exam period','The IT team is not qualified','The system will not improve search functionality'],answer:1,
+        explanation:'Daniel explicitly states he is concerned about the April 1 switch date coinciding with mid-term exam week. He agrees the new system would improve search functionality, so option D is the opposite of what he says. Cost and IT qualifications are never mentioned.'},
+      {q:'What does Daniel suggest?',options:['Canceling the upgrade entirely','Using the old system for another year','Moving the migration date to after exams','Hiring more IT staff'],answer:2,
+        explanation:'Daniel proposes postponing the migration to the week of April 14, after exams are finished. He does not suggest cancellation, using the old system long-term, or hiring staff — he even says the later date gives the existing IT team more time to test and train.'},
+      {q:'Why does Daniel think April 14 is a better date?',options:['The IT team will be on vacation before then','Library usage is typically lower after exams','The documentation will not be ready until then','Students specifically requested it'],answer:1,
+        explanation:'Daniel says that after exams, "usage is typically lower," making it a safer time to migrate. He also notes it gives the IT team more time — but the reason the date itself is better is lower traffic, not a vacation schedule or documentation deadline.'},
+    ]
+  },
+  academic:{
+    type:'academic', sectionLabel:'Read an Academic Passage',
+    passage:`<h4>The Psychology of Decision Fatigue</h4>Decision fatigue refers to the deteriorating quality of decisions made after a long session of decision-making. The concept suggests that human mental energy is finite: the more choices a person must make, the worse their subsequent decision-making becomes. This effect has been observed in courtroom judges, hospital staff, and retail shoppers alike.\n\nResearch shows that people facing decision fatigue tend to choose the default option or make impulsive decisions. In a famous study of Israeli parole hearings, judges were far more likely to grant parole early in the day or just after a break — when mental energy was higher — than later in a long session. By the end of stretched periods without a break, denial became the default outcome.\n\nThe commercial world exploits this phenomenon. Retailers place high-margin items near checkout counters, knowing that shoppers who have already made many decisions are more susceptible to impulse buying. Digital interfaces are similarly designed to capitalize on user fatigue.\n\nAddressing decision fatigue requires individual strategies and structural changes. Individuals can make important decisions earlier in the day, simplify routine choices, or delegate minor ones. Organizations can redesign processes to reduce the decisions required of workers during high-stakes periods.`,
+    questions:[
+      {q:'What is the main idea of the passage?',options:['Judges make poor decisions in Israeli courts','Making many decisions reduces the quality of later ones','Retailers manipulate customers through store layouts','Impulse buying is caused by poor self-control'],answer:1,
+        explanation:'The passage defines decision fatigue as a deterioration in decision quality after prolonged decision-making. The Israeli parole study and the retail examples are supporting evidence for this central idea, not the main point themselves.'},
+      {q:'What are the two main behaviors linked to decision fatigue?',options:['Procrastination and perfectionism','Choosing defaults and making impulsive decisions','Delegation and avoidance','Overthinking and confusion'],answer:1,
+        explanation:'The passage states: "people facing decision fatigue tend to choose the default option or make impulsive decisions." These two behaviors — defaulting and impulse choices — are explicitly named in paragraph two.'},
+      {q:'What does the Israeli parole study suggest?',options:['Judges are biased against certain prisoners','Physical surroundings affect legal outcomes','Mental energy levels influence decision quality','Parole rates are consistently low all day'],answer:2,
+        explanation:'The study shows parole was granted more often early in the day or after breaks — when mental energy was higher. This directly illustrates that cognitive energy affects decision quality, not physical surroundings or personal bias.'},
+      {q:'The word "finite" in the first paragraph most likely means:',options:['Unlimited','Complex','Limited','Flexible'],answer:2,
+        explanation:'"Finite" contrasts with "unlimited" and is used to explain why decision quality deteriorates — if mental energy were unlimited, fatigue would not occur. The context ("the more choices a person must make, the worse their decisions") confirms finite means limited/exhaustible.'},
+      {q:'Which of the following is NOT mentioned as a way to address decision fatigue?',options:['Making important decisions in the morning','Simplifying routine choices','Taking more frequent vacations','Redesigning work processes'],answer:2,
+        explanation:'The passage mentions: making important decisions earlier in the day, simplifying routine choices, delegating minor ones, and redesigning processes. Taking vacations is never suggested — it is a plausible-sounding distractor.'},
+    ]
+  }
+};
+
+const M2_HARD = {
+  ctw:{
+    type:'ctw', sectionLabel:'Complete the Words',
+    instruction:'Complete each word in the paragraph. The first letter(s) are shown. Type the missing letters — one letter per box.',
+    completedParagraph:`The human <span class="filled-word">immune</span> system is a <span class="filled-word">sophisticated</span> network of cells, tissues, and organs that defend the body against <span class="filled-word">harmful</span> invaders. When foreign <span class="filled-word">substances</span> such as bacteria or viruses enter the body, <span class="filled-word">specialized</span> white blood cells called <span class="filled-word">lymphocytes</span> detect them. Some lymphocytes <span class="filled-word">produce</span> proteins known as <span class="filled-word">antibodies</span>, which bind to the foreign substances and mark them for <span class="filled-word">destruction</span>. This <span class="filled-word">process</span> involves <span class="filled-word">remarkable</span> <span class="filled-word">specificity</span>: each antibody is designed to <span class="filled-word">recognize</span> a particular <span class="filled-word">invader</span>. Over time, the immune system develops <span class="filled-word">memory</span>, allowing it to <span class="filled-word">respond</span> more <span class="filled-word">efficiently</span> to pathogens previously <span class="filled-word">encountered</span>. This is the principle behind <span class="filled-word">vaccines</span>.`,
+    segments:[
+      'The human ',
+      {id:'b1',prefix:'im',answer:'mu',suffix:'ne'},
+      ' system is a ',
+      {id:'b2',prefix:'soph',answer:'istic',suffix:'ated'},
+      ' network of cells, tissues, and organs that defend the body against ',
+      {id:'b3',prefix:'harm',answer:'f',suffix:'ul'},
+      ' invaders. When foreign ',
+      {id:'b4',prefix:'sub',answer:'stan',suffix:'ces'},
+      ' such as bacteria or viruses enter the body, ',
+      {id:'b5',prefix:'spec',answer:'ial',suffix:'ized'},
+      ' white blood cells called ',
+      {id:'b6',prefix:'lymph',answer:'oc',suffix:'ytes'},
+      ' detect them. Some lymphocytes ',
+      {id:'b7',prefix:'pro',answer:'du',suffix:'ce'},
+      ' proteins known as ',
+      {id:'b8',prefix:'ant',answer:'ibod',suffix:'ies'},
+      ', which bind to the foreign substances and mark them for ',
+      {id:'b9',prefix:'dest',answer:'ruc',suffix:'tion'},
+      '. This ',
+      {id:'b10',prefix:'pr',answer:'oc',suffix:'ess'},
+      ' involves ',
+      {id:'b11',prefix:'rem',answer:'ark',suffix:'able'},
+      ' ',
+      {id:'b12',prefix:'spec',answer:'ific',suffix:'ity'},
+      ': each antibody is designed to ',
+      {id:'b13',prefix:'rec',answer:'og',suffix:'nize'},
+      ' a particular ',
+      {id:'b14',prefix:'inv',answer:'ad',suffix:'er'},
+      '. Over time, the immune system develops ',
+      {id:'b15',prefix:'mem',answer:'or',suffix:'y'},
+      ', allowing it to ',
+      {id:'b16',prefix:'resp',answer:'on',suffix:'d'},
+      ' more ',
+      {id:'b17',prefix:'eff',answer:'icient',suffix:'ly'},
+      ' to threats it has ',
+      {id:'b18',prefix:'enc',answer:'ount',suffix:'ered'},
+      ' before — the mechanism behind ',
+      {id:'b19',prefix:'vac',answer:'cin',suffix:'es'},
+      '.',
+    ]
+  },
+  email1:{
+    type:'email', sectionLabel:'Read in Daily Life — Email',
+    passage:`<b>From:</b> Priya Mehta &lt;priya.mehta@novacorp.com&gt;<br><b>To:</b> All Staff<br><b>Subject:</b> Mandatory Data Security Training — Deadline Extended<br><br>Dear Team,<br><br>All staff members were required to complete the annual Data Security Training by February 28. Due to the higher-than-expected volume of support requests this month, the deadline has been extended to March 15.<br><br>Please note that this extension applies only to the online self-paced module. Employees required to attend the advanced in-person workshop — specifically those in Finance, Legal, and IT — should still attend the session scheduled for March 5, as that date will not change.<br><br>If you have already completed the training, no further action is required. Others can access the training portal through the company intranet under "Compliance."<br><br>Contact HR at hr@novacorp.com with any questions.<br><br>Best regards,<br>Priya Mehta<br>HR Compliance Manager`,
+    questions:[
+      {q:'Why was the training deadline extended?',options:['Staff found the training too difficult','An unusually high number of support requests','Technical issues with the training portal','A change in compliance requirements'],answer:1,
+        explanation:'The email states the extension is due to "the higher-than-expected volume of support requests this month." There is no mention of difficulty, technical problems, or compliance changes.'},
+      {q:'Which employees must still attend on March 5?',options:['All staff members','Employees who completed the online module','Staff in Finance, Legal, and IT','Only new employees'],answer:2,
+        explanation:'The email specifies that the extension applies only to the online module. Employees in Finance, Legal, and IT must still attend the March 5 in-person workshop, which "will not change."'},
+      {q:'What should employees who already finished the training do?',options:['Register again to confirm completion','Contact HR to receive a certificate','No action is required','Attend the in-person workshop regardless'],answer:2,
+        explanation:'The email explicitly states: "If you have already completed the training, no further action is required." Re-registration, certificates, and attending the workshop are not mentioned as requirements for those who have finished.'},
+    ]
+  },
+  email2:{
+    type:'email', sectionLabel:'Read in Daily Life — Email',
+    passage:`<b>From:</b> Thomas Reyes &lt;t.reyes@halcyonstudios.com&gt;<br><b>To:</b> Clara Obi &lt;c.obi@halcyonstudios.com&gt;<br><b>Subject:</b> Concerns Regarding the Dalton Account Proposal<br><br>Hi Clara,<br><br>I've reviewed the proposal for the Dalton account and, while the effort is clear, I have reservations before we send it to the client.<br><br>My main concern is the projected timeline. The proposal estimates full delivery in eight weeks, but given the scope — particularly the three-platform integration and custom analytics dashboard — eleven to twelve weeks is more realistic. Promising an aggressive deadline could create serious problems if we miss it.<br><br>I'm also uncertain about the pricing on page 7. The cost estimate for the analytics component seems low relative to the hours this type of work typically takes. I'd recommend checking with the development team before we finalize that number.<br><br>Could we find time this week to go through the proposal together? I'm available Wednesday afternoon or Thursday morning.<br><br>Thanks,<br>Thomas`,
+    questions:[
+      {q:"What is Thomas' main concern?",options:['The proposal is poorly written','The timeline estimate may be too short','The client has not been properly consulted','The analytics dashboard is unnecessary'],answer:1,
+        explanation:'Thomas says his "main concern is the projected timeline" — eight weeks is too optimistic for the scope. He does not criticise the writing quality, question client consultation, or suggest removing the dashboard.'},
+      {q:'What does Thomas suggest about the pricing?',options:['Raise it immediately before sending','Check it with the development team first','It is accurate and should not change','It is too high and may lose the client'],answer:1,
+        explanation:'Thomas says the analytics cost "seems low" and recommends checking with the development team before finalising the number. He does not say to raise it immediately or that it is too high.'},
+      {q:'What does Thomas propose as a next step?',options:['Send the proposal as is','Withdraw from the Dalton account','Meet to review the proposal together','Ask Clara to rewrite the entire proposal'],answer:2,
+        explanation:'Thomas asks Clara if they can "find time this week to go through the proposal together" and offers Wednesday or Thursday. He is not suggesting sending it immediately, withdrawing, or a full rewrite.'},
+    ]
+  },
+  academic:{
+    type:'academic', sectionLabel:'Read an Academic Passage',
+    passage:`<h4>Cognitive Load Theory and Learning Design</h4>Cognitive load theory, developed by John Sweller in the 1980s, proposes that the human brain has a limited capacity for processing new information. Working memory — which holds and manipulates information during active learning — can become overwhelmed when task demands exceed its capacity, a state called cognitive overload. When overload occurs, learning is impaired.\n\nThe theory identifies three types of cognitive load. Intrinsic load reflects the inherent complexity of the material and is determined by how many elements a learner must process simultaneously. Extraneous load is caused by poor instructional design — unnecessary complexity added by how material is presented, not by the material itself. Germane load is the mental effort devoted to building cognitive schemas, the internal structures through which knowledge is organized.\n\nEffective instructional design minimizes extraneous load while managing intrinsic load appropriately. Worked examples — where learners study fully solved problems before attempting their own — significantly reduce extraneous load for novices. As expertise grows, however, these same techniques can become counterproductive, a phenomenon called the expertise reversal effect.\n\nThe theory has influenced classroom teaching, interface design, and military training. By understanding how the mind processes information, educators and designers can create environments that work with, rather than against, the brain's natural limitations.`,
+    questions:[
+      {q:'What is cognitive load theory\'s central claim?',options:['Intelligence is fixed','Working memory has limited capacity for processing information','Complex subjects should be avoided early in education','Learners need emotional motivation to retain knowledge'],answer:1,
+        explanation:'The passage opens by stating the theory "proposes that the human brain has a limited capacity for processing new information," specifically that working memory can be overwhelmed. Intelligence, avoidance of complexity, and emotional motivation are not part of the theory as described.'},
+      {q:'What causes extraneous cognitive load?',options:['The inherent complexity of the subject','Poor instructional design','Lack of learner motivation','Over-reliance on worked examples'],answer:1,
+        explanation:'The passage explicitly defines extraneous load as "caused by poor instructional design — unnecessary complexity added by how material is presented." Intrinsic load is caused by subject complexity; motivation is not mentioned as a type of load.'},
+      {q:'What is the "expertise reversal effect"?',options:['Experts forgetting basic skills over time','Techniques helpful for novices becoming counterproductive for experts','A reversal of learning gains after a long break','Experts performing worse than beginners on unfamiliar tasks'],answer:1,
+        explanation:'The passage says that as expertise grows, techniques like worked examples "can become counterproductive" — this is the expertise reversal effect. It has nothing to do with forgetting, breaks, or unfamiliar tasks.'},
+      {q:'The word "germane" most likely means:',options:['Foreign or unrelated','Relevant and directly contributing','Excessive or redundant','Automatic or unconscious'],answer:1,
+        explanation:'The passage describes germane load as "mental effort devoted to building cognitive schemas" — i.e., directly useful learning work. Context makes clear it is a positive, contributing form of load, not redundant or unrelated.'},
+      {q:'Which field is NOT mentioned as influenced by cognitive load theory?',options:['Classroom teaching','Military training','Interface design','Medical diagnosis'],answer:3,
+        explanation:'The passage mentions classroom teaching, interface design, and military training as fields influenced by the theory. Medical diagnosis is never mentioned — it is a plausible-sounding distractor.'},
+    ]
+  }
+};
+
+const M2_STANDARD = {
+  ctw:{
+    type:'ctw', sectionLabel:'Complete the Words',
+    instruction:'Complete each word in the paragraph. The first letter(s) are shown. Type the missing letters — one letter per box.',
+    completedParagraph:`Climate <span class="filled-word">change</span> is one of the most pressing <span class="filled-word">environmental</span> challenges of our era. <span class="filled-word">Scientists</span> have observed a steady rise in global <span class="filled-word">temperatures</span> over the past century, largely <span class="filled-word">attributed</span> to the burning of <span class="filled-word">fossil</span> fuels. This has led to a range of environmental impacts, including the <span class="filled-word">melting</span> of polar ice caps, rising sea <span class="filled-word">levels</span>, and more <span class="filled-word">frequent</span> extreme weather <span class="filled-word">events</span>. Many species are struggling to <span class="filled-word">adapt</span> to the <span class="filled-word">rapidly</span> changing conditions, and some face the risk of <span class="filled-word">extinction</span>. <span class="filled-word">Governments</span> around the world are working to reduce greenhouse gas <span class="filled-word">emissions</span> and <span class="filled-word">develop</span> cleaner, more <span class="filled-word">sustainable</span> sources of <span class="filled-word">energy</span>. Experts warn that more <span class="filled-word">decisive</span> action is needed to <span class="filled-word">limit</span> the worst effects of climate change in the <span class="filled-word">decades</span> ahead.`,
+    segments:[
+      'Climate ',
+      {id:'b1',prefix:'ch',answer:'an',suffix:'ge'},
+      ' is one of the most pressing ',
+      {id:'b2',prefix:'env',answer:'iron',suffix:'mental'},
+      ' challenges of our era. ',
+      {id:'b3',prefix:'Sci',answer:'ent',suffix:'ists'},
+      ' have observed a steady rise in global ',
+      {id:'b4',prefix:'temp',answer:'erat',suffix:'ures'},
+      ' over the past century, largely ',
+      {id:'b5',prefix:'attr',answer:'ibut',suffix:'ed'},
+      ' to the burning of ',
+      {id:'b6',prefix:'fos',answer:'s',suffix:'il'},
+      ' fuels. This has led to a range of environmental impacts, including the ',
+      {id:'b7',prefix:'mel',answer:'t',suffix:'ing'},
+      ' of polar ice caps, rising sea ',
+      {id:'b8',prefix:'lev',answer:'e',suffix:'ls'},
+      ', and more ',
+      {id:'b9',prefix:'fr',answer:'equ',suffix:'ent'},
+      ' extreme weather ',
+      {id:'b10',prefix:'ev',answer:'en',suffix:'ts'},
+      '. Many species are struggling to ',
+      {id:'b11',prefix:'ad',answer:'ap',suffix:'t'},
+      ' to the ',
+      {id:'b12',prefix:'rap',answer:'id',suffix:'ly'},
+      ' changing conditions, and some face the risk of ',
+      {id:'b13',prefix:'ext',answer:'inct',suffix:'ion'},
+      '. ',
+      {id:'b14',prefix:'Govern',answer:'men',suffix:'ts'},
+      ' around the world are working to reduce greenhouse gas ',
+      {id:'b15',prefix:'emiss',answer:'ion',suffix:'s'},
+      ' and ',
+      {id:'b16',prefix:'dev',answer:'el',suffix:'op'},
+      ' cleaner, more ',
+      {id:'b17',prefix:'sus',answer:'tain',suffix:'able'},
+      ' sources of ',
+      {id:'b18',prefix:'en',answer:'erg',suffix:'y'},
+      '. Experts warn that more ',
+      {id:'b19',prefix:'dec',answer:'isi',suffix:'ve'},
+      ' action is needed to ',
+      {id:'b20',prefix:'lim',answer:'i',suffix:'t'},
+      ' the worst effects of climate change in the ',
+      {id:'b21',prefix:'dec',answer:'ad',suffix:'es'},
+      ' ahead.',
+    ]
+  },
+  email1:{
+    type:'email', sectionLabel:'Read in Daily Life — Email',
+    passage:`<b>From:</b> Marcus Webb &lt;m.webb@clearwatercc.org&gt;<br><b>To:</b> Members, Clearwater Community Centre<br><b>Subject:</b> Changes to Swimming Pool Schedule — Starting April 7<br><br>Dear Members,<br><br>We would like to inform you of upcoming changes to the swimming pool timetable, taking effect Monday, April 7.<br><br>Adult lane swim sessions will now run from 6:00–8:00 a.m. and 7:00–9:00 p.m., Monday through Friday. Weekend lane swim remains unchanged at 8:00 a.m.–12:00 p.m.<br><br>The Saturday afternoon family swim has been extended by one hour and will run from 1:00–5:00 p.m. The Wednesday evening aqua fitness class is being moved from 6:30 p.m. to 7:30 p.m. to accommodate the new lane swim scheduling.<br><br>These changes reflect member feedback and aim to better serve working professionals. An updated schedule will be available on our website and at the reception desk by March 31.<br><br>Thank you,<br>Marcus Webb<br>Facilities Coordinator`,
+    questions:[
+      {q:'When do the new pool changes take effect?',options:['March 31','April 1','April 7','May 1'],answer:2,
+        explanation:'The email subject line and first paragraph both state the changes take effect "Monday, April 7." March 31 is when the updated schedule will be available on the website, not when the changes begin.'},
+      {q:'Why is the Wednesday aqua fitness class moved to 7:30 p.m.?',options:['The instructor requested a later slot','To make room for the new lane swim schedule','The pool will be closed for cleaning before 7:30','Due to lower attendance at 6:30 p.m.'],answer:1,
+        explanation:'The email says the class is moved "to accommodate the new lane swim scheduling." No instructor preference, cleaning schedule, or attendance data is mentioned.'},
+      {q:'What change is made to Saturday family swim?',options:['It is canceled permanently','It is shortened by one hour','It is extended by one hour','It is moved to Sunday'],answer:2,
+        explanation:'The email states "The Saturday afternoon family swim has been extended by one hour and will run from 1:00–5:00 p.m." It is not shortened, canceled, or moved to a different day.'},
+    ]
+  },
+  email2:{
+    type:'email', sectionLabel:'Read in Daily Life — Email',
+    passage:`<b>From:</b> Amara Diallo &lt;a.diallo@pinnaclelearn.com&gt;<br><b>To:</b> Jordan Spencer &lt;j.spencer@pinnaclelearn.com&gt;<br><b>Subject:</b> Re: Onboarding Materials for New Cohort<br><br>Hi Jordan,<br><br>Thanks for sending the draft onboarding materials for the April cohort. The content is clear and well-organized overall. However, I noticed the platform navigation section still refers to the old dashboard layout updated last November — this could confuse new learners on day one. Could you update the screenshots and instructions to reflect the current interface?<br><br>I'd also suggest adding a short FAQ at the end. We get the same questions every first week — mainly about submitting assignments and accessing recorded sessions. Having answers upfront would save both learners and our support team time.<br><br>One more thing: the welcome video on page 3 links to a 2023 version. Could you replace it with the updated January version? The link is on the shared drive under "Onboarding 2025 > Videos."<br><br>Let me know if you'd like to jump on a call before you finalize.<br><br>Best,<br>Amara`,
+    questions:[
+      {q:'What problem does Amara identify in the navigation section?',options:['Instructions are too long','It refers to an outdated dashboard version','The language is too technical','Screenshots are missing entirely'],answer:1,
+        explanation:'Amara says the navigation section "still refers to the old dashboard layout updated last November." The issue is outdated references, not length, language complexity, or missing screenshots.'},
+      {q:'Why does Amara suggest adding a FAQ section?',options:['To replace the support team','To save time for learners and support staff','Because the platform is too complex','To comply with company policy'],answer:1,
+        explanation:'Amara says a FAQ would save "both learners and our support team time" by answering the most common first-week questions upfront. She is not suggesting eliminating the support team or citing platform complexity or policy.'},
+      {q:'What does Amara ask Jordan to do with the welcome video?',options:['Delete it','Replace it with the updated 2025 version','Create a new video from scratch','Move it to a different page'],answer:1,
+        explanation:'Amara asks Jordan to "replace it with the updated January version" found on the shared drive under "Onboarding 2025 > Videos." She wants a replacement, not deletion, a new creation, or relocation.'},
+    ]
+  },
+  academic:{
+    type:'academic', sectionLabel:'Read an Academic Passage',
+    passage:`<h4>The Role of Sleep in Memory Consolidation</h4>Sleep is essential to physical health, but research over the past three decades has also revealed its critical role in memory consolidation — the process by which newly acquired information is stabilized and integrated into long-term storage. This process, which begins in the hippocampus during waking hours, is significantly enhanced during sleep.\n\nThe brain cycles through distinct stages during sleep, including non-REM (NREM) and rapid eye movement (REM) sleep. Different types of memory benefit from different stages. Declarative memory — memory of facts and events — is primarily consolidated during deep slow-wave NREM sleep. The hippocampus repeatedly replays recently acquired information and gradually transfers it to the neocortex for long-term storage. Procedural memory — memory of how to perform tasks — appears to rely more heavily on REM sleep.\n\nSleep deprivation consistently impairs memory formation. Individuals prevented from sleeping after learning retain significantly less the following day than those who slept normally. Even a short nap of 60–90 minutes can produce meaningful memory benefits — a finding with important implications for educational settings.\n\nFor students, this has practical consequences. Those who sleep well after studying are likely to outperform those who stay up late reviewing. Evidence suggests that protecting sleep may be one of the most effective strategies for academic success.`,
+    questions:[
+      {q:'What is the main focus of the passage?',options:['The physical health benefits of sleep','How sleep helps consolidate memories','The dangers of REM sleep disorders','Why students perform poorly on exams'],answer:1,
+        explanation:'The passage is explicitly about memory consolidation during sleep. Physical health is mentioned only in the opening sentence as background. REM disorders and student performance are not the focus — they appear briefly as supporting details.'},
+      {q:'Which memory type is mainly consolidated during slow-wave NREM sleep?',options:['Procedural memory','Emotional memory','Declarative memory','Spatial memory'],answer:2,
+        explanation:'The passage states "Declarative memory — memory of facts and events — is primarily consolidated during deep slow-wave NREM sleep." Procedural memory is linked to REM sleep, while emotional and spatial memory are not specifically discussed.'},
+      {q:'What does the passage say about naps?',options:['Naps over two hours are most effective','Even a short nap can provide memory benefits','Naps only help procedural memory','Naps are always less effective than a full night\'s sleep'],answer:1,
+        explanation:'The passage says "a short nap of 60–90 minutes can produce meaningful memory benefits." It does not specify an optimal length of two hours, limit naps to procedural memory, or compare them unfavourably to a full night\'s sleep.'},
+      {q:'The word "consolidation" most nearly means:',options:['Erasure of old memories','Stabilizing and integrating information into long-term memory','The act of learning new facts','Transferring memories between people'],answer:1,
+        explanation:'The passage defines consolidation in its first paragraph as "the process by which newly acquired information is stabilized and integrated into long-term storage." This matches option B precisely.'},
+      {q:'What practical recommendation does the passage make for students?',options:['Study during REM sleep if possible','Review material multiple times quickly','Protect sleep rather than sacrificing it for more study time','Focus only on procedural skills before tests'],answer:2,
+        explanation:'The final paragraph advises that "protecting sleep may be one of the most effective strategies for academic success," directly contrasting with the common habit of sacrificing sleep for extra study time.'},
+    ]
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LISTENING DATA
+// Each task type:
+//   listen_choose: {type:'listen_choose', sectionLabel, items:[{text, options, answer, explanation}]}
+//   listen_passage: {type:'listen_passage', sectionLabel, subtype:'conversation'|'announcement'|'lecture',
+//                    title, transcript:[{speaker?,text}], questions:[{q,options,answer,explanation}]}
+// ══════════════════════════════════════════════════════════════════════════════
+
+const M1_L = {
+  listenChoose: {
+    type:'listen_choose', sectionLabel:'Listen and Choose a Response',
+    items:[
+      { text:"Have you had a chance to look at the syllabus for Professor Kim's class yet?",
+        options:["Not yet — is it posted online somewhere?","Yes, I finished all the assignments already.","She usually gives extra credit, right?","I think the library closes at nine tonight."],
+        answer:0, explanation:'The speaker asks if you have seen the syllabus. The natural reply is to say you haven\'t and ask where to find it. The other options don\'t address the question directly.' },
+      { text:"I'm a bit worried about the group presentation next week.",
+        options:["The cafeteria has really good pasta on Thursdays.","Have you decided who's going to cover each part?","My laptop battery died this morning.","The gym doesn't open until eight."],
+        answer:1, explanation:'The speaker expresses concern about a group presentation. Asking about task division is a relevant, supportive response. The others are completely unrelated.' },
+      { text:"Could you remind me what time office hours are today?",
+        options:["I think they start at two and run until four.","The assignment is due at midnight.","You should email the department directly.","I've never been to that building before."],
+        answer:0, explanation:'The question asks specifically about office hours timing. Providing the time is the only directly responsive answer.' },
+      { text:"This reading is so dense — I can barely get through a page.",
+        options:["Try breaking it into sections and taking notes as you go.","The weather has been really unpredictable lately.","I heard the vending machine on the second floor is broken.","My roommate plays guitar until midnight every night."],
+        answer:0, explanation:'The speaker is struggling with a dense reading. Offering a practical strategy — breaking it into sections with notes — is a helpful, on-topic response.' },
+      { text:"Did the professor say whether the midterm is open-book?",
+        options:["I think she said we can bring one page of notes.","The bookstore closes early on Saturdays.","My bike got a flat tyre yesterday.","I prefer studying in the morning."],
+        answer:0, explanation:'The question is about midterm format. Reporting what the professor said about notes is the only answer that addresses it.' },
+    ]
+  },
+  conversation: {
+    type:'listen_passage', sectionLabel:'Listen to a Conversation', subtype:'conversation',
+    title:'Campus Conversation',
+    transcript:[
+      {speaker:'Maya', text:"Hey, are you going to the study session for the economics exam tonight?"},
+      {speaker:'James', text:"I was planning to, but I just found out it's been moved to the library's second floor. Do you know where that is?"},
+      {speaker:'Maya', text:"Yeah, it's past the reference section — there's a set of stairs near the east entrance."},
+      {speaker:'James', text:"Thanks. Did Professor Santos say anything about which chapters to focus on?"},
+      {speaker:'Maya', text:"She posted a revision guide on the course page. Chapters four through seven, plus the case studies from week nine."},
+      {speaker:'James', text:"Oh good. I was going to review everything, which would've taken forever."},
+      {speaker:'Maya', text:"Ha, yeah. The guide really narrows it down. Oh — and bring your own copy of the textbook. Apparently the library copies are all checked out."},
+    ],
+    questions:[
+      {q:'Why does James mention the second floor?',options:['He wants to know if Maya has been there before','He is unsure of the location of the study session','He is looking for the reference section','He wants to change the location of the session'],answer:1,
+        explanation:'James says he found out the session was moved to the second floor and asks if Maya knows where it is — he is uncertain about the location.'},
+      {q:"What does Maya tell James to bring to the study session?",options:['A printed copy of the revision guide','His student ID card','His own copy of the textbook','A laptop for note-taking'],answer:2,
+        explanation:"Maya explicitly warns James to bring his own textbook because the library copies are all checked out."},
+    ]
+  },
+  announcement: {
+    type:'listen_passage', sectionLabel:'Listen to an Announcement', subtype:'announcement',
+    title:'Campus Announcement',
+    transcript:[
+      {text:"Attention all students: the university's main computer lab in Burton Hall will be closed for maintenance this Friday from eight a.m. to five p.m. During this time, students can use the alternative computer lab in the Westfield Student Centre on the ground floor. That lab has twenty workstations available on a first-come, first-served basis and will remain open until ten p.m. Students working on deadline-sensitive assignments are encouraged to plan ahead. Printing services will be available in the Westfield lab as usual. We apologise for any inconvenience."}
+    ],
+    questions:[
+      {q:'Why will the Burton Hall computer lab be closed?',options:['A campus event is taking place there','It is being renovated permanently','Scheduled maintenance is taking place','The equipment is being replaced'],answer:2,
+        explanation:'The announcement states the lab will be closed "for maintenance" — scheduled upkeep, not renovation or replacement.'},
+      {q:'Where can students use computers during the closure?',options:['The library on the third floor','The Westfield Student Centre ground floor','The Burton Hall study room','The IT department office'],answer:1,
+        explanation:'The announcement directs students to the alternative computer lab in the Westfield Student Centre on the ground floor.'},
+      {q:'What advice does the announcement give to students with urgent deadlines?',options:['Email their professor in advance','Use their personal laptops instead','Plan ahead and go early','Request an extension from the IT office'],answer:2,
+        explanation:'The announcement says students with deadline-sensitive assignments "are encouraged to plan ahead" — implying they should not leave it to the last minute.'},
+    ]
+  },
+  lecture: {
+    type:'listen_passage', sectionLabel:'Listen to a Lecture', subtype:'lecture',
+    title:'Academic Lecture',
+    transcript:[
+      {speaker:'Professor', text:"Today I want to talk about something called the bystander effect — a well-documented phenomenon in social psychology. The bystander effect refers to the tendency for people to be less likely to offer help in an emergency situation when other people are present."},
+      {speaker:'Professor', text:"The concept was first studied seriously after the 1964 murder of Kitty Genovese in New York City. Reports at the time — though later disputed — suggested that dozens of neighbours witnessed the attack and did nothing. Whether those reports were entirely accurate, the case prompted researchers John Darley and Bibb Latané to investigate why people fail to act in emergencies."},
+      {speaker:'Professor', text:"Darley and Latané identified two main psychological mechanisms. The first is diffusion of responsibility: when more people are present, each individual feels less personally responsible for taking action. The second is pluralistic ignorance: people observe others around them acting calmly and assume the situation must not require help, even when it does."},
+      {speaker:'Professor', text:"Their experiments showed that when participants believed they were the only one aware of an emergency, they intervened around 85% of the time. When they believed four other people also knew, that rate dropped to just 31%. The more bystanders, the less likely any one of them is to help."},
+      {speaker:'Professor', text:"From an applied perspective, this has real implications. In CPR training, for instance, instructors teach people to point directly at a specific person and say 'You — call an ambulance.' Naming someone counteracts the diffusion of responsibility."},
+    ],
+    questions:[
+      {q:'What is the main topic of the lecture?',options:['Why the Kitty Genovese case was misreported','How crowd size affects individual helping behaviour','The history of emergency response training','Why cities have higher crime rates'],answer:1,
+        explanation:'The lecture is centrally about the bystander effect — how the presence of others reduces individual likelihood of helping. The Genovese case is only an introduction.'},
+      {q:'What is "diffusion of responsibility"?',options:['The tendency to blame others for not helping','The feeling that others will take action so you do not need to','The tendency to misread emergency situations','Confusion caused by too many people giving instructions'],answer:1,
+        explanation:'The professor defines diffusion of responsibility as each individual feeling less personally responsible when more people are present — the assumption that someone else will act.'},
+      {q:'According to the lecture, what happened when participants thought four others also knew about the emergency?',options:['The intervention rate rose sharply','The intervention rate dropped to about 31%','Most participants called for help immediately','Participants discussed what to do before acting'],answer:1,
+        explanation:'The professor states that when participants believed four others were also aware, the intervention rate dropped to just 31%, compared to 85% when alone.'},
+      {q:'Why does the professor mention CPR training?',options:['To show that bystander effects do not apply in medical situations','To give an example of how to counteract diffusion of responsibility','To explain why CPR is rarely performed correctly','To argue that first aid training should be mandatory'],answer:1,
+        explanation:'CPR instructors teach students to name a specific person to call for help — this directly counteracts diffusion of responsibility, illustrating an applied solution to the bystander effect.'},
+    ]
+  }
+};
+
+const M2_HARD_L = {
+  listenChoose: {
+    type:'listen_choose', sectionLabel:'Listen and Choose a Response',
+    items:[
+      { text:"I'm not sure I fully understood the professor's point about cognitive dissonance.",
+        options:["She was saying that people often hold contradictory beliefs and feel discomfort about it.","I think the seminar room is on the third floor.","The deadline for the literature review was extended.","Most students find the first week the hardest."],
+        answer:0, explanation:'The speaker is confused about a specific academic concept. The correct response explains the concept clearly and directly.' },
+      { text:"The methodology section of my thesis keeps getting flagged by my supervisor.",
+        options:["Have you tried restructuring it to clarify your research design?","The library has extended its weekend hours.","My supervisor specialises in medieval history.","You should check if the printer is out of toner."],
+        answer:0, explanation:'The speaker has a specific academic writing problem. A constructive suggestion about restructuring is the only relevant response.' },
+      { text:"Do you think the peer review process actually improves academic papers?",
+        options:["There's a seminar on data analysis running next Thursday.","Generally yes — it catches errors and strengthens arguments, though it has its critics.","The department photocopier is on the second floor.","I submitted my application last Monday."],
+        answer:1, explanation:'The speaker asks for an opinion on peer review. A nuanced, relevant answer that engages with the question is the only appropriate response.' },
+    ]
+  },
+  conversation: {
+    type:'listen_passage', sectionLabel:'Listen to a Conversation', subtype:'conversation',
+    title:'Academic Advising Conversation',
+    transcript:[
+      {speaker:'Student', text:"Hi, I wanted to ask about changing my dissertation topic. I'm about six weeks in, but I feel like the scope is too broad."},
+      {speaker:'Advisor', text:"That's actually a very common concern at this stage. What's the current focus?"},
+      {speaker:'Student', text:"I'm looking at how social media affects political participation in general. There's just too much literature — I can't find a clear angle."},
+      {speaker:'Advisor', text:"Right. The solution is usually to narrow both the population and the time frame. For example, instead of 'political participation in general,' you might look at voter turnout among first-time voters in a specific election cycle."},
+      {speaker:'Student', text:"That actually makes sense. Would I need to completely rewrite what I've already done?"},
+      {speaker:'Advisor', text:"Not necessarily. Much of your literature review on social media and engagement would still be relevant. You'd mainly be refocusing your research questions and adjusting your methodology section."},
+    ],
+    questions:[
+      {q:"What is the student's main concern about the dissertation?",options:['The topic has already been researched too extensively','The scope is too broad to handle effectively','The advisor does not approve of the subject area','The methodology is not appropriate for the topic'],answer:1,
+        explanation:"The student says directly: 'I feel like the scope is too broad.' This is the stated problem, not methodology or approval issues."},
+      {q:'What does the advisor say the student would need to change?',options:['The entire dissertation structure','Only the research questions and methodology section','The theoretical framework and conclusion','The literature review and title'],answer:1,
+        explanation:"The advisor says the literature review would still be relevant, and that mainly the research questions and methodology section would need adjustment — not the entire dissertation."},
+    ]
+  },
+  announcement: {
+    type:'listen_passage', sectionLabel:'Listen to an Announcement', subtype:'announcement',
+    title:'Departmental Announcement',
+    transcript:[
+      {text:"This is an announcement for all postgraduate students in the School of Social Sciences. The annual research colloquium has been rescheduled from March 14th to March 21st due to a conflict with the faculty assessment period. All students who have already submitted abstracts will receive a confirmation email by end of week. Students who have not yet submitted are reminded that the deadline remains February 28th — this has not changed. Presentations will be twenty minutes each, followed by a ten-minute Q&A. Students requiring AV equipment should notify the department administrator no later than March 10th."}
+    ],
+    questions:[
+      {q:'Why was the colloquium rescheduled?',options:['Too few abstracts were submitted on time','A conflict with the faculty assessment period','The original venue was unavailable','The date clashed with a public holiday'],answer:1,
+        explanation:'The announcement explicitly states the colloquium was rescheduled "due to a conflict with the faculty assessment period."'},
+      {q:'What has NOT changed according to the announcement?',options:['The date of the colloquium','The abstract submission deadline','The presentation time limit','The venue for the event'],answer:1,
+        explanation:'The announcement stresses that while the colloquium date changed, "the deadline remains February 28th — this has not changed."'},
+      {q:'What must students who need AV equipment do?',options:['Include a request in their abstract','Notify the department administrator by March 10th','Bring their own equipment on the day','Contact the IT helpdesk directly'],answer:1,
+        explanation:'The announcement states that students requiring AV equipment "should notify the department administrator no later than March 10th."'},
+    ]
+  },
+  lecture: {
+    type:'listen_passage', sectionLabel:'Listen to a Lecture', subtype:'lecture',
+    title:'Academic Lecture',
+    transcript:[
+      {speaker:'Professor', text:"In today's session I want to examine the concept of path dependency — a theory used in economics, political science, and institutional sociology to explain why institutions and technologies often persist even when better alternatives exist."},
+      {speaker:'Professor', text:"The core idea is this: early choices constrain later ones. Once a particular path is established — whether it's a technical standard, a legal framework, or an organisational structure — switching costs make it progressively harder to change course, even if the original choice was somewhat arbitrary."},
+      {speaker:'Professor', text:"The classic example is the QWERTY keyboard. The layout was designed in the 1870s for mechanical typewriters — specifically to slow down fast typists and prevent key jamming. By the time electric and then digital keyboards made that problem irrelevant, QWERTY was too entrenched to be replaced. Studies have suggested that alternative layouts, like the Dvorak layout, are more efficient, but the switching costs — retraining millions of users — are simply too high."},
+      {speaker:'Professor', text:"Path dependency has important implications for policy. It helps explain why healthcare systems, for instance, look so different across countries even when they face similar challenges. The US system reflects decades of employer-based insurance decisions; the UK's NHS reflects post-war political choices. Both are path dependent — meaning today's policies are constrained by yesterday's institutional decisions."},
+      {speaker:'Professor', text:"Critically, path dependency doesn't mean change is impossible. It means change requires a 'critical juncture' — a moment of disruption, crisis, or external shock that loosens the lock-in and opens new trajectories. The financial crisis of 2008, for example, created a critical juncture in banking regulation in many countries."},
+    ],
+    questions:[
+      {q:'What is path dependency, according to the professor?',options:['The tendency for institutions to copy each other over time','The way early decisions constrain later ones, making change costly','A method for evaluating policy effectiveness','The process by which technology becomes standardised'],answer:1,
+        explanation:'The professor defines path dependency as: "early choices constrain later ones" and switching costs make change progressively harder — even when alternatives are better.'},
+      {q:'Why does the professor use the QWERTY keyboard as an example?',options:['To show that old technology is always inferior','To illustrate how an early design persists despite better alternatives existing','To argue that typing speed has not improved over time','To explain how companies resist digital transformation'],answer:1,
+        explanation:'QWERTY was designed for mechanical typewriters but persists on digital devices — it illustrates path dependency perfectly: an early, somewhat arbitrary choice entrenched by switching costs.'},
+      {q:'What does the professor mean by a "critical juncture"?',options:['A key moment when two institutions merge','A disruption that creates an opportunity to break from an established path','A deadline imposed by policymakers','A point at which path dependency begins to form'],answer:1,
+        explanation:'The professor says a critical juncture is "a moment of disruption, crisis, or external shock that loosens the lock-in and opens new trajectories" — not a merger or deadline.'},
+      {q:'Which field does the professor NOT explicitly mention as using path dependency?',options:['Economics','Political science','Psychology','Institutional sociology'],answer:2,
+        explanation:'The professor lists economics, political science, and institutional sociology. Psychology is never mentioned.'},
+    ]
+  }
+};
+
+const M2_EASY_L = {
+  listenChoose: {
+    type:'listen_choose', sectionLabel:'Listen and Choose a Response',
+    items:[
+      { text:"I can't find the recycling bins in this building anywhere.",
+        options:["They moved them to the end of the corridor near the fire exit.","The assignment is due on Friday at noon.","I prefer handwriting my notes.","The gym membership fee went up this semester."],
+        answer:0, explanation:'The speaker cannot find the recycling bins. Telling them where the bins were moved is the direct, helpful response.' },
+      { text:"Is the campus shuttle running today? I need to get to the sports complex.",
+        options:["I think so — the schedule is on the transport board by the main entrance.","My cousin goes to a different university.","The cafeteria has a new menu this week.","I usually cycle to class."],
+        answer:0, explanation:'The question is about shuttle availability. Pointing to where the schedule can be found is the only on-topic response.' },
+      { text:"I left my umbrella somewhere on campus and I can't remember where.",
+        options:["You should check lost property in the main admin building.","It's supposed to rain all week apparently.","I like that coffee shop near the library.","The photocopier in the library is out of order."],
+        answer:0, explanation:'The speaker has lost an umbrella. Directing them to lost property is the practical, relevant reply.' },
+    ]
+  },
+  conversation: {
+    type:'listen_passage', sectionLabel:'Listen to a Conversation', subtype:'conversation',
+    title:'Campus Conversation',
+    transcript:[
+      {speaker:'Lena', text:"Hey, do you know if the student canteen is still doing the discounted meal deal?"},
+      {speaker:'Tom', text:"I think it ended last week — they changed to a new menu. But the salad bar is cheaper now, I heard."},
+      {speaker:'Lena', text:"That's fine actually, I've been trying to eat healthier anyway. Is it the same place or did they move it?"},
+      {speaker:'Tom', text:"Same location, just redesigned inside. Oh, and they added a hot drinks station near the entrance — free refills if you bring your own cup."},
+      {speaker:'Lena', text:"Oh that's brilliant. I always bring my travel mug. Thanks for the update!"},
+    ],
+    questions:[
+      {q:'What does Tom say about the meal deal?',options:['It has become more expensive','It ended last week','It is only available at lunchtime','It has been moved to a different canteen'],answer:1,
+        explanation:"Tom says directly: 'I think it ended last week — they changed to a new menu.'"},
+      {q:'What can students get for free if they bring their own cup?',options:['A discounted meal','A salad from the salad bar','Hot drink refills','A reusable bag'],answer:2,
+        explanation:"Tom mentions the new hot drinks station offers 'free refills if you bring your own cup.'"},
+    ]
+  },
+  announcement: {
+    type:'listen_passage', sectionLabel:'Listen to an Announcement', subtype:'announcement',
+    title:'Campus Announcement',
+    transcript:[
+      {text:"Good morning, everyone. This is a reminder that the campus community garden is looking for student volunteers for its spring planting weekend on the 22nd and 23rd of this month. No experience is necessary — all tools and materials will be provided. Volunteers are asked to wear clothes they don't mind getting muddy and to bring a water bottle. Lunch will be provided on both days. If you'd like to sign up, please visit the Student Activities desk in the Union building or register online through the campus events portal. Spaces are limited, so we encourage you to sign up as soon as possible."}
+    ],
+    questions:[
+      {q:'What is the main purpose of this announcement?',options:['To advertise a gardening course for credit','To recruit student volunteers for a campus event','To inform students about a new campus facility','To remind students about an assignment deadline'],answer:1,
+        explanation:'The announcement is specifically recruiting volunteers for a planting weekend — not a course, facility announcement, or academic reminder.'},
+      {q:'What are volunteers told to bring?',options:['Their own gardening tools','A packed lunch','A water bottle','Sunscreen and a hat'],answer:2,
+        explanation:"The announcement says to 'bring a water bottle.' Tools are provided, and lunch is also provided — so volunteers do not need to bring those."},
+      {q:'How can students register?',options:['By emailing the garden coordinator','At the Student Activities desk or online','By showing up on the day','Through their department office'],answer:1,
+        explanation:"Students are told to visit the Student Activities desk in the Union building 'or register online through the campus events portal' — two options are given."},
+    ]
+  },
+  lecture: {
+    type:'listen_passage', sectionLabel:'Listen to a Lecture', subtype:'lecture',
+    title:'Academic Lecture',
+    transcript:[
+      {speaker:'Professor', text:"Today I want to introduce you to a concept in environmental psychology called restorative environments. The basic idea is that certain types of environments help people recover mentally from the fatigue and stress of everyday life."},
+      {speaker:'Professor', text:"The theory was developed in the 1980s by Rachel and Stephen Kaplan. They proposed that natural settings — parks, forests, open water — tend to be more restorative than urban, man-made environments. But why?"},
+      {speaker:'Professor', text:"The Kaplans identified four key components of a restorative environment. The first is being away — the sense that you've mentally stepped out of your usual routine. The second is extent — the environment feels large enough to fully occupy your attention. Third is fascination — the setting captures your interest effortlessly, without requiring concentration. And fourth is compatibility — the environment supports what you want to do, rather than demanding something different from you."},
+      {speaker:'Professor', text:"What's interesting is that restoration doesn't require actually being in nature. Research has shown that even viewing images of natural scenes can reduce stress hormones. Hospital patients with window views of trees, for example, have been shown to recover faster and need less pain medication than patients with a view of a brick wall."},
+      {speaker:'Professor', text:"This has obvious implications for urban planning, workplace design, and healthcare environments. The more we understand what makes spaces restorative, the better we can design them — whether it's adding green spaces to cities, including natural elements in offices, or landscaping hospital grounds."},
+    ],
+    questions:[
+      {q:'What is the main topic of the lecture?',options:['How urban environments cause stress','The theory of restorative environments in psychology','The health benefits of exercise in nature','How hospitals should be designed'],answer:1,
+        explanation:'The lecture is centrally about restorative environments — what they are, their components, and their applications. Urban stress and hospital design are supporting details.'},
+      {q:'Which of the following is NOT one of the four components of a restorative environment?',options:['Being away','Fascination','Isolation','Compatibility'],answer:2,
+        explanation:'The four components given are: being away, extent, fascination, and compatibility. Isolation is not mentioned — being away refers to mental stepping-out, not physical isolation.'},
+      {q:'What does the hospital window study show?',options:['Patients recover faster when they have more visitors','Patients with views of natural scenes recover faster and need less pain medication','Trees reduce air pollution inside hospital buildings','Hospital rooms should always face south for sunlight'],answer:1,
+        explanation:'The professor states that patients with window views of trees "have been shown to recover faster and need less pain medication" than those with a view of a brick wall.'},
+      {q:'According to the lecture, what is "fascination" in the context of restorative environments?',options:['A strong emotional reaction to natural scenery','Effortless interest that does not require concentration','The feeling that a space is large and expansive','A sense of compatibility between person and place'],answer:1,
+        explanation:'The professor defines fascination as the setting capturing your interest "effortlessly, without requiring concentration" — it is the involuntary attention component.'},
+    ]
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WRITING DATA
+// build_sentence: {type:'build_sentence', context, words:[], suffix, answer, timerMin}
+// write_email:    {type:'write_email', scenario, bullets:[], to, subject, timerMin}
+// academic_disc:  {type:'academic_disc', subject, professorQ, student1, student2, timerMin}
+// ══════════════════════════════════════════════════════════════════════════════
+const WRITING_DATA = [
+  // ── BUILD A SENTENCE (10 questions, ~1 min each) ──────────────────────────
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:'I need to buy a new laptop.',
+   prefix:'', suffix:' ?',
+   words:['deals','which','has','store','the best'],
+   answer:'Which store has the best deals'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:"I'm thinking about starting a blog.",
+   prefix:'', suffix:' yet?',
+   words:['on','decided','have','a topic','you'],
+   answer:'Have you decided on a topic'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:"I'm going to study at the library this afternoon.",
+   prefix:'', suffix:' ?',
+   words:['any books','need','do','to borrow','you'],
+   answer:'Do you need to borrow any books'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:"I'm thinking about getting a pet.",
+   prefix:'', suffix:' ?',
+   words:['of','are','animal','what','you considering','kind'],
+   answer:'What kind of animal are you considering'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:"I'm excited to see the new science fiction movie tonight.",
+   prefix:'', suffix:' ?',
+   words:['showing','it','where','is'],
+   answer:'Where is it showing'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:'I have an interview for a new job next week.',
+   prefix:'', suffix:' ?',
+   words:['ready','your','have','resume','do','you'],
+   answer:'Do you have your resume ready'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:'I need to submit my assignment by tomorrow.',
+   prefix:'', suffix:' ?',
+   words:['it','writing','finished','have','you'],
+   answer:'Have you finished writing it'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:"I'm planning a trip to Europe this summer.",
+   prefix:'Did you', suffix:' yet?',
+   words:['flight','your','book'],
+   answer:'book your flight'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:'I just started learning French.',
+   prefix:'', suffix:' ?',
+   words:['classes','you','taking','where','are'],
+   answer:'Where are you taking classes'},
+
+  {type:'build_sentence', sectionLabel:'Build a Sentence', timerMin:1,
+   context:'Why are you asking about the project deadline?',
+   prefix:"I'm", suffix:' .',
+   words:['has been','it','to see','extended','checking','if'],
+   answer:"checking to see if it has been extended"},
+
+  // ── WRITE AN EMAIL (1 task, 7 min) ──────────────────────────────────────
+  {type:'write_email', sectionLabel:'Write an Email', timerMin:7,
+   scenario:"Your coworker, Kevin, recently recommended a new restaurant for your team to visit. You took the team there, but everyone was disappointed. The food was not as good as expected, and the service was slow. You need to inform Kevin about the situation and discuss future lunch options.",
+   bullets:['Explain what was wrong with the restaurant.','Describe the team\'s reaction to the visit.','Suggest alternative lunch arrangements.'],
+   instruction:'Write as much as you can and in complete sentences.',
+   to:'Kevin', subject:'Team Lunch Experience'},
+
+  // ── WRITE FOR AN ACADEMIC DISCUSSION (1 task, 10 min) ───────────────────
+  {type:'academic_disc', sectionLabel:'Write for an Academic Discussion', timerMin:10,
+   subject:'psychology',
+   professorQ:"Today we'll discuss the effects of exercise on mental health. Clearly, regular physical activity can improve mood and reduce stress. On the other hand, some people believe that mental health is primarily influenced by other factors such as genetics and the environment. Which do you believe plays a larger role in mental health? Why?",
+   student1:{name:'Aisha', text:"I think regular exercise has a significant positive impact on mental health. It can reduce stress, improve mood, and increase overall well-being by releasing endorphins and promoting a healthy lifestyle."},
+   student2:{name:'Marcus', text:"I believe that while exercise is important, other factors like genetics and environment play a larger role in mental health. A supportive environment and good mental health practices are crucial for overall well-being."},
+   minWords:100},
+];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SPEAKING DATA
+// listen_repeat: {type:'listen_repeat', sectionLabel, scenario, sentences:[{speaker,text}], recordSec}
+// take_interview: {type:'take_interview', sectionLabel, scenario, questions:[{text, responseSec}]}
+// ══════════════════════════════════════════════════════════════════════════════
+const SPEAKING_DATA = [
+  // ── LISTEN AND REPEAT ─────────────────────────────────────────────────────
+  // Each sentence is its own question item for nav/progress purposes
+  {type:'listen_repeat', sectionLabel:'Listen and Repeat', recordSec:8,
+   scenario:'You are learning how to guide new students through the campus gym. Listen to the speaker and repeat what she says. Repeat only once.',
+   text:'Welcome to our campus gym.'},
+
+  {type:'listen_repeat', sectionLabel:'Listen and Repeat', recordSec:8,
+   scenario:'You are learning how to guide new students through the campus gym. Listen to the speaker and repeat what she says. Repeat only once.',
+   text:'Cardio machines are near the entrance.'},
+
+  {type:'listen_repeat', sectionLabel:'Listen and Repeat', recordSec:8,
+   scenario:'You are learning how to guide new students through the campus gym. Listen to the speaker and repeat what she says. Repeat only once.',
+   text:'Free weights are in the back.'},
+
+  {type:'listen_repeat', sectionLabel:'Listen and Repeat', recordSec:10,
+   scenario:'You are learning how to guide new students through the campus gym. Listen to the speaker and repeat what she says. Repeat only once.',
+   text:'All of our locker rooms are equipped with showers and towels.'},
+
+  {type:'listen_repeat', sectionLabel:'Listen and Repeat', recordSec:10,
+   scenario:'You are learning how to guide new students through the campus gym. Listen to the speaker and repeat what she says. Repeat only once.',
+   text:'Our fitness instructors hold exercise classes over here.'},
+
+  {type:'listen_repeat', sectionLabel:'Listen and Repeat', recordSec:12,
+   scenario:'You are learning how to guide new students through the campus gym. Listen to the speaker and repeat what she says. Repeat only once.',
+   text:'You can check the schedule for available classes and timings.'},
+
+  {type:'listen_repeat', sectionLabel:'Listen and Repeat', recordSec:12,
+   scenario:'You are learning how to guide new students through the campus gym. Listen to the speaker and repeat what she says. Repeat only once.',
+   text:'If you have any questions, please seek assistance from the attendants at the help desk.'},
+
+  // ── TAKE AN INTERVIEW ─────────────────────────────────────────────────────
+  // Each interview question is its own item
+  {type:'take_interview', sectionLabel:'Take an Interview', responseSec:30,
+   scenario:'You have volunteered for a research study about commuting habits. You will have a short online interview with a researcher. The researcher will ask you some questions. Please answer the interviewer\'s questions.',
+   question:'Thank you for joining the study. Today, I\'d like to ask you some questions about your commuting habits. First, is it important to live close to your school or work? Why?'},
+
+  {type:'take_interview', sectionLabel:'Take an Interview', responseSec:30,
+   scenario:'You have volunteered for a research study about commuting habits.',
+   question:'I see. Imagine that you could choose to commute by car, which is faster but more expensive, or by public transportation, which is slower but less expensive. Which would you choose, and why?'},
+
+  {type:'take_interview', sectionLabel:'Take an Interview', responseSec:45,
+   scenario:'You have volunteered for a research study about commuting habits.',
+   question:'Interesting. Some people believe that commuting can be stressful and tiring. What do you think are one or two different ways to make commuting more enjoyable? Give reasons for your answer.'},
+
+  {type:'take_interview', sectionLabel:'Take an Interview', responseSec:45,
+   scenario:'You have volunteered for a research study about commuting habits.',
+   question:'Good points. Lastly, considering advances in technology, some people believe that commuting might disappear entirely. How do you think a severe decline in commuting might affect businesses in positive ways and negative ways? Please give one example of each.'},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selectedMode = 'practice';
+let selectedSection = 'reading';
+
+const SECTION_META = {
+  reading:   { icon:'📖', title:'Reading',   sub:'2 Adaptive Modules · 36 min each', adaptive:true,
+    info:[{h:'Format',p:'2 Modules, Adaptive'},{h:'Questions',p:'~26 per module'},{h:'Time',p:'36 min per module'},{h:'Tasks',p:'CTW · Emails · Academic'}] },
+  listening: { icon:'🎧', title:'Listening',  sub:'2 Adaptive Modules · 20 min each', adaptive:true,
+    info:[{h:'Format',p:'2 Modules, Adaptive'},{h:'Questions',p:'~14 per module'},{h:'Time',p:'20 min per module'},{h:'Tasks',p:'Choose · Conversation · Lecture'}] },
+  writing:   { icon:'✍️', title:'Writing',    sub:'1 Section · ~30 min', adaptive:false,
+    info:[{h:'Format',p:'Linear'},{h:'Questions',p:'12 questions'},{h:'Time',p:'~30 min'},{h:'Tasks',p:'Build Sentence · Email · Discussion'}] },
+  speaking:  { icon:'🎤', title:'Speaking',   sub:'1 Section · ~20 min', adaptive:false,
+    info:[{h:'Format',p:'Linear'},{h:'Questions',p:'11 questions'},{h:'Time',p:'~20 min'},{h:'Tasks',p:'Listen & Repeat · Interview'}] },
+};
+
+function goToDetail(s) {
+  selectedSection = s;
+  const m = SECTION_META[s];
+  document.getElementById('detailIcon').textContent  = m.icon;
+  document.getElementById('detailTitle').textContent = m.title;
+  document.getElementById('detailSub').textContent   = m.sub;
+  document.getElementById('detailAdaptiveNote').style.display = m.adaptive ? '' : 'none';
+  document.getElementById('detailInfoGrid').innerHTML = m.info.map(c =>
+    `<div class="info-card"><h3>${c.h}</h3><p>${c.p}</p></div>`).join('');
+  // Reset mode to practice on each visit
+  selectMode('practice');
+  showScreen('detailScreen');
+}
+
+function selectSection(s) { goToDetail(s); } // kept for any legacy calls
+
+function selectMode(m) {
+  selectedMode = m;
+  document.getElementById('modeOptPractice').classList.toggle('active', m==='practice');
+  document.getElementById('modeOptTest').classList.toggle('active', m==='test');
+}
+
+let state = {
+  module:1, path:null, questions:[], qi:0, answers:{},
+  timerSec:36*60, timerInterval:null,
+  m1Score:0, m1Total:0, mode:'practice', section:'reading'
+};
+
+function buildQuestions(data) {
+  const qs = [];
+  qs.push({type:'ctw', data:data.ctw});
+  ['email1','email2','academic'].forEach(key => {
+    data[key].questions.forEach((q,i) => {
+      qs.push({type:'mcq', data:{...q, passage:data[key].passage, sectionLabel:data[key].sectionLabel}});
+    });
+  });
+  return qs;
+}
+
+function buildWritingQuestions() {
+  return WRITING_DATA.map(d => ({type: d.type, data: d}));
+}
+
+function buildListeningQuestions(data) {
+  const qs = [];
+  // Listen & Choose: each item becomes its own question
+  data.listenChoose.items.forEach(item => {
+    qs.push({type:'listen_choose', data:{...item, sectionLabel:data.listenChoose.sectionLabel}});
+  });
+  // Passage-based: conversation, announcement, lecture
+  ['conversation','announcement','lecture'].forEach(key => {
+    const block = data[key];
+    block.questions.forEach(q => {
+      qs.push({type:'listen_passage', data:{...q, transcript:block.transcript, title:block.title, subtype:block.subtype, sectionLabel:block.sectionLabel}});
+    });
+  });
+  return qs;
+}
+
+// ── SCREENS ───────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startTest() {
+  const isListening = selectedSection === 'listening';
+  const isWriting   = selectedSection === 'writing';
+  const isSpeaking  = selectedSection === 'speaking';
+  const timerSec = (isWriting||isSpeaking) ? 20*60 : isListening ? 20*60 : 36*60;
+  const questions = isWriting  ? buildWritingQuestions()
+    : isSpeaking ? SPEAKING_DATA.map(d=>({type:d.type,data:d}))
+    : isListening ? buildListeningQuestions(M1_L) : buildQuestions(M1);
+  state = {module:1, path:null, questions, qi:0, answers:{},
+           timerSec, timerInterval:null, m1Score:0, m1Total:0,
+           mode:selectedMode, section:selectedSection};
+  document.getElementById('topbarSectionLabel').textContent =
+    isWriting ? 'Writing Section' : isSpeaking ? 'Speaking Section' :
+    isListening ? 'Listening Section' : 'Reading Section';
+  if (isWriting) {
+    document.getElementById('introTitle').textContent = 'Writing Section';
+    document.getElementById('introDesc').textContent = '12 questions · Build a Sentence, Write an Email, and Academic Discussion. You have 30 minutes.';
+  } else if (isSpeaking) {
+    document.getElementById('introTitle').textContent = 'Speaking Section';
+    document.getElementById('introDesc').textContent = '11 questions · Listen & Repeat and Take an Interview. You have 20 minutes. Microphone access is required.';
+  } else {
+    document.getElementById('introTitle').textContent = 'Module 1 of 2';
+    const tot = displayTotal(state.questions);
+    document.getElementById('introDesc').textContent = `This module is the same for all test-takers. ${tot} questions. You have ${isListening?'20':'36'} minutes.`;
+  }
+  showScreen('introScreen');
+}
+
+function startModule() {
+  document.getElementById('topbar').classList.add('shown');
+  document.getElementById('navBar').classList.add('shown');
+  const sec = state.section;
+  state.timerSec = (sec==='writing'||sec==='speaking'||sec==='listening') ? 20*60 : 36*60;
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(tickTimer, 1000);
+  updateTimerDisplay();
+  showScreen('questionScreen');
+  renderQuestion();
+}
+
+function beginModule2() {
+  const pct = state.m1Total > 0 ? state.m1Score/state.m1Total : 0;
+  state.path = pct >= 0.70 ? 'hard' : 'standard';
+  const isListening = state.section === 'listening';
+  const data = isListening
+    ? (state.path==='hard' ? M2_HARD_L : M2_EASY_L)
+    : (state.path==='hard' ? M2_HARD : M2_STANDARD);
+  state.module = 2;
+  state.questions = isListening ? buildListeningQuestions(data) : buildQuestions(data);
+  state.qi = 0;
+  state.answers = {};
+  const pathLabel = state.path==='hard' ? 'Advanced' : 'Standard';
+  const timerMin = isListening ? '20' : '36';
+  document.getElementById('introTitle').textContent = `Module 2 of 2 — ${pathLabel} Path`;
+  const tot = displayTotal(state.questions);
+  document.getElementById('introDesc').textContent = `Based on your Module 1 score, you've been placed on the ${pathLabel} path. ${tot} questions. You have ${timerMin} minutes.`;
+  showScreen('introScreen');
+}
+
+// ── TIMER ─────────────────────────────────────────────────────────────────────
+function tickTimer() {
+  state.timerSec--;
+  updateTimerDisplay();
+  if (state.timerSec <= 0) { clearInterval(state.timerInterval); finishModule(); }
+}
+function updateTimerDisplay() {
+  const m=Math.floor(state.timerSec/60), s=state.timerSec%60;
+  document.getElementById('timerDisplay').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('timerDisplay').style.background = state.timerSec<120?'#b53b3b':'rgba(255,255,255,0.15)';
+}
+function finishModule() {
+  if (state.section === 'writing')  { showWritingResults();  return; }
+  if (state.section === 'speaking') { showSpeakingResults(); return; }
+  if (state.module===1) showTransition(); else showResults();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+// Count each CTW blank as one question; listen_choose and listen_passage each = 1
+function displayTotal(questions) {
+  return questions.reduce((sum, item) => {
+    return sum + (item.type === 'ctw' ? getBlanks(item.data).length : 1);
+  }, 0);
+}
+function displayIndex(questions, qi) {
+  // 1-based "question number" for item at index qi
+  let n = 0;
+  for (let i = 0; i < qi; i++) {
+    n += questions[i].type === 'ctw' ? getBlanks(questions[i].data).length : 1;
+  }
+  return n + 1;
+}
+
+function renderQuestion() {
+  const questions=state.questions, qi=state.qi, item=questions[qi];
+  const dTotal=displayTotal(questions), dIdx=displayIndex(questions, qi);
+  const dEnd = item.type==='ctw' ? dIdx + getBlanks(item.data).length - 1 : dIdx;
+  const label = item.type==='ctw' ? `Questions ${dIdx}–${dEnd} of ${dTotal}` : `Question ${dIdx} of ${dTotal}`;
+  document.getElementById('qNum').textContent=label;
+  document.getElementById('progressfill').style.width=(((dIdx-1)/dTotal)*100)+'%';
+  document.getElementById('qCounter').textContent=`${dIdx}${item.type==='ctw'?`–${dEnd}`:''} / ${dTotal}`;
+  hideFeedback();
+  document.getElementById('qSection').textContent=item.data.sectionLabel;
+  if (item.type==='ctw') renderCTW(item.data, qi);
+  else if (item.type==='mcq') renderMCQ(item.data, qi);
+  else if (item.type==='listen_choose') renderListenChoose(item.data, qi);
+  else if (item.type==='listen_passage') renderListenPassage(item.data, qi);
+  else if (item.type==='build_sentence') renderBuildSentence(item.data, qi);
+  else if (item.type==='write_email') renderWriteEmail(item.data, qi);
+  else if (item.type==='academic_disc') renderAcademicDisc(item.data, qi);
+  else if (item.type==='listen_repeat') renderListenRepeat(item.data, qi);
+  else if (item.type==='take_interview') renderTakeInterview(item.data, qi);
+  updateNav();
+}
+
+function getBlanks(data) {
+  return data.segments.filter(s => typeof s === 'object');
+}
+
+function renderCTW(data, qi) {
+  const saved = state.answers[qi]||{};
+  const blanks = getBlanks(data);
+  const html = data.segments.map(seg => {
+    if (typeof seg === 'string') return seg;
+    const b = seg;
+    const userVal = (saved.userAnswers && saved.userAnswers[b.id]) || '';
+    const dis = saved.submitted ? 'disabled' : '';
+    const letters = b.answer.split('').map((_, li) => {
+      const val = userVal[li] || '';
+      let cls = 'ctw-letter';
+      if (saved.submitted) cls += saved.results && saved.results[b.id] ? ' correct' : ' wrong';
+      return `<input type="text" class="${cls}" id="ctw_${b.id}_${li}" data-bid="${b.id}" data-li="${li}" data-total="${b.answer.length}" maxlength="1" value="${val}" ${dis} autocomplete="off" spellcheck="false" oninput="onLetterInput(this)" onkeydown="onLetterKey(event,this)">`;
+    }).join('');
+    return `<span style="white-space:nowrap">${b.prefix}<span class="ctw-blank">${letters}</span>${b.suffix}</span>`;
+  }).join('');
+
+  document.getElementById('qBody').innerHTML = `
+    <div class="ctw-instruction">${data.instruction}</div>
+    <div class="ctw-paragraph">${html}</div>
+    <div style="margin-top:18px">
+      <button class="btn" onclick="submitCTW(${qi})" ${saved.submitted?'disabled':''}>
+        ${saved.submitted?'Submitted ✓':'Submit Answers'}
+      </button>
+      ${saved.submitted?`<span style="margin-left:14px;color:var(--muted)">Score: ${saved.score} / ${blanks.length}</span>`:''}
+    </div>`;
+  if (!saved.submitted && blanks[0]) {
+    setTimeout(() => document.getElementById(`ctw_${blanks[0].id}_0`)?.focus(), 50);
+  }
+}
+
+function onLetterInput(inp) {
+  const li = +inp.dataset.li, total = +inp.dataset.total, bid = inp.dataset.bid;
+  if (inp.value.length > 1) inp.value = inp.value.slice(-1); // keep last char
+  if (inp.value && li < total - 1) {
+    document.getElementById(`ctw_${bid}_${li+1}`)?.focus();
+  } else if (inp.value && li === total - 1) {
+    const blanks = getBlanks(state.questions[state.qi].data);
+    const bi = blanks.findIndex(b => b.id === bid);
+    if (bi < blanks.length - 1) document.getElementById(`ctw_${blanks[bi+1].id}_0`)?.focus();
+  }
+}
+
+function onLetterKey(e, inp) {
+  const li = +inp.dataset.li, bid = inp.dataset.bid, total = +inp.dataset.total;
+  if (e.key === 'Backspace') {
+    if (inp.value) { inp.value = ''; e.preventDefault(); }
+    else if (li > 0) { e.preventDefault(); const p = document.getElementById(`ctw_${bid}_${li-1}`); if(p){p.value='';p.focus();} }
+  }
+  if (e.key === 'ArrowLeft' && li > 0) { e.preventDefault(); document.getElementById(`ctw_${bid}_${li-1}`)?.focus(); }
+  if (e.key === 'ArrowRight' && li < total-1) { e.preventDefault(); document.getElementById(`ctw_${bid}_${li+1}`)?.focus(); }
+}
+
+function submitCTW(qi) {
+  const item = state.questions[qi], data = item.data;
+  const blanks = getBlanks(data);
+  const userAnswers = {}, results = {};
+  let score = 0;
+  blanks.forEach(b => {
+    const val = b.answer.split('').map((_,li) => document.getElementById(`ctw_${b.id}_${li}`)?.value || '').join('');
+    userAnswers[b.id] = val;
+    const ok = val.toLowerCase() === b.answer.toLowerCase();
+    results[b.id] = ok;
+    if (ok) score++;
+  });
+  state.answers[qi] = {submitted:true, userAnswers, results, score, total:blanks.length};
+  renderCTW(data, qi);
+  if(state.mode==='practice'){
+    showFeedback(score===blanks.length?'correct':'wrong', `${score} / ${blanks.length} correct`);
+    if(data.completedParagraph){
+      const existing = document.getElementById('qBody');
+      const box = document.createElement('div');
+      box.className='ctw-completed';
+      box.innerHTML=`<strong>Completed paragraph</strong>${data.completedParagraph}`;
+      existing.appendChild(box);
+    }
+  }
+  updateNav();
+}
+
+function renderMCQ(data, qi) {
+  const saved=state.answers[qi];
+  const showResult = saved && state.mode==='practice';
+  const opts=data.options.map((opt,i)=>{
+    let cls='option-btn';
+    const dis=saved?'disabled':'';
+    if(showResult){
+      if(i===data.answer) cls+=' correct';
+      else if(saved.selected===i) cls+=' wrong';
+    } else if(saved) {
+      // test mode: just mark selected, no right/wrong colours
+      if(saved.selected===i) cls+=' selected-only';
+    }
+    return `<button class="${cls}" ${dis} onclick="selectOption(${qi},${i})">${String.fromCharCode(65+i)}. ${opt}</button>`;
+  }).join('');
+  const explanationHtml = showResult && data.explanation
+    ? `<div class="explanation-box"><strong>Explanation</strong>${data.explanation}</div>` : '';
+  document.getElementById('qBody').innerHTML=`
+    <div class="passage-box">${data.passage}</div>
+    <div class="q-text">${data.q}</div>
+    <div class="options">${opts}</div>
+    ${explanationHtml}`;
+}
+
+function selectOption(qi, sel) {
+  const item=state.questions[qi];
+  const correct=sel===item.data.answer;
+  state.answers[qi]={selected:sel,correct};
+  renderMCQ(item.data,qi);
+  if(state.mode==='practice'){
+    showFeedback(correct?'correct':'wrong', correct?'Correct!': `Incorrect — the answer is ${String.fromCharCode(65+item.data.answer)}.`);
+  }
+  updateNav();
+}
+
+// ── TTS ENGINE ────────────────────────────────────────────────────────────────
+let ttsPlaying = false;
+let ttsQueue = [];      // array of utterances waiting to be spoken
+let ttsAborted = false;
+
+function stopSpeech() {
+  ttsAborted = true;
+  ttsQueue = [];
+  _stopKeepalive();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  ttsPlaying = false;
+}
+
+// Pick best available voices for male/female
+function getVoices() {
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  const enVoices = voices.filter(v => v.lang.startsWith('en'));
+  const base = enVoices.length ? enVoices : voices;
+
+  // Prefer named voices that are clearly gendered; fall back to index-based split
+  const femaleKeywords = /female|woman|zira|samantha|victoria|karen|moira|fiona|tessa|allison|ava|susan|kate|lisa/i;
+  const maleKeywords   = /male|man|daniel|david|alex|fred|tom|rishi|oliver|george|arthur|aaron|noel|liam/i;
+
+  let female = base.find(v => femaleKeywords.test(v.name));
+  let male   = base.find(v => maleKeywords.test(v.name));
+
+  // Fallback: use first two distinct voices
+  if (!female && base.length > 0) female = base[0];
+  if (!male   && base.length > 1) male   = base[1];
+  if (!male)                       male   = female; // last resort
+
+  return { female, male };
+}
+
+// Map speaker name → gender using conversation data hints
+// By default: first unique speaker = female, second = male (or override with speakerGenders map)
+function assignSpeakerVoices(transcript) {
+  const { female, male } = getVoices();
+  const seen = [];
+  const map = {};
+  transcript.forEach(line => {
+    if (line.speaker && !map[line.speaker]) {
+      if (seen.length === 0) { map[line.speaker] = female; seen.push(line.speaker); }
+      else if (seen.length === 1) { map[line.speaker] = male; seen.push(line.speaker); }
+      else { map[line.speaker] = seen.length % 2 === 0 ? female : male; seen.push(line.speaker); }
+    }
+  });
+  return map;
+}
+
+// Chrome pauses speechSynthesis after ~15s — keep it alive
+let _ttsKeepalive = null;
+function _startKeepalive() {
+  _stopKeepalive();
+  _ttsKeepalive = setInterval(() => {
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }
+  }, 10000);
+}
+function _stopKeepalive() {
+  if (_ttsKeepalive) { clearInterval(_ttsKeepalive); _ttsKeepalive = null; }
+}
+
+// Speak a plain string with a single voice
+function speakSimple(text, voice, rate, onEnd) {
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = rate || 0.92;
+  utt.pitch = 1;
+  if (voice) utt.voice = voice;
+  utt.onend = () => { _stopKeepalive(); if(onEnd) onEnd(); };
+  utt.onerror = (e) => { _stopKeepalive(); if(onEnd) onEnd(); };
+  _startKeepalive();
+  window.speechSynthesis.speak(utt);
+}
+
+// Main entry point. text = string | transcript array
+function speakText(text, onEnd) {
+  stopSpeech();
+  ttsAborted = false;
+  if (!window.speechSynthesis) { if(onEnd) onEnd(); return; }
+
+  function doSpeak() {
+    if (ttsAborted) return;
+
+    // Plain string or array without speaker tags → single voice
+    if (typeof text === 'string' || !Array.isArray(text) || !text.some(t => t.speaker)) {
+      const flat = typeof text === 'string' ? text : text.map(t => t.text).join(' ');
+      ttsPlaying = true;
+      speakSimple(flat, null, 0.92, () => { ttsPlaying = false; if(onEnd) onEnd(); });
+      return;
+    }
+
+    // Conversation with multiple speakers → queue turns
+    const voiceMap = assignSpeakerVoices(text);
+    ttsQueue = [...text];
+    ttsPlaying = true;
+
+    function speakNext() {
+      if (ttsAborted || ttsQueue.length === 0) {
+        ttsPlaying = false;
+        if (!ttsAborted && onEnd) onEnd();
+        return;
+      }
+      const line = ttsQueue.shift();
+      const voice = line.speaker ? voiceMap[line.speaker] : null;
+      speakSimple(line.text, voice, 0.92, speakNext);
+    }
+
+    if (window.speechSynthesis.getVoices().length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; speakNext(); };
+    } else {
+      speakNext();
+    }
+  }
+
+  // Chrome bug: after cancel(), need one tick before speak() works reliably
+  setTimeout(doSpeak, 50);
+}
+
+function updateAudioStatus(status, btnId) {
+  const el = document.getElementById('audioStatus');
+  const btn = document.getElementById(btnId||'audioPlayBtn');
+  if (el) el.textContent = status;
+  if (btn) {
+    btn.textContent = status==='Playing…'?'⏹':'▶';
+    btn.disabled = status==='Playing…';
+  }
+}
+
+// ── LISTEN & CHOOSE RENDERER ──────────────────────────────────────────────────
+function renderListenChoose(data, qi) {
+  const saved = state.answers[qi];
+  const showResult = saved && state.mode==='practice';
+  const optionsLocked = !saved; // options only appear after first play in test mode? No — show always but disable until played
+  // On real test: audio plays, then options appear. We show options from start but allow answering freely.
+  const opts = data.options.map((opt,i)=>{
+    let cls = 'option-btn';
+    const dis = saved ? 'disabled' : '';
+    if(showResult){
+      if(i===data.answer) cls+=' correct';
+      else if(saved.selected===i) cls+=' wrong';
+    } else if(saved){
+      if(saved.selected===i) cls+=' selected-only';
+    }
+    return `<button class="${cls}" ${dis} onclick="selectListenOption(${qi},${i})">${String.fromCharCode(65+i)}. ${opt}</button>`;
+  }).join('');
+
+  const transcriptHtml = (showResult || (saved && state.mode==='test'))
+    ? `<div class="transcript-box" style="margin-top:16px"><div class="transcript-label">Transcript</div>${data.text}</div>` : '';
+  const expHtml = showResult && data.explanation
+    ? `<div class="explanation-box"><strong>Explanation</strong>${data.explanation}</div>` : '';
+
+  document.getElementById('qBody').innerHTML = `
+    <div class="audio-player">
+      <button class="audio-play-btn" id="audioPlayBtn" onclick="playListenChoose(${qi})">▶</button>
+      <div class="audio-info">
+        <div class="audio-title">Listen and Choose a Response</div>
+        <div class="audio-subtitle">Press play — select the best response after listening</div>
+      </div>
+      <div class="audio-status" id="audioStatus">Ready</div>
+    </div>
+    <div class="listen-choose-options">${opts}</div>
+    ${transcriptHtml}
+    ${expHtml}`;
+}
+
+function playListenChoose(qi) {
+  const data = state.questions[qi].data;
+  updateAudioStatus('Playing…', 'audioPlayBtn');
+  speakText(data.text, () => updateAudioStatus('Replay ▶', 'audioPlayBtn'));
+}
+
+function selectListenOption(qi, sel) {
+  const item = state.questions[qi];
+  const correct = sel === item.data.answer;
+  state.answers[qi] = {selected:sel, correct};
+  renderListenChoose(item.data, qi);
+  if(state.mode==='practice'){
+    showFeedback(correct?'correct':'wrong', correct?'Correct!' : `Incorrect — the answer is ${String.fromCharCode(65+item.data.answer)}.`);
+  }
+  updateNav();
+}
+
+// ── LISTEN PASSAGE RENDERER (conversation / announcement / lecture) ────────────
+function renderListenPassage(data, qi) {
+  const saved = state.answers[qi];
+  const showResult = saved && state.mode==='practice';
+
+  // Build transcript HTML
+  const txHtml = data.transcript.map(line =>
+    line.speaker
+      ? `<div><span class="speaker">${line.speaker}:</span> ${line.text}</div>`
+      : `<div>${line.text}</div>`
+  ).join('');
+
+  // Show transcript: always after answering in practice; always after answering in test
+  const transcriptHtml = saved
+    ? `<div class="transcript-box"><div class="transcript-label">Transcript — ${data.title}</div>${txHtml}</div>`
+    : `<div class="transcript-box" style="background:#f0f0ee;color:#999;"><div class="transcript-label">Transcript</div><div class="locked-msg">Transcript will appear after you answer.</div></div>`;
+
+  const opts = data.options.map((opt,i)=>{
+    let cls = 'option-btn';
+    const dis = saved ? 'disabled' : '';
+    if(showResult){
+      if(i===data.answer) cls+=' correct';
+      else if(saved.selected===i) cls+=' wrong';
+    } else if(saved){
+      if(saved.selected===i) cls+=' selected-only';
+    }
+    return `<button class="${cls}" ${dis} onclick="selectPassageOption(${qi},${i})">${String.fromCharCode(65+i)}. ${opt}</button>`;
+  }).join('');
+
+  const expHtml = showResult && data.explanation
+    ? `<div class="explanation-box"><strong>Explanation</strong>${data.explanation}</div>` : '';
+
+  const subtypeLabel = {conversation:'Conversation',announcement:'Announcement',lecture:'Lecture'}[data.subtype] || 'Audio';
+
+  document.getElementById('qBody').innerHTML = `
+    <div class="audio-player">
+      <button class="audio-play-btn" id="audioPlayBtn" onclick="playPassage(${qi})">▶</button>
+      <div class="audio-info">
+        <div class="audio-title">${data.title}</div>
+        <div class="audio-subtitle">${subtypeLabel} · Answer questions after listening</div>
+      </div>
+      <div class="audio-status" id="audioStatus">Ready</div>
+    </div>
+    ${transcriptHtml}
+    <div class="q-text">${data.q}</div>
+    <div class="options">${opts}</div>
+    ${expHtml}`;
+}
+
+function playPassage(qi) {
+  const data = state.questions[qi].data;
+  updateAudioStatus('Playing…', 'audioPlayBtn');
+  speakText(data.transcript, () => updateAudioStatus('Replay ▶', 'audioPlayBtn'));
+}
+
+function selectPassageOption(qi, sel) {
+  const item = state.questions[qi];
+  const correct = sel === item.data.answer;
+  state.answers[qi] = {selected:sel, correct};
+  stopSpeech();
+  renderListenPassage(item.data, qi);
+  if(state.mode==='practice'){
+    showFeedback(correct?'correct':'wrong', correct?'Correct!' : `Incorrect — the answer is ${String.fromCharCode(65+item.data.answer)}.`);
+  }
+  updateNav();
+}
+
+// ── BUILD A SENTENCE ──────────────────────────────────────────────────────────
+function renderBuildSentence(data, qi) {
+  const saved = state.answers[qi];
+  const submitted = saved && saved.submitted;
+  const slotCount = data.words.length;
+  const placed = saved ? [...saved.placed] : Array(slotCount).fill(null);
+
+  // Slots — each is an individual drop target
+  const slotsHtml = placed.map((word, i) => {
+    let cls = 'bas-slot';
+    if (submitted) cls += word ? ' correct-slot' : ' wrong-slot';
+    const inner = word ? word : '<span class="bas-slot-ph">___</span>';
+    const clickHandler = (!submitted && word) ? `onclick="removeFromSlot(${qi},${i})"` : '';
+    const title = (!submitted && word) ? 'title="Click to remove"' : '';
+    return `<span class="${cls}${word?' filled':' empty'}"
+      data-slot="${i}"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="onSlotDrop(event,${qi},${i})"
+      ${clickHandler} ${title}>${inner}</span>`;
+  }).join('<span class="bas-slot-gap"></span>');
+
+  // Tiles — words not yet placed
+  const tilesHtml = data.words.map((w) => {
+    const isUsed = placed.includes(w);
+    const wSafe = w.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<span class="bas-tile${isUsed?' used':''}"
+      draggable="${!isUsed && !submitted}"
+      ondragstart="onTileDragStart(event,'${wSafe}',${qi})"
+      onclick="${!isUsed && !submitted ? `onTileClick('${wSafe}',${qi})` : ''}"
+      >${w}</span>`;
+  }).join('');
+
+  const correctSentence = (data.prefix ? data.prefix + ' ' : '') + data.answer + data.suffix;
+  const answerHtml = submitted
+    ? `<div class="bas-answer-row">✅ Correct answer: <strong>${correctSentence}</strong></div>` : '';
+
+  const prefixHtml  = data.prefix  ? `<span class="bas-affix">${data.prefix}</span>` : '';
+  const suffixHtml  = data.suffix  ? `<span class="bas-affix">${data.suffix}</span>`  : '';
+
+  document.getElementById('qBody').innerHTML = `
+    <div class="bas-context">${data.context}</div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:10px;">
+      Drag the word tiles into the boxes to make a grammatical sentence.
+      Click a placed word to return it.
+    </p>
+    <div class="bas-sentence-row">
+      ${prefixHtml}
+      <div class="bas-slots" id="basSlots">${slotsHtml}</div>
+      ${suffixHtml}
+    </div>
+    <div class="bas-tiles" id="basTiles">${tilesHtml}</div>
+    ${answerHtml}
+    ${!submitted ? `<button class="btn" style="margin-top:14px" onclick="submitBuildSentence(${qi})">Submit</button>` : ''}`;
+}
+
+let dragWord = null;
+let dragFromSlot = null; // index if dragging from a slot, null if from tile bank
+
+function onTileDragStart(e, word, qi) {
+  dragWord = word;
+  dragFromSlot = null;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onTileClick(word, qi) {
+  const data = state.questions[qi].data;
+  const saved = state.answers[qi] || {placed: Array(data.words.length).fill(null), submitted:false};
+  // Place in first empty slot
+  const idx = saved.placed.indexOf(null);
+  if (idx === -1) return;
+  saved.placed[idx] = word;
+  state.answers[qi] = saved;
+  renderBuildSentence(data, qi);
+}
+
+function onSlotDrop(e, qi, slotIdx) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!dragWord) return;
+  const data = state.questions[qi].data;
+  const saved = state.answers[qi] || {placed: Array(data.words.length).fill(null), submitted:false};
+
+  // If dropping from another slot, clear that slot first
+  if (dragFromSlot !== null) saved.placed[dragFromSlot] = null;
+
+  // If target slot already has a word, swap it back to bank (set to null)
+  // The displaced word becomes available again automatically
+  saved.placed[slotIdx] = dragWord;
+  state.answers[qi] = saved;
+  dragWord = null; dragFromSlot = null;
+  renderBuildSentence(data, qi);
+}
+
+function removeFromSlot(qi, slotIdx) {
+  const data = state.questions[qi].data;
+  const saved = state.answers[qi];
+  if (!saved || saved.submitted) return;
+  saved.placed[slotIdx] = null;
+  renderBuildSentence(data, qi);
+}
+
+function submitBuildSentence(qi) {
+  const data = state.questions[qi].data;
+  const saved = state.answers[qi] || {placed: Array(data.words.length).fill(null)};
+  const userSentence = ((data.prefix ? data.prefix + ' ' : '') + saved.placed.filter(Boolean).join(' ') + data.suffix).trim();
+  const correctSentence = ((data.prefix ? data.prefix + ' ' : '') + data.answer + data.suffix).trim();
+  const correct = userSentence.toLowerCase() === correctSentence.toLowerCase();
+  saved.submitted = true;
+  saved.correct = correct;
+  state.answers[qi] = saved;
+  renderBuildSentence(data, qi);
+  if (state.mode==='practice') showFeedback(correct?'correct':'wrong', correct?'Correct!' : 'Incorrect — see the correct answer below.');
+  updateNav();
+}
+
+// ── WRITE AN EMAIL ────────────────────────────────────────────────────────────
+function renderWriteEmail(data, qi) {
+  const saved = state.answers[qi] || {text:'', scored:false, band:null, feedback:''};
+
+  const bulletsHtml = data.bullets.map(b=>`<li>${b}</li>`).join('');
+  const wc = countWords(saved.text);
+  const feedbackHtml = saved.scored
+    ? `<div class="ai-feedback-box"><h4>AI Scoring</h4><div class="band-display">${saved.band}/5 <span>band</span></div><div class="ai-feedback-text">${saved.feedback}</div></div>` : '';
+
+  document.getElementById('qBody').innerHTML = `
+    <div class="email-scenario">
+      <p>${data.scenario}</p>
+      <p style="margin-top:10px;font-weight:600;">In your email, do the following:</p>
+      <ul class="email-bullets">${bulletsHtml}</ul>
+      <p style="margin-top:8px;color:var(--muted);font-size:0.88rem;">${data.instruction}</p>
+    </div>
+    <div class="email-header"><span>To:</span>${data.to} &nbsp;&nbsp; <span>Subject:</span>${data.subject}</div>
+    <textarea class="writing-area" id="emailArea" placeholder="Write your email here..."
+      oninput="onWritingInput(${qi},'email')">${saved.text}</textarea>
+    <div class="wc-bar">Word count: <span id="wcDisplay">${wc}</span></div>
+    ${!saved.scored ? `<button class="scoring-btn" id="scoreBtn" onclick="scoreWriting(${qi},'email')" ${wc<10?'disabled':''}>Get AI Feedback</button>` : ''}
+    ${feedbackHtml}`;
+}
+
+// ── ACADEMIC DISCUSSION ───────────────────────────────────────────────────────
+function renderAcademicDisc(data, qi) {
+  const saved = state.answers[qi] || {text:'', scored:false, band:null, feedback:''};
+  const wc = countWords(saved.text);
+
+  const feedbackHtml = saved.scored
+    ? `<div class="ai-feedback-box"><h4>AI Scoring</h4><div class="band-display">${saved.band}/5 <span>band</span></div><div class="ai-feedback-text">${saved.feedback}</div></div>` : '';
+
+  document.getElementById('qBody').innerHTML = `
+    <div class="discussion-prompt">
+      <div class="prof-post">
+        <div class="prof-avatar">👨‍🏫</div>
+        <div class="prof-text"><strong>Professor (${data.subject}):</strong><br>${data.professorQ}</div>
+      </div>
+    </div>
+    <div class="student-posts">
+      <div class="student-post">
+        <div class="student-avatar">👩</div>
+        <div><strong style="font-size:0.82rem;color:var(--navy);">${data.student1.name}</strong><div class="student-text">${data.student1.text}</div></div>
+      </div>
+      <div class="student-post">
+        <div class="student-avatar">👨</div>
+        <div><strong style="font-size:0.82rem;color:var(--navy);">${data.student2.name}</strong><div class="student-text">${data.student2.text}</div></div>
+      </div>
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:8px;">Write a post responding to the professor's question. Express and support your opinion in your own words. An effective response contains at least ${data.minWords} words.</p>
+    <textarea class="writing-area" id="discArea" placeholder="Write your response here..."
+      oninput="onWritingInput(${qi},'disc')" style="min-height:160px;">${saved.text}</textarea>
+    <div class="wc-bar">Word count: <span id="wcDisplay">${wc}</span>${wc < data.minWords ? ` <span style="color:var(--red)">(minimum ${data.minWords})</span>` : ''}</div>
+    ${!saved.scored ? `<button class="scoring-btn" id="scoreBtn" onclick="scoreWriting(${qi},'disc')" ${wc<20?'disabled':''}>Get AI Feedback</button>` : ''}
+    ${feedbackHtml}`;
+}
+
+function countWords(text) {
+  return text.trim() ? text.trim().split(/\s+/).length : 0;
+}
+
+function onWritingInput(qi, type) {
+  const id = type==='email' ? 'emailArea' : 'discArea';
+  const text = document.getElementById(id).value;
+  const wc = countWords(text);
+  const wcEl = document.getElementById('wcDisplay');
+  if (wcEl) wcEl.textContent = wc;
+  if (!state.answers[qi]) state.answers[qi] = {text:'', scored:false, band:null, feedback:''};
+  state.answers[qi].text = text;
+  const btn = document.getElementById('scoreBtn');
+  if (btn) btn.disabled = wc < (type==='email' ? 10 : 20);
+}
+
+async function scoreWriting(qi, type) {
+  const saved = state.answers[qi];
+  if (!saved || !saved.text.trim()) return;
+  const btn = document.getElementById('scoreBtn');
+  if (btn) { btn.disabled=true; btn.textContent='Scoring…'; }
+
+  const data = state.questions[qi].data;
+  let prompt = '';
+  if (type==='email') {
+    prompt = `You are a TOEFL iBT writing examiner. Score the following email response on a band of 1–5.
+
+TASK: The test-taker was asked to write an email to ${data.to} with subject "${data.subject}".
+Scenario: ${data.scenario}
+Required points: ${data.bullets.join('; ')}
+
+RESPONSE:
+${saved.text}
+
+Give a band score from 1 to 5 and 2–3 sentences of specific, constructive feedback. Format:
+Band: [1-5]
+Feedback: [your feedback]`;
+  } else {
+    prompt = `You are a TOEFL iBT writing examiner. Score the following Academic Discussion response on a band of 1–5.
+
+PROFESSOR'S QUESTION: ${data.professorQ}
+Student 1 (${data.student1.name}): ${data.student1.text}
+Student 2 (${data.student2.name}): ${data.student2.text}
+
+TEST-TAKER'S RESPONSE:
+${saved.text}
+
+Give a band score from 1 to 5 and 2–3 sentences of specific, constructive feedback. The response should express an opinion, support it, and add meaningfully to the discussion. Format:
+Band: [1-5]
+Feedback: [your feedback]`;
+  }
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:400, messages:[{role:'user',content:prompt}]})
+    });
+    const json = await res.json();
+    const text = json.content.map(b=>b.text||'').join('');
+    const bandMatch = text.match(/Band:\s*([1-5])/i);
+    const feedMatch = text.match(/Feedback:\s*([\s\S]+)/i);
+    saved.band = bandMatch ? parseInt(bandMatch[1]) : 3;
+    saved.feedback = feedMatch ? feedMatch[1].trim() : text;
+    saved.scored = true;
+    state.answers[qi] = saved;
+  } catch(e) {
+    saved.band = null;
+    saved.feedback = 'Scoring unavailable — please check your connection.';
+    saved.scored = true;
+    state.answers[qi] = saved;
+  }
+
+  if (type==='email') renderWriteEmail(data, qi);
+  else renderAcademicDisc(data, qi);
+}
+
+// ── WRITING RESULTS ───────────────────────────────────────────────────────────
+function showWritingResults() {
+  clearInterval(state.timerInterval);
+  document.getElementById('navBar').classList.remove('shown');
+  document.getElementById('topbar').classList.remove('shown');
+
+  // Count build-a-sentence score
+  let basCorrect=0, basTotal=0;
+  state.questions.forEach((item,qi) => {
+    if (item.type==='build_sentence') {
+      basTotal++;
+      if (state.answers[qi] && state.answers[qi].correct) basCorrect++;
+    }
+  });
+
+  const emailAns = state.answers[10] || {};
+  const discAns  = state.answers[11] || {};
+  const emailBand = emailAns.band || '—';
+  const discBand  = discAns.band  || '—';
+
+  // Overall band: average of BaS pct (scaled 1–5) + email + discussion
+  const basPct = basTotal ? basCorrect/basTotal : 0;
+  const basScaled = Math.round(1 + basPct * 4);
+  const scored = [basScaled, emailAns.band, discAns.band].filter(Boolean);
+  const overall = scored.length ? Math.round(scored.reduce((a,b)=>a+b,0)/scored.length) : '—';
+
+  // Build review for BaS questions
+  const basReview = state.questions.slice(0,10).map((item,qi) => {
+    const a = state.answers[qi];
+    const ok = a && a.correct;
+    const user = a && a.placed ? (item.data.prefix?item.data.prefix+' ':'')+a.placed.filter(Boolean).join(' ')+item.data.suffix : 'Not answered';
+    return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.context}</span></div>
+      <div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${user}</span>${!ok?` · Correct: <span class="corr">${item.data.prefix?item.data.prefix+' ':''}${item.data.answer}${item.data.suffix}</span>`:''}</div></div>`;
+  }).join('');
+
+  const emailReview = `<div class="review-item"><div class="ri-top"><span class="ri-badge ${emailAns.scored?'ok':'miss'}">${emailAns.scored?'✓':'—'}</span><span class="ri-q">Write an Email — ${state.questions[10].data.subject||state.questions[10].data.to}</span></div>
+    ${emailAns.text ? `<div class="ri-answer">Band: <strong>${emailBand}/5</strong></div><div style="margin-top:8px;font-size:0.88rem;background:#f8f8f8;padding:10px;border-radius:6px;">${emailAns.text}</div>` : '<div class="ri-answer" style="color:var(--muted)">Not attempted</div>'}
+    ${emailAns.feedback ? `<div class="explanation-box" style="margin-top:8px"><strong>Feedback</strong>${emailAns.feedback}</div>` : ''}</div>`;
+
+  const discReview = `<div class="review-item"><div class="ri-top"><span class="ri-badge ${discAns.scored?'ok':'miss'}">${discAns.scored?'✓':'—'}</span><span class="ri-q">Academic Discussion</span></div>
+    ${discAns.text ? `<div class="ri-answer">Band: <strong>${discBand}/5</strong></div><div style="margin-top:8px;font-size:0.88rem;background:#f8f8f8;padding:10px;border-radius:6px;">${discAns.text}</div>` : '<div class="ri-answer" style="color:var(--muted)">Not attempted</div>'}
+    ${discAns.feedback ? `<div class="explanation-box" style="margin-top:8px"><strong>Feedback</strong>${discAns.feedback}</div>` : ''}</div>`;
+
+  document.getElementById('resultsScreen').innerHTML = `
+    <h2>Writing Section Complete</h2>
+    <div class="writing-results-grid">
+      <div class="wr-card"><div class="big">${overall}/5</div><div class="label">Overall Band</div></div>
+      <div class="wr-card"><div class="big">${basCorrect}/${basTotal}</div><div class="label">Build a Sentence</div></div>
+      <div class="wr-card"><div class="big">${emailBand}${emailAns.band?'/5':''} · ${discBand}${discAns.band?'/5':''}</div><div class="label">Email · Discussion</div></div>
+    </div>
+    <button class="btn" onclick="restartTest()">Restart</button>
+    <h3 style="margin-top:28px;color:var(--navy);">Answer Review</h3>
+    <div class="review-list">${basReview}${emailReview}${discReview}</div>`;
+
+  document.getElementById('progressfill').style.width='100%';
+  showScreen('resultsScreen');
+}
+
+// ── FEEDBACK ──────────────────────────────────────────────────────────────────
+function showFeedback(type, msg) {
+  const bar=document.getElementById('feedbackBar');
+  bar.textContent=msg; bar.className=type; bar.style.display='block';
+}
+function hideFeedback() {
+  const bar=document.getElementById('feedbackBar');
+  bar.style.display='none'; bar.className='';
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function updateNav() {
+  const qi=state.qi, total=state.questions.length, isLast=qi===total-1;
+  document.getElementById('backBtn').style.visibility=qi>0?'visible':'hidden';
+  const nb=document.getElementById('nextBtn');
+  const isWriting = state.section==='writing';
+  if(isLast){
+    nb.textContent = state.module===1 && !isWriting ? 'Submit Module 1 →' : 'Finish →';
+    nb.style.background='var(--accent)';
+  } else {
+    nb.textContent='Next →'; nb.style.background='';
+  }
+}
+function goNext() {
+  stopSpeech();
+  if(state.qi<state.questions.length-1){ state.qi++; renderQuestion(); }
+  else { clearInterval(state.timerInterval); finishModule(); }
+}
+function goBack() {
+  stopSpeech();
+  if(state.qi>0){ state.qi--; renderQuestion(); }
+}
+
+// ── TRANSITION ────────────────────────────────────────────────────────────────
+function showTransition() {
+  let correct=0, total=0;
+  state.questions.forEach((item,qi)=>{
+    if(item.type==='ctw'){
+      const a=state.answers[qi];
+      const blanks = getBlanks(item.data);
+      total+=blanks.length;
+      if(a&&a.submitted) correct+=a.score;
+    } else {
+      total++;
+      const a=state.answers[qi];
+      if(a&&a.correct) correct++;
+    }
+  });
+  state.m1Score=correct; state.m1Total=total;
+  const pct=total>0?Math.round((correct/total)*100):0;
+  const isHard=pct>=70;
+  document.getElementById('transitionScore').textContent=`You answered ${correct} of ${total} correctly (${pct}%)`;
+  document.getElementById('pathBadge').innerHTML=`<span class="path-badge ${isHard?'path-hard':'path-standard'}">${isHard?'🔴 Advanced Path assigned':'🟢 Standard Path assigned'}</span>`;
+  document.getElementById('transitionMsg').textContent=isHard
+    ?'Great work! Module 2 will feature more challenging material.'
+    :'Module 2 will be at standard difficulty. Keep going!';
+  document.getElementById('navBar').classList.remove('shown');
+  document.getElementById('topbar').classList.remove('shown');
+  showScreen('transitionScreen');
+}
+
+// ── BAND SCORING ──────────────────────────────────────────────────────────────
+// Hard path: 1–6 available. Easy path: capped at 4.
+// Band is primarily determined by M2 performance (the path module).
+// M1 acts as a tiebreaker at the margins (±1 boundary cases).
+function calcBand(m1pct, m2pct, isHard) {
+  let band;
+  if (isHard) {
+    if (m2pct >= 85) band = 6;
+    else if (m2pct >= 70) band = 5;
+    else if (m2pct >= 55) band = 4;
+    else if (m2pct >= 40) band = 3;
+    else if (m2pct >= 25) band = 2;
+    else band = 1;
+  } else {
+    // Easy path: max band = 4
+    if (m2pct >= 75) band = 4;
+    else if (m2pct >= 50) band = 3;
+    else if (m2pct >= 30) band = 2;
+    else band = 1;
+  }
+  // M1 tiebreaker: strong M1 can nudge up by 1 at a borderline M2; weak M1 nudges down
+  // Only applies within the allowed range (hard: 1–6, easy: 1–4)
+  const maxBand = isHard ? 6 : 4;
+  if (m1pct >= 85 && band < maxBand) band += 1;
+  else if (m1pct < 40 && band > 1) band -= 1;
+  return Math.min(Math.max(band, 1), maxBand);
+}
+
+// ── RESULTS ───────────────────────────────────────────────────────────────────
+function showResults() {
+  document.getElementById('navBar').classList.remove('shown');
+  document.getElementById('topbar').classList.remove('shown');
+  let m2c=0, m2t=0;
+  state.questions.forEach((item,qi)=>{
+    if(item.type==='ctw'){
+      m2t+=getBlanks(item.data).length;
+      const a=state.answers[qi];
+      if(a&&a.submitted) m2c+=a.score;
+    } else {
+      m2t++;
+      const a=state.answers[qi];
+      if(a&&a.correct) m2c++;
+    }
+  });
+  const m1p=state.m1Total>0?Math.round((state.m1Score/state.m1Total)*100):0;
+  const m2p=m2t>0?Math.round((m2c/m2t)*100):0;
+  const isHard=state.path==='hard';
+  const band=calcBand(m1p, m2p, isHard);
+  const cefr=['','A1','A2','B1','B2','C1','C2'][band];
+  document.getElementById('totalScore').textContent=band+'/6';
+  document.getElementById('cefrLabel').textContent=cefr;
+  document.getElementById('m1Score').textContent=m1p+'%';
+  document.getElementById('m2Score').textContent=m2p+'%';
+  document.getElementById('pathTakenBadge').innerHTML=`<span class="path-badge ${isHard?'path-hard':'path-standard'}">${isHard?'🔴 Advanced Path':'🟢 Standard Path'}</span>`;
+  document.getElementById('bandNote').textContent=isHard
+    ?'Advanced path: full band range (1–6) available.'
+    :'Standard path: band capped at 4. A score of 5–6 requires the Advanced path.';
+  document.getElementById('progressfill').style.width='100%';
+
+  const rev=state.questions.map((item,qi)=>{
+    const a=state.answers[qi];
+    if(item.type==='ctw'){
+      const sc=a&&a.submitted?a.score:0, tot=getBlanks(item.data).length, ok=sc===tot&&a&&a.submitted;
+      const completedHtml = item.data.completedParagraph
+        ? `<div class="ctw-completed" style="margin-top:10px"><strong>Completed paragraph</strong>${item.data.completedParagraph}</div>` : '';
+      return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.sectionLabel}</span></div><div class="ri-answer">Score: <span class="${ok?'corr':'wrong2'}">${sc} / ${tot}</span></div>${completedHtml}</div>`;
+    } else if(item.type==='listen_choose') {
+      const ok=a&&a.correct;
+      const txHtml = `<div class="transcript-box" style="margin-top:8px"><div class="transcript-label">Audio</div>${item.data.text}</div>`;
+      const expHtml = item.data.explanation ? `<div class="explanation-box" style="margin-top:8px"><strong>Explanation</strong>${item.data.explanation}</div>` : '';
+      return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.sectionLabel} — Choose a Response</span></div>${a?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+a.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+item.data.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}${txHtml}${expHtml}</div>`;
+    } else {
+      // mcq and listen_passage share same shape
+      const ok=a&&a.correct;
+      const expHtml = item.data.explanation
+        ? `<div class="explanation-box" style="margin-top:8px"><strong>Explanation</strong>${item.data.explanation}</div>` : '';
+      // For listen_passage, also show transcript in review
+      const txHtml = item.type==='listen_passage' && item.data.transcript
+        ? `<div class="transcript-box" style="margin-top:8px"><div class="transcript-label">Transcript</div>${item.data.transcript.map(l=>l.speaker?`<div><span class="speaker">${l.speaker}:</span> ${l.text}</div>`:`<div>${l.text}</div>`).join('')}</div>` : '';
+      return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.q}</span></div>${a?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+a.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+item.data.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}${txHtml}${expHtml}</div>`;
+    }
+  }).join('');
+  document.getElementById('reviewList').innerHTML=rev;
+  showScreen('resultsScreen');
+}
+
+function togglePause() {
+  state.paused = !state.paused;
+  const btn = document.getElementById('pauseBtn');
+  if (state.paused) {
+    clearInterval(state.timerInterval);
+    stopSpeech();
+    btn.textContent = '▶ Resume';
+  } else {
+    btn.textContent = '⏸ Pause';
+    state.timerInterval = setInterval(tickTimer, 1000);
+  }
+}
+
+
+function restartTest() {
+  clearInterval(state.timerInterval);
+  stopSpeech();
+  state={module:1,path:null,questions:[],qi:0,answers:{},timerSec:36*60,timerInterval:null,m1Score:0,m1Total:0,paused:false,mode:'practice',section:'reading'};
+  selectedMode='practice'; selectedSection='reading';
+  document.getElementById('progressfill').style.width='0%';
+  document.getElementById('topbar').classList.remove('shown');
+  document.getElementById('navBar').classList.remove('shown');
+  // Restore results screen if writing/speaking replaced it
+  const rs = document.getElementById('resultsScreen');
+  if (!rs.querySelector('.score-row')) {
+    rs.innerHTML = `<h2>Test Complete</h2>
+    <div class="score-row">
+      <div class="score-card score-card-main"><div class="big" id="totalScore">—</div><div class="label">TOEFL Band</div><div class="cefr-label" id="cefrLabel">—</div></div>
+      <div class="score-card"><div class="big" id="m1Score">—</div><div class="label">Module 1</div></div>
+      <div class="score-card"><div class="big" id="m2Score">—</div><div class="label">Module 2</div></div>
+    </div>
+    <div id="pathTakenBadge" style="text-align:center;margin:8px 0 16px;"></div>
+    <div id="bandNote" style="text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto;"></div>
+    <button class="btn" onclick="restartTest()">Back to Home</button>
+    <h3 style="margin-top:28px;color:var(--navy);">Answer Review</h3>
+    <div class="review-list" id="reviewList"></div>`;
+  }
+  showScreen('startScreen');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SPEAKING ENGINE
+// ══════════════════════════════════════════════════════════════════════════════
+let spkRecognition = null;
+let spkCountdownTimer = null;
+
+function stopRecording() {
+  if (spkRecognition) { try { spkRecognition.stop(); } catch(e){} spkRecognition = null; }
+  if (spkCountdownTimer) { clearInterval(spkCountdownTimer); spkCountdownTimer = null; }
+}
+
+function startRecording(qi, maxSec, onResult) {
+  stopRecording();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { onResult(''); return; }
+  spkRecognition = new SR();
+  spkRecognition.continuous = true;
+  spkRecognition.interimResults = false;
+  spkRecognition.lang = 'en-US';
+  let transcript = '';
+  spkRecognition.onresult = e => {
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) transcript += e.results[i][0].transcript + ' ';
+    }
+  };
+  spkRecognition.onerror = () => { stopRecording(); onResult(transcript.trim()); };
+  spkRecognition.start();
+
+  // Countdown
+  let remaining = maxSec;
+  const cdEl = document.getElementById('spkCountdown');
+  if (cdEl) cdEl.textContent = remaining;
+  spkCountdownTimer = setInterval(() => {
+    remaining--;
+    const el = document.getElementById('spkCountdown');
+    if (el) el.textContent = remaining;
+    if (remaining <= 0) {
+      clearInterval(spkCountdownTimer);
+      spkCountdownTimer = null;
+      if (spkRecognition) { try { spkRecognition.stop(); } catch(e){} }
+      // onend will fire → onResult called there
+    }
+  }, 1000);
+
+  spkRecognition.onend = () => { stopRecording(); onResult(transcript.trim()); };
+}
+
+// Word-level diff scoring for Listen & Repeat
+function scoreDiff(original, spoken) {
+  const normalize = s => s.toLowerCase().replace(/[^a-z0-9 ]/g,'').trim();
+  const origWords = normalize(original).split(/\s+/);
+  const spknWords = normalize(spoken).split(/\s+/);
+  let correct = 0;
+  origWords.forEach((w, i) => { if (spknWords[i] === w) correct++; });
+  const pct = Math.round((correct / origWords.length) * 100);
+  // Build coloured diff HTML (word by word)
+  const html = origWords.map((w, i) => {
+    if (spknWords[i] === w) return `<span class="spk-diff-correct">${w}</span>`;
+    if (spknWords[i]) return `<span class="spk-diff-wrong">${spknWords[i]}</span> <span class="spk-diff-missing">[${w}]</span>`;
+    return `<span class="spk-diff-missing">[${w}]</span>`;
+  }).join(' ');
+  return { pct, html, correct, total: origWords.length };
+}
+
+// ── LISTEN AND REPEAT RENDERER ────────────────────────────────────────────────
+function renderListenRepeat(data, qi) {
+  const saved = state.answers[qi];
+  const phase = saved ? saved.phase : 'idle'; // idle | played | recording | done
+
+  let controlsHtml = '';
+  if (phase === 'idle' || phase === 'played') {
+    controlsHtml = `
+      <div class="spk-controls">
+        <button class="spk-mic-btn idle" onclick="lrPlay(${qi})">▶</button>
+        <div class="spk-status">${phase==='played' ? 'Listen again or start recording' : 'Press ▶ to listen'}</div>
+        ${phase==='played' ? `<button class="btn" onclick="lrRecord(${qi})">🎙 Record my repetition</button>` : ''}
+      </div>`;
+  } else if (phase === 'recording') {
+    controlsHtml = `
+      <div class="spk-controls">
+        <button class="spk-mic-btn listening" disabled>🎙</button>
+        <div class="spk-countdown" id="spkCountdown">${data.recordSec}</div>
+        <div class="spk-status">Recording… speak now</div>
+      </div>`;
+  } else if (phase === 'done') {
+    const diff = saved.diff || {};
+    const pill = diff.pct >= 80 ? 'background:var(--green)' : diff.pct >= 50 ? 'background:var(--accent)' : 'background:var(--red)';
+    controlsHtml = `
+      <div class="spk-controls">
+        <button class="spk-mic-btn done" onclick="lrPlay(${qi})">▶</button>
+        <div class="spk-status">Replay · <button class="btn" style="padding:6px 16px;font-size:0.82rem" onclick="lrRecord(${qi})">🎙 Try again</button></div>
+      </div>
+      <div class="spk-score-row">
+        <span class="spk-score-pill" style="${pill}">${diff.pct ?? 0}%</span>
+        <span style="font-size:0.88rem;color:var(--muted)">${diff.correct ?? 0} / ${diff.total ?? 0} words matched</span>
+      </div>
+      <div class="spk-transcript-box">
+        <div class="label">Your words vs. original</div>
+        <div>${diff.html || '(no speech detected)'}</div>
+      </div>
+      <div class="spk-transcript-box" style="margin-top:8px">
+        <div class="label">Original</div>
+        <div>${data.text}</div>
+      </div>`;
+  }
+
+  document.getElementById('qBody').innerHTML = `
+    <div class="spk-scenario">${data.scenario}</div>
+    ${controlsHtml}`;
+}
+
+function lrPlay(qi) {
+  const data = state.questions[qi].data;
+  const saved = state.answers[qi] || {phase:'idle'};
+  saved.phase = 'played';
+  state.answers[qi] = saved;
+  renderListenRepeat(data, qi);
+
+  if (!window.speechSynthesis) return;
+
+  function doSpeak() {
+    window.speechSynthesis.cancel();
+    setTimeout(() => {
+      const utt = new SpeechSynthesisUtterance(data.text);
+      utt.rate  = 0.88;
+      utt.pitch = 1;
+      utt.lang  = 'en-US';
+      const allVoices = window.speechSynthesis.getVoices();
+      const enVoice = allVoices.find(v => v.lang.startsWith('en'));
+      if (enVoice) utt.voice = enVoice;
+      utt.onend   = () => renderListenRepeat(state.questions[qi].data, qi);
+      utt.onerror = () => renderListenRepeat(state.questions[qi].data, qi);
+      window.speechSynthesis.speak(utt);
+    }, 100);
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 0) {
+    doSpeak();
+  } else {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null;
+      doSpeak();
+    };
+  }
+}
+
+function lrRecord(qi) {
+  const data = state.questions[qi].data;
+  const saved = state.answers[qi] || {phase:'idle'};
+  saved.phase = 'recording';
+  state.answers[qi] = saved;
+  stopSpeech();
+  renderListenRepeat(data, qi);
+  startRecording(qi, data.recordSec, transcript => {
+    const diff = scoreDiff(data.text, transcript || '');
+    saved.phase = 'done';
+    saved.transcript = transcript;
+    saved.diff = diff;
+    saved.correct = diff.pct >= 70; // passing threshold for scoring
+    saved.pct = diff.pct;
+    state.answers[qi] = saved;
+    renderListenRepeat(state.questions[qi].data, qi);
+    updateNav();
+  });
+}
+
+// ── TAKE AN INTERVIEW RENDERER ────────────────────────────────────────────────
+function renderTakeInterview(data, qi) {
+  const saved = state.answers[qi];
+  const phase = saved ? saved.phase : 'idle';
+
+  let controlsHtml = '';
+  if (phase === 'idle' || phase === 'played') {
+    controlsHtml = `
+      <div class="spk-controls">
+        <button class="spk-mic-btn idle" onclick="tiPlay(${qi})">▶</button>
+        <div class="spk-status">${phase==='played' ? 'Listen again or record your answer' : 'Press ▶ to hear the question'}</div>
+        ${phase==='played' ? `<button class="btn" onclick="tiRecord(${qi})">🎙 Record my answer</button>` : ''}
+      </div>`;
+  } else if (phase === 'recording') {
+    controlsHtml = `
+      <div class="spk-controls">
+        <button class="spk-mic-btn listening" disabled>🎙</button>
+        <div class="spk-countdown" id="spkCountdown">${data.responseSec}</div>
+        <div class="spk-status">Recording… speak now. Say as much as you can.</div>
+      </div>`;
+  } else if (phase === 'scoring') {
+    controlsHtml = `
+      <div class="spk-controls">
+        <div class="spk-status">⏳ AI is scoring your response…</div>
+      </div>`;
+  } else if (phase === 'done') {
+    const fb = saved.feedback || {};
+    controlsHtml = `
+      <div class="spk-controls" style="margin-bottom:0">
+        <button class="spk-mic-btn idle" style="width:48px;height:48px;font-size:1.2rem" onclick="tiPlay(${qi})">▶</button>
+        <div class="spk-status">Replay question · <button class="btn" style="padding:6px 16px;font-size:0.82rem" onclick="tiRecord(${qi})">🎙 Try again</button></div>
+      </div>
+      <div class="spk-transcript-box" style="margin-top:14px">
+        <div class="label">Your transcribed answer</div>
+        <div>${saved.transcript || '(no speech detected)'}</div>
+      </div>
+      <div class="spk-ai-feedback">
+        <h4>AI Feedback</h4>
+        <div class="spk-band-row">
+          <div class="spk-band-num">${fb.band ?? '—'}/5</div>
+          <div class="spk-band-label">Speaking Band</div>
+        </div>
+        <div class="spk-feedback-text">${fb.text || ''}</div>
+      </div>`;
+  }
+
+  document.getElementById('qBody').innerHTML = `
+    <div class="spk-scenario">${data.scenario}</div>
+    <div class="spk-interview-q">
+      <div class="interviewer">Interviewer</div>
+      <div class="question">${data.question}</div>
+    </div>
+    ${controlsHtml}`;
+}
+
+function tiPlay(qi) {
+  const data = state.questions[qi].data;
+  const saved = state.answers[qi] || {phase:'idle'};
+  saved.phase = 'played';
+  state.answers[qi] = saved;
+  renderTakeInterview(data, qi);
+
+  if (!window.speechSynthesis) return;
+
+  function doSpeak() {
+    window.speechSynthesis.cancel();
+    setTimeout(() => {
+      const utt = new SpeechSynthesisUtterance(data.question);
+      utt.rate  = 0.88;
+      utt.pitch = 1;
+      utt.lang  = 'en-US';
+      const enVoice = window.speechSynthesis.getVoices().find(v => v.lang.startsWith('en'));
+      if (enVoice) utt.voice = enVoice;
+      utt.onend   = () => renderTakeInterview(state.questions[qi].data, qi);
+      utt.onerror = () => renderTakeInterview(state.questions[qi].data, qi);
+      window.speechSynthesis.speak(utt);
+    }, 100);
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 0) {
+    doSpeak();
+  } else {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null;
+      doSpeak();
+    };
+  }
+}
+
+function tiRecord(qi) {
+  const data = state.questions[qi].data;
+  const saved = state.answers[qi] || {phase:'idle'};
+  saved.phase = 'recording';
+  state.answers[qi] = saved;
+  stopSpeech();
+  renderTakeInterview(data, qi);
+  startRecording(qi, data.responseSec, async transcript => {
+    saved.transcript = transcript;
+    saved.phase = 'scoring';
+    state.answers[qi] = saved;
+    renderTakeInterview(data, qi);
+    // Score with Claude API
+    const prompt = `You are a TOEFL iBT Speaking examiner. Score this spoken response on a band of 1–5.
+
+INTERVIEW CONTEXT: ${data.scenario}
+INTERVIEWER QUESTION: ${data.question}
+TRANSCRIBED SPOKEN RESPONSE: ${transcript || '(silence / no speech detected)'}
+
+Evaluate: fluency, vocabulary, grammar, relevance, and development of ideas.
+Give a band 1–5 and 2–3 sentences of specific, actionable feedback.
+Format exactly:
+Band: [1-5]
+Feedback: [your feedback]`;
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:350, messages:[{role:'user',content:prompt}]})
+      });
+      const json = await res.json();
+      const text = json.content.map(b=>b.text||'').join('');
+      const bandMatch = text.match(/Band:\s*([1-5])/i);
+      const feedMatch = text.match(/Feedback:\s*([\s\S]+)/i);
+      saved.feedback = { band: bandMatch ? parseInt(bandMatch[1]) : 3, text: feedMatch ? feedMatch[1].trim() : text };
+    } catch(e) {
+      saved.feedback = { band: null, text: 'Scoring unavailable — please check your connection.' };
+    }
+    saved.phase = 'done';
+    saved.correct = (saved.feedback.band || 0) >= 3;
+    state.answers[qi] = saved;
+    renderTakeInterview(state.questions[qi].data, qi);
+    updateNav();
+  });
+}
+
+// ── SPEAKING RESULTS ──────────────────────────────────────────────────────────
+function showSpeakingResults() {
+  clearInterval(state.timerInterval);
+  stopRecording();
+  stopSpeech();
+  document.getElementById('navBar').classList.remove('shown');
+  document.getElementById('topbar').classList.remove('shown');
+
+  const lrItems = state.questions.filter(q=>q.type==='listen_repeat');
+  const tiItems = state.questions.filter(q=>q.type==='take_interview');
+  const lrQIs   = state.questions.map((q,i)=>q.type==='listen_repeat'?i:-1).filter(i=>i>=0);
+  const tiQIs   = state.questions.map((q,i)=>q.type==='take_interview'?i:-1).filter(i=>i>=0);
+
+  const lrScores = lrQIs.map(qi => state.answers[qi]?.pct ?? 0);
+  const lrAvg    = lrScores.length ? Math.round(lrScores.reduce((a,b)=>a+b,0)/lrScores.length) : 0;
+
+  const tiBands  = tiQIs.map(qi => state.answers[qi]?.feedback?.band).filter(Boolean);
+  const tiAvg    = tiBands.length ? (tiBands.reduce((a,b)=>a+b,0)/tiBands.length).toFixed(1) : '—';
+
+  // Overall band: average of LR (scaled 1–5) + interview avg
+  const lrScaled = Math.round(1 + (lrAvg/100)*4);
+  const allBands = [lrScaled, ...tiBands].filter(Boolean);
+  const overall  = allBands.length ? Math.round(allBands.reduce((a,b)=>a+b,0)/allBands.length) : '—';
+
+  const lrReview = lrQIs.map(qi => {
+    const a = state.answers[qi]; const d = state.questions[qi].data;
+    const pct = a?.pct ?? 0;
+    const color = pct>=80?'var(--green)':pct>=50?'var(--accent)':'var(--red)';
+    return `<div class="review-item"><div class="ri-top">
+      <span class="ri-badge ${pct>=70?'ok':'miss'}">${pct>=70?'✓':'✗'}</span>
+      <span class="ri-q">${d.text}</span></div>
+      <div class="ri-answer">Score: <strong style="color:${color}">${pct}%</strong></div>
+      ${a?.diff?.html ? `<div class="spk-transcript-box" style="margin-top:8px"><div class="label">Word match</div><div>${a.diff.html}</div></div>` : ''}
+    </div>`;
+  }).join('');
+
+  const tiReview = tiQIs.map(qi => {
+    const a = state.answers[qi]; const d = state.questions[qi].data;
+    const band = a?.feedback?.band;
+    return `<div class="review-item"><div class="ri-top">
+      <span class="ri-badge ${band>=3?'ok':'miss'}">${band?'✓':'—'}</span>
+      <span class="ri-q">${d.question.substring(0,80)}…</span></div>
+      ${band ? `<div class="ri-answer">Band: <strong>${band}/5</strong></div>` : '<div class="ri-answer" style="color:var(--muted)">Not attempted</div>'}
+      ${a?.transcript ? `<div class="spk-transcript-box" style="margin-top:8px"><div class="label">Your answer</div><div>${a.transcript}</div></div>` : ''}
+      ${a?.feedback?.text ? `<div class="explanation-box" style="margin-top:8px"><strong>AI Feedback</strong>${a.feedback.text}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('resultsScreen').innerHTML = `
+    <h2>Speaking Section Complete</h2>
+    <div class="writing-results-grid">
+      <div class="wr-card"><div class="big">${overall}/5</div><div class="label">Overall Band</div></div>
+      <div class="wr-card"><div class="big">${lrAvg}%</div><div class="label">Listen & Repeat avg</div></div>
+      <div class="wr-card"><div class="big">${tiAvg}${tiBands.length?'/5':''}</div><div class="label">Interview avg band</div></div>
+    </div>
+    <button class="btn" onclick="restartTest()">Restart</button>
+    <h3 style="margin-top:28px;color:var(--navy);">Listen & Repeat Review</h3>
+    <div class="review-list">${lrReview}</div>
+    <h3 style="margin-top:24px;color:var(--navy);">Interview Review</h3>
+    <div class="review-list">${tiReview}</div>`;
+
+  document.getElementById('progressfill').style.width='100%';
+  showScreen('resultsScreen');
+}
+
+</script>
+</body>
+</html>
