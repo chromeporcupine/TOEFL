@@ -1,0 +1,2 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://texttospeech.googleapis.com https://api.anthropic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; font-src 'self' data:
