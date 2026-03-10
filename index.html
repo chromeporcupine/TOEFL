@@ -5,15 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TOEFL iBT® Practice</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  #emailArea:empty:before { content: attr(data-placeholder); color: #aaa; pointer-events: none; }
   :root {
-    --navy: #1a2744;
-    --blue: #2c4a9e;
-    --accent: #c8951a;
-    --bg: #f7f7f5;
+    --navy: #1a1a3e;
+    --blue: #5356cc;
+    --accent: #d4a017;
+    --purple: #9196ff;
+    --orange: #ff8f60;
+    --lime: #d8e800;
+    --bg: #f5f5fa;
     --card: #ffffff;
-    --border: #ddd;
-    --text: #222;
+    --border: #dde0f0;
+    --text: #1a1a2e;
     --muted: #666;
     --green: #2a7a4f;
     --red: #b53b3b;
@@ -21,13 +25,13 @@
   body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
   .screen { display: none; }
   .screen.active { display: block; }
-  #topbar { background: var(--navy); color: #fff; display: none; align-items: center; justify-content: space-between; padding: 10px 24px; position: sticky; top: 0; z-index: 100; }
+  #topbar { background: #fff; color: var(--navy); border-bottom: 3px solid var(--purple); display: none; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 100; height: 52px; }
   #topbar.shown { display: flex; }
-  #topbar .logo { font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; }
-  #topbar .section-label { font-size: 0.82rem; opacity: 0.75; }
-  #topbar .timer { font-size: 1rem; font-weight: 600; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 4px; }
+  #topbar .logo { font-size: 0.78rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--navy); opacity: 0.6; }
+  #topbar .section-label { font-size: 0.95rem; font-weight: 700; color: var(--navy); }
+  #topbar .timer { font-size: 0.95rem; font-weight: 700; color: var(--navy); background: #eeeeff; padding: 4px 12px; border-radius: 4px; font-variant-numeric: tabular-nums; }
   #progressbar { height: 4px; background: #ddd; }
-  #progressfill { height: 4px; background: var(--accent); transition: width 0.3s; width: 0%; }
+  #progressfill { height: 4px; background: var(--purple); transition: width 0.3s; width: 0%; }
   .content-wrap { max-width: 820px; margin: 0 auto; padding: 40px 20px 120px; }
   #startScreen h1 { font-size: 2rem; color: var(--navy); margin-bottom: 8px; }
   #startScreen .subtitle { color: var(--muted); margin-bottom: 32px; }
@@ -37,20 +41,20 @@
   .info-card p { font-size: 1rem; font-weight: 600; color: var(--navy); }
   .mode-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
   .mode-option { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 18px 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
-  .mode-option:hover { border-color: var(--blue); }
-  .mode-option.active { border-color: var(--blue); background: #eef2fb; }
+  .mode-option:hover { border-color: var(--purple); }
+  .mode-option.active { border-color: var(--purple); background: #eeeeff; }
   .mode-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 6px; }
   .mode-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
-  .explanation-box { background: #f0f4ff; border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 16px; font-size: 0.9rem; color: var(--text); line-height: 1.5; }
+  .explanation-box { background: #eeeeff; border-left: 4px solid var(--purple); border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 16px; font-size: 0.9rem; color: var(--text); line-height: 1.5; }
   .explanation-box strong { color: var(--navy); display: block; margin-bottom: 4px; }
-  .ctw-completed { background: #f0f4ff; border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-top: 16px; font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+  .ctw-completed { background: #eeeeff; border-left: 4px solid var(--purple); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-top: 16px; font-size: 0.95rem; line-height: 1.8; color: var(--text); }
   .ctw-completed strong { color: var(--navy); display: block; margin-bottom: 8px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
   .ctw-completed .filled-word { color: var(--blue); font-weight: 700; }
-  .btn { display: inline-block; background: var(--blue); color: #fff; border: none; padding: 12px 32px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .btn { display: inline-block; background: var(--purple); color: #fff; border: none; padding: 12px 32px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
   .btn:hover { background: var(--navy); }
   .btn:disabled { opacity: 0.5; cursor: default; }
-  .btn-outline { background: transparent; color: var(--blue); border: 2px solid var(--blue); }
-  .btn-outline:hover { background: var(--blue); color: #fff; }
+  .btn-outline { background: transparent; color: var(--purple); border: 2px solid var(--purple); }
+  .btn-outline:hover { background: var(--purple); color: #fff; }
   #introScreen, #transitionScreen { text-align: center; }
   #introScreen h2, #transitionScreen h2 { font-size: 1.6rem; color: var(--navy); margin-bottom: 12px; }
   #introScreen p, #transitionScreen p { color: var(--muted); margin-bottom: 24px; max-width: 520px; margin-left: auto; margin-right: auto; }
@@ -60,29 +64,42 @@
   .q-header { margin-bottom: 18px; }
   .q-num { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
   .q-section-label { font-size: 1.1rem; font-weight: 600; color: var(--navy); margin-top: 4px; }
-  .ctw-instruction { background: #eef2ff; border-left: 4px solid var(--blue); padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 18px; font-size: 0.9rem; color: var(--navy); }
+  .ctw-instruction { background: #eeeeff; border-left: 4px solid var(--purple); padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 18px; font-size: 0.9rem; color: var(--navy); }
   .ctw-paragraph { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; line-height: 2.1; font-size: 1rem; }
   /* CTW per-letter inputs */
   .ctw-blank { display: inline-flex; gap: 4px; vertical-align: baseline; }
-  .ctw-letter { width: 16px; border: none; border-bottom: 2px solid var(--blue); background: transparent; font-size: 1rem; font-family: inherit; color: var(--navy); outline: none; padding: 0; text-align: center; caret-color: var(--accent); transition: border-color 0.15s; }
-  .ctw-letter:focus { border-color: var(--accent); }
+  .ctw-letter { width: 16px; border: none; border-bottom: 2px solid var(--purple); background: transparent; font-size: 1rem; font-family: inherit; color: var(--navy); outline: none; padding: 0; text-align: center; caret-color: var(--orange); transition: border-color 0.15s; }
+  .ctw-letter:focus { border-color: var(--orange); }
   .ctw-letter.correct { border-color: var(--green); color: var(--green); }
   .ctw-letter.wrong { border-color: var(--red); color: var(--red); }
   .ctw-letter:disabled { cursor: default; opacity: 0.9; }
 
-  #pauseBtn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 6px 14px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600; margin-left: 12px; transition: background 0.2s; }
-  #pauseBtn:hover { background: rgba(255,255,255,0.28); }
+  #pauseBtn { background: #f0f2f7; border: 1px solid #ccc; color: var(--navy); padding: 5px 12px; border-radius: 4px; font-size: 0.82rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+  #pauseBtn:hover { background: #dde2f0; }
   .passage-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; font-size: 0.95rem; line-height: 1.75; margin-bottom: 18px; max-height: 280px; overflow-y: auto; }
   .passage-box h4 { font-size: 1rem; margin-bottom: 10px; color: var(--navy); }
   .q-text { font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
   .options { display: flex; flex-direction: column; gap: 10px; }
-  .option-btn { background: var(--card); border: 2px solid var(--border); border-radius: 6px; padding: 12px 16px; text-align: left; font-size: 0.95rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; width: 100%; }
-  .option-btn:hover:not(:disabled) { border-color: var(--blue); }
-  .option-btn.selected { border-color: var(--blue); background: #eef2ff; }
+  /* Radio-circle style options (ETS 2026) */
+  .option-btn { background: var(--card); border: 2px solid var(--border); border-radius: 6px; padding: 12px 16px 12px 48px; text-align: left; font-size: 0.95rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; width: 100%; position: relative; }
+  .option-btn::before { content: ''; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%; border: 2px solid #aaa; background: #fff; transition: border-color 0.15s, background 0.15s; flex-shrink: 0; }
+  .option-btn:hover:not(:disabled) { border-color: var(--purple); }
+  .option-btn:hover:not(:disabled)::before { border-color: var(--purple); }
+  .option-btn.selected { border-color: var(--purple); background: #eeeeff; }
+  .option-btn.selected::before { border-color: var(--purple); background: var(--purple); box-shadow: inset 0 0 0 3px #fff; }
   .option-btn.correct { border-color: var(--green); background: #e8f4f0; color: var(--green); font-weight: 600; }
+  .option-btn.correct::before { border-color: var(--green); background: var(--green); box-shadow: inset 0 0 0 3px #fff; }
   .option-btn.wrong { border-color: var(--red); background: #fdecea; color: var(--red); }
+  .option-btn.wrong::before { border-color: var(--red); background: var(--red); box-shadow: inset 0 0 0 3px #fff; }
   .option-btn:disabled { cursor: default; }
-  .option-btn.selected-only { border-color: var(--blue); background: #eef2ff; }
+  .option-btn.selected-only { border-color: var(--purple); background: #eeeeff; }
+  .option-btn.selected-only::before { border-color: var(--purple); background: var(--purple); box-shadow: inset 0 0 0 3px #fff; }
+  /* Full-test card */
+  .full-test-card { background: var(--navy); border: 2px solid var(--navy); border-radius: 12px; padding: 22px 16px; text-align: center; cursor: pointer; transition: background 0.15s, box-shadow 0.15s; margin-bottom: 20px; color: #fff; border-top: 5px solid #9196ff; }
+  .full-test-card:hover { background: #26264e; box-shadow: 0 2px 16px rgba(145,150,255,0.25); }
+  .full-test-card-icon { font-size: 2rem; margin-bottom: 8px; }
+  .full-test-card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+  .full-test-card-sub { font-size: 0.82rem; opacity: 0.75; }
   #feedbackBar { position: fixed; bottom: 62px; left: 0; right: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem; text-align: center; display: none; z-index: 50; }
   #feedbackBar.correct { background: #e8f4f0; color: var(--green); border-top: 1px solid #b2d8c5; }
   #feedbackBar.wrong { background: #fdecea; color: var(--red); border-top: 1px solid #f0b8b8; }
@@ -92,11 +109,11 @@
   #resultsScreen h2 { font-size: 1.8rem; color: var(--navy); margin-bottom: 8px; }
   .score-row { display: flex; gap: 16px; margin: 24px 0; }
   .score-card { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; text-align: center; }
-  .score-card .big { font-size: 2.4rem; font-weight: 700; color: var(--blue); }
+  .score-card .big { font-size: 2.4rem; font-weight: 700; color: var(--purple); }
   .score-card .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 4px; }
-  .score-card-main { border-color: var(--blue); border-width: 2px; }
+  .score-card-main { border-color: var(--purple); border-width: 2px; }
   .score-card-main .big { font-size: 3rem; color: var(--navy); }
-  .cefr-label { font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-top: 4px; }
+  .cefr-label { font-size: 0.9rem; font-weight: 600; color: var(--purple); margin-top: 4px; }
   .review-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
   .review-item { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 0.88rem; }
   .ri-top { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 4px; }
@@ -108,14 +125,14 @@
   .ri-answer .corr { color: var(--green); font-weight: 600; }
   .ri-answer .wrong2 { color: var(--red); font-weight: 600; }
   .section-card { background:var(--card); border:2px solid var(--border); border-radius:12px; padding:22px 16px; text-align:center; cursor:pointer; transition:border-color 0.15s, box-shadow 0.15s; }
-  .section-card:hover { border-color:var(--blue); box-shadow:0 2px 12px rgba(44,74,158,0.12); }
+  .section-card:hover { border-color:var(--purple); box-shadow:0 2px 12px rgba(145,150,255,0.18); }
   .section-card-icon  { font-size:2rem; margin-bottom:8px; }
   .section-card-title { font-size:1.05rem; font-weight:700; color:var(--navy); margin-bottom:4px; }
   .section-card-sub   { font-size:0.8rem; color:var(--muted); }
-  .back-link { background:none; border:none; color:var(--blue); font-size:0.88rem; cursor:pointer; padding:0; margin-bottom:16px; display:inline-block; font-weight:600; }
+  .back-link { background:none; border:none; color:var(--purple); font-size:0.88rem; cursor:pointer; padding:0; margin-bottom:16px; display:inline-block; font-weight:600; }
   .back-link:hover { text-decoration:underline; }
   .spk-scenario { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin-bottom:16px; font-size:0.93rem; line-height:1.65; color:var(--text); }
-  .spk-sentence  { background:#f0f4ff; border-left:4px solid var(--blue); border-radius:0 8px 8px 0; padding:14px 18px; font-size:1.05rem; font-weight:600; color:var(--navy); margin-bottom:16px; line-height:1.6; }
+  .spk-sentence  { background:#eeeeff; border-left:4px solid var(--purple); border-radius:0 8px 8px 0; padding:14px 18px; font-size:1.05rem; font-weight:600; color:var(--navy); margin-bottom:16px; line-height:1.6; }
   .spk-controls  { display:flex; flex-direction:column; align-items:center; gap:14px; margin:20px 0; }
   .spk-mic-btn   { width:72px; height:72px; border-radius:50%; border:none; font-size:2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s, transform 0.1s; box-shadow:0 3px 10px rgba(0,0,0,0.15); }
   .spk-mic-btn.idle      { background:var(--navy); color:#fff; }
@@ -189,16 +206,16 @@
   .wr-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px; text-align:center; }
   .wr-card .big { font-size:1.8rem; font-weight:800; color:var(--navy); }
   .wr-card .label { font-size:0.75rem; color:var(--muted); margin-top:2px; }
-  .audio-player { background: var(--navy); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; color: #fff; }
-  .audio-play-btn { background: var(--accent); border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-  .audio-play-btn:hover { background: #a87618; }
+
+  .audio-play-btn { background: #ff8f60; border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .audio-play-btn:hover { background: #e87040; }
   .audio-play-btn:disabled { background: #555; cursor: default; }
   .audio-info { flex: 1; }
   .audio-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 3px; }
   .audio-subtitle { font-size: 0.8rem; opacity: 0.7; }
   .audio-status { font-size: 0.8rem; opacity: 0.8; min-width: 70px; text-align: right; }
   .transcript-box { background: #f8f8f6; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-size: 0.92rem; line-height: 1.7; color: var(--text); }
-  .transcript-box .speaker { font-weight: 700; color: var(--blue); }
+  .transcript-box .speaker { font-weight: 700; color: var(--purple); }
   .transcript-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
   .listen-choose-options { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
   .locked-msg { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 12px; font-style: italic; }
@@ -207,11 +224,9 @@
 <body>
 
 <div id="topbar">
-  <div>
-    <div class="logo">TOEFL iBT® Practice</div>
-    <div class="section-label" id="topbarSectionLabel">Reading Section</div>
-  </div>
-  <div style="display:flex;align-items:center">
+  <div class="logo">TOEFL iBT®</div>
+  <div class="section-label" id="topbarSectionLabel">Reading Section</div>
+  <div style="display:flex;align-items:center;gap:10px;">
     <div id="timerDisplay" class="timer">36:00</div>
     <button id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
   </div>
@@ -221,32 +236,43 @@
 
 <!-- HOME: section picker only -->
 <div id="startScreen" class="screen active content-wrap">
-  <h1>TOEFL iBT® Practice</h1>
-  <p class="subtitle">Select a section to begin</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">
-    <div class="section-card" onclick="goToDetail('reading')">
+  <h1 id="homeTitle" onclick="adminTap()" style="cursor:default;user-select:none;">TOEFL iBT® Practice</h1>
+  <p class="subtitle">Select a section to practise, or take a full test</p>
+  <div class="full-test-card" onclick="startFullTest()">
+    <div class="full-test-card-icon">🏆</div>
+    <div class="full-test-card-title">Full Test</div>
+    <div class="full-test-card-sub">Reading · Listening · Writing · Speaking · ~85 min</div>
+  </div>
+  <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;font-weight:600;">Section Practice</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:0px;">
+    <div class="section-card" onclick="goToDetail('reading')" style="border-top:4px solid #9196ff;">
       <div class="section-card-icon">📖</div>
       <div class="section-card-title">Reading</div>
       <div class="section-card-sub">2 adaptive modules</div>
     </div>
-    <div class="section-card" onclick="goToDetail('listening')">
+    <div class="section-card" onclick="goToDetail('listening')" style="border-top:4px solid #f0ff96;color:inherit;">
       <div class="section-card-icon">🎧</div>
       <div class="section-card-title">Listening</div>
       <div class="section-card-sub">2 adaptive modules</div>
     </div>
-    <div class="section-card" onclick="goToDetail('writing')">
+    <div class="section-card" onclick="goToDetail('writing')" style="border-top:4px solid #ff8f60;">
       <div class="section-card-icon">✍️</div>
       <div class="section-card-title">Writing</div>
       <div class="section-card-sub">12 questions · 30 min</div>
     </div>
-    <div class="section-card" onclick="goToDetail('speaking')">
+    <div class="section-card" onclick="goToDetail('speaking')" style="border-top:4px solid #9196ff;">
       <div class="section-card-icon">🎤</div>
       <div class="section-card-title">Speaking</div>
       <div class="section-card-sub">11 questions · 20 min</div>
     </div>
   </div>
-  <button onclick="testTTS()" style="margin-top:20px;background:#444;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:0.9rem;">🔊 Test TTS</button>
-  <div id="ttsTestResult" style="margin-top:8px;font-size:0.85rem;color:var(--muted);min-height:20px;"></div>
+  <div id="adminPanel" style="display:none;margin-top:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
+    <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;font-weight:600;">⚙️ Admin — Google TTS Key</p>
+    <input id="adminKeyInput" type="password" placeholder="AIza..." autocomplete="off"
+      style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.9rem;font-family:monospace;background:#f9f9f7;margin-bottom:10px;">
+    <button onclick="saveAdminKey()" style="background:var(--navy);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;">Save Key</button>
+    <div id="adminKeyStatus" style="margin-top:8px;font-size:0.83rem;color:var(--muted);"></div>
+  </div>
 </div>
 
 <!-- DETAIL: info + mode + begin -->
@@ -290,17 +316,70 @@
 </div>
 
 <!-- TRANSITION -->
-<div id="transitionScreen" class="screen content-wrap">
-  <h2>Module 1 Complete</h2>
-  <div id="transitionScore" style="font-size:1.05rem;margin-bottom:16px;color:var(--text)"></div>
-  <div id="pathBadge" style="margin-bottom:12px"></div>
-  <p id="transitionMsg"></p>
-  <button class="btn" onclick="beginModule2()">Continue to Module 2 →</button>
+<div id="transitionScreen" class="screen content-wrap" style="text-align:center;">
+  <div style="font-size:2.5rem;margin-bottom:8px;" id="transitionEmoji">💪</div>
+  <h2 id="transitionTitle" style="color:var(--navy);margin-bottom:6px;">Module 1 — Done!</h2>
+  <div id="transitionScore" style="font-size:1.05rem;margin-bottom:20px;color:var(--text)"></div>
+
+  <!-- Adaptive routing card + gauge row -->
+  <div style="display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:24px;">
+    <!-- Teal routing card -->
+    <div id="routingCard" style="background:#00796b;color:#fff;border-radius:12px;padding:22px 26px;max-width:280px;text-align:left;flex:0 0 auto;">
+      <div style="font-size:1rem;font-weight:700;margin-bottom:8px;">Adaptive Routing Complete</div>
+      <div id="transitionMsg" style="font-size:0.88rem;line-height:1.5;opacity:0.92;"></div>
+    </div>
+    <!-- Gauge -->
+    <div style="flex:0 0 auto;">
+      <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">1.0–6.0 Band Scale</div>
+      <svg id="gaugesvg" width="240" height="140" viewBox="0 0 240 140" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="pathBadge" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <button class="btn" onclick="beginModule2()">Bring on Module 2 →</button>
+</div>
+
+<!-- FULL-TEST SECTION TRANSITION -->
+<div id="fullTestTransitionScreen" class="screen content-wrap" style="text-align:center;">
+  <div style="font-size:3rem;margin-bottom:16px;" id="ftTransIcon">✅</div>
+  <h2 id="ftTransTitle" style="color:var(--navy);margin-bottom:8px;"></h2>
+  <p id="ftTransMsg" style="color:var(--muted);margin-bottom:12px;max-width:480px;margin-left:auto;margin-right:auto;"></p>
+  <div id="ftTransScore" style="display:inline-block;background:var(--card);border:2px solid var(--blue);border-radius:10px;padding:14px 32px;margin-bottom:28px;">
+    <div style="font-size:2.2rem;font-weight:800;color:var(--purple)" id="ftTransBand">—</div>
+    <div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-top:2px;">Section Band</div>
+  </div>
+  <br>
+  <button class="btn" id="ftTransBtn" onclick="advanceFullTest()"></button>
+</div>
+
+<!-- FULL-TEST FINAL RESULTS -->
+<div id="fullTestResultsScreen" class="screen content-wrap">
+  <h2 style="color:var(--navy);margin-bottom:4px;">Full Test Complete</h2>
+  <p style="color:var(--muted);margin-bottom:24px;font-size:0.92rem;">Your TOEFL iBT® results</p>
+  <div style="text-align:center;margin-bottom:28px;">
+    <div style="display:inline-block;background:var(--navy);color:#fff;border-radius:14px;padding:24px 48px;">
+      <div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1.5px;opacity:0.7;margin-bottom:4px;">Overall Band</div>
+      <div style="font-size:3.5rem;font-weight:800;" id="ftOverallBand">—</div>
+      <div style="font-size:0.9rem;opacity:0.8;margin-top:2px;" id="ftCefrLabel">—</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:24px;">
+    <div class="score-card"><div class="big" id="ftReadingBand">—</div><div class="label">Reading</div></div>
+    <div class="score-card"><div class="big" id="ftListeningBand">—</div><div class="label">Listening</div></div>
+    <div class="score-card"><div class="big" id="ftWritingBand">—</div><div class="label">Writing</div></div>
+    <div class="score-card"><div class="big" id="ftSpeakingBand">—</div><div class="label">Speaking</div></div>
+  </div>
+  <div style="text-align:center;margin-bottom:28px;">
+    <button class="btn" onclick="restartTest()">Return to Home</button>
+  </div>
+  <h3 style="color:var(--navy);margin-bottom:12px;">Section Reviews</h3>
+  <div id="ftReviewAccordion"></div>
 </div>
 
 <!-- RESULTS -->
 <div id="resultsScreen" class="screen content-wrap">
   <h2>Test Complete</h2>
+  <div id="personalityLabel" style="text-align:center;font-size:1.15rem;font-weight:700;color:var(--orange);margin-bottom:16px;min-height:1.5em;"></div>
   <div class="score-row">
     <div class="score-card score-card-main"><div class="big" id="totalScore">—</div><div class="label">TOEFL Band</div><div class="cefr-label" id="cefrLabel">—</div></div>
     <div class="score-card"><div class="big" id="m1Score">—</div><div class="label">Module 1</div></div>
@@ -308,7 +387,8 @@
   </div>
   <div id="pathTakenBadge" style="text-align:center;margin:8px 0 16px;"></div>
   <div id="bandNote" style="text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto;"></div>
-  <button class="btn" onclick="restartTest()">Restart Test</button>
+  <div id="breakdownBars" style="margin-bottom:20px;"></div>
+  <button class="btn" onclick="restartTest()">Try Again →</button>
   <h3 style="margin-top:28px;color:var(--navy);">Answer Review</h3>
   <div class="review-list" id="reviewList"></div>
 </div>
@@ -316,28 +396,33 @@
 <div id="feedbackBar"></div>
 <div id="navBar">
   <button class="btn btn-outline" id="backBtn" onclick="goBack()">← Back</button>
-  <span class="q-counter" id="qCounter"></span>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+    <span id="streakDisplay" style="font-size:1rem;min-height:1.2em;letter-spacing:1px;"></span>
+    <span class="q-counter" id="qCounter"></span>
+  </div>
   <button class="btn" id="nextBtn" onclick="goNext()">Next →</button>
 </div>
 
 <script>
-// ── TTS DIAGNOSTIC ────────────────────────────────────────────────────────────
-function testTTS() {
-  const el = document.getElementById('ttsTestResult');
-  const set = msg => { el.textContent = msg; console.log('[TTS test]', msg); };
-
-  set('Checking speechSynthesis...');
-  if (!window.speechSynthesis) { set('❌ speechSynthesis not available'); return; }
-  set('✓ speechSynthesis exists. Calling speak()...');
-
-  const utt = new SpeechSynthesisUtterance('Testing. One two three.');
-  utt.lang  = 'en-US';
-  utt.rate  = 1;
-  utt.onstart = () => set('✅ onstart — audio is playing!');
-  utt.onend   = () => set('✅ onend — finished.');
-  utt.onerror = e => set('❌ onerror: ' + e.error);
-  window.speechSynthesis.speak(utt);
-  set('speak() called. pending=' + window.speechSynthesis.pending + ' speaking=' + window.speechSynthesis.speaking + ' paused=' + window.speechSynthesis.paused);
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+let _adminTaps = 0, _adminTimer = null;
+function adminTap() {
+  _adminTaps++;
+  clearTimeout(_adminTimer);
+  _adminTimer = setTimeout(() => { _adminTaps = 0; }, 2000);
+  if (_adminTaps >= 5) {
+    _adminTaps = 0;
+    const panel = document.getElementById('adminPanel');
+    panel.style.display = panel.style.display === 'none' ? '' : 'none';
+  }
+}
+function saveAdminKey() {
+  const val = document.getElementById('adminKeyInput').value.trim();
+  if (!val) { document.getElementById('adminKeyStatus').textContent = 'Enter a key first.'; return; }
+  window._runtimeTTSKey = val;
+  document.getElementById('adminKeyStatus').textContent = '✅ Key saved for this session.';
+  document.getElementById('adminKeyInput').value = '';
+  setTimeout(() => { document.getElementById('adminPanel').style.display = 'none'; }, 1500);
 }
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
@@ -972,7 +1057,124 @@ const SPEAKING_DATA = [
    question:'Good points. Lastly, considering advances in technology, some people believe that commuting might disappear entirely. How do you think a severe decline in commuting might affect businesses in positive ways and negative ways? Please give one example of each.'},
 ];
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
+// ── FUN LAYER ─────────────────────────────────────────────────────────────────
+const PERSONALITY_LABELS = {
+  6: ['Basically a BBC presenter 🎙️', 'Your grammar is doing push-ups 💪', 'C2? You might be smarter than your teacher 🎓'],
+  5: ['One espresso away from full fluency ☕', 'Almost there — your English is showing off 😎', 'Top shelf, nearly 🏆'],
+  4: ['Solid! Your professors will understand you... mostly 🎓', 'Strong foundation, sky\'s the limit 🏗️', 'Not bad at all — not bad at all 👀'],
+  3: ['More practice, more power 💪', 'You\'re warming up 🔥', 'The comeback arc begins here 📈'],
+  2: ['Hey, every expert was once a beginner 🌱', 'Room to grow — and grow you will 🚀', 'The journey of a thousand words begins with one 📝'],
+  1: ['Everyone starts somewhere. This is your somewhere 🗺️', 'Bold of you to try. We respect it 🫡', 'The only way is up ⬆️'],
+};
+
+const WRONG_REACTIONS = [
+  'Nope 😬', 'Not quite 🤔', 'Almost! 😅', 'Swing and a miss ⚾',
+  'Oops 🙈', 'Not this time 😶', 'Close... but no 🫣', 'The correct answer disagrees 😄',
+];
+const RIGHT_REACTIONS = [
+  'Correct! ✅', 'Nailed it! 🎯', 'Nice one 👌', 'Yes! 🙌',
+  'That\'s the one ✨', 'Boom 💥', 'On fire 🔥', 'Smooth 😎',
+];
+
+const TRANSITION_MSGS = {
+  hard: [
+    'That was the easy part. Module 2 is bringing its A-game. 🔥',
+    'Strong start! Now the real fun begins. 💪',
+    'Advanced path unlocked. Your English is ready for this. 🚀',
+  ],
+  standard: [
+    'Module 1 done! Keep your head in the game. 🎯',
+    'Steady progress. Module 2 awaits. 🏃',
+    'You\'re doing great — stay focused for Module 2! 🧠',
+  ],
+};
+
+let streak = 0;
+
+function getPersonalityLabel(band) {
+  const opts = PERSONALITY_LABELS[band] || PERSONALITY_LABELS[1];
+  return opts[Math.floor(Math.random() * opts.length)];
+}
+function getWrongReaction() { return WRONG_REACTIONS[Math.floor(Math.random()*WRONG_REACTIONS.length)]; }
+function getRightReaction()  { return RIGHT_REACTIONS[Math.floor(Math.random()*RIGHT_REACTIONS.length)]; }
+function getTransitionMsg(isHard) {
+  const opts = isHard ? TRANSITION_MSGS.hard : TRANSITION_MSGS.standard;
+  return opts[Math.floor(Math.random()*opts.length)];
+}
+
+function updateStreak(correct) {
+  if (correct) {
+    streak++;
+  } else {
+    streak = 0;
+  }
+  const el = document.getElementById('streakDisplay');
+  if (!el) return;
+  if (streak >= 3) {
+    el.textContent = '🔥'.repeat(Math.min(streak, 5)) + ` ×${streak}`;
+    el.title = `${streak} in a row!`;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function buildBreakdownBars(questions, answers, section) {
+  // Group by type and compute scores
+  const groups = {};
+  const typeLabels = {
+    ctw: 'Complete the Words', email: 'Email Reading', academic: 'Academic Passage',
+    listen_choose: 'Choose a Response', listen_passage: 'Conversations & Lectures',
+    build_sentence: 'Build a Sentence', write_email: 'Write an Email', write_discussion: 'Academic Discussion',
+    listen_repeat: 'Listen & Repeat', take_interview: 'Interview',
+  };
+  questions.forEach((item, qi) => {
+    const t = item.type;
+    if (!groups[t]) groups[t] = {correct:0, total:0};
+    const a = answers[qi];
+    if (item.type === 'ctw') {
+      const blanks = getBlanks(item.data);
+      groups[t].total += blanks.length;
+      if (a && a.submitted) groups[t].correct += a.score;
+    } else if (item.type === 'listen_passage') {
+      item.data.questions.forEach((q, i) => {
+        groups[t].total++;
+        if (a && a[i] && a[i].correct) groups[t].correct++;
+      });
+    } else if (item.type === 'build_sentence') {
+      groups[t].total++;
+      if (a && a.correct) groups[t].correct++;
+    } else if (item.type === 'listen_repeat') {
+      groups[t].total++;
+      if (a && (a.pct||0) >= 70) groups[t].correct++;
+    } else if (item.type === 'take_interview' || item.type === 'write_email' || item.type === 'write_discussion') {
+      groups[t].total++;
+      if (a && a.band >= 3) groups[t].correct++;
+    } else {
+      groups[t].total++;
+      if (a && a.correct) groups[t].correct++;
+    }
+  });
+
+  const rows = Object.entries(groups).map(([t, g]) => {
+    const pct = g.total ? Math.round(g.correct/g.total*100) : 0;
+    const color = pct >= 70 ? 'var(--green)' : pct >= 45 ? 'var(--orange)' : 'var(--red)';
+    const label = typeLabels[t] || t;
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;direction:ltr;">
+      <div style="flex:0 0 140px;font-size:0.82rem;color:var(--navy);font-weight:600;text-align:right;">${label}</div>
+      <div style="flex:1;background:#eee;border-radius:99px;height:10px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${color};border-radius:99px;transition:width 0.6s ease;"></div>
+      </div>
+      <div style="flex:0 0 44px;font-size:0.85rem;font-weight:700;color:${color};">${g.correct}/${g.total}</div>
+    </div>`;
+  }).join('');
+
+  return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:4px;">
+    <div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:12px;">Breakdown by question type 📊</div>
+    ${rows}
+  </div>`;
+}
+
+
 let selectedMode = 'practice';
 let selectedSection = 'reading';
 
@@ -996,7 +1198,6 @@ function goToDetail(s) {
   document.getElementById('detailAdaptiveNote').style.display = m.adaptive ? '' : 'none';
   document.getElementById('detailInfoGrid').innerHTML = m.info.map(c =>
     `<div class="info-card"><h3>${c.h}</h3><p>${c.p}</p></div>`).join('');
-  // Reset mode to practice on each visit
   selectMode('practice');
   showScreen('detailScreen');
 }
@@ -1019,8 +1220,9 @@ function buildQuestions(data) {
   const qs = [];
   qs.push({type:'ctw', data:data.ctw});
   ['email1','email2','academic'].forEach(key => {
+    const blockType = key.startsWith('email') ? 'email' : 'academic';
     data[key].questions.forEach((q,i) => {
-      qs.push({type:'mcq', data:{...q, passage:data[key].passage, sectionLabel:data[key].sectionLabel}});
+      qs.push({type:blockType, data:{...q, passage:data[key].passage, sectionLabel:data[key].sectionLabel}});
     });
   });
   return qs;
@@ -1036,12 +1238,16 @@ function buildListeningQuestions(data) {
   data.listenChoose.items.forEach(item => {
     qs.push({type:'listen_choose', data:{...item, sectionLabel:data.listenChoose.sectionLabel}});
   });
-  // Passage-based: conversation, announcement, lecture
+  // Passage-based: one item per passage, all questions inside
   ['conversation','announcement','lecture'].forEach(key => {
     const block = data[key];
-    block.questions.forEach(q => {
-      qs.push({type:'listen_passage', data:{...q, transcript:block.transcript, title:block.title, subtype:block.subtype, sectionLabel:block.sectionLabel}});
-    });
+    qs.push({type:'listen_passage', data:{
+      transcript: block.transcript,
+      title:      block.title,
+      subtype:    block.subtype,
+      sectionLabel: block.sectionLabel,
+      questions:  block.questions,   // full array
+    }});
   });
   return qs;
 }
@@ -1056,16 +1262,20 @@ function startTest() {
   const isListening = selectedSection === 'listening';
   const isWriting   = selectedSection === 'writing';
   const isSpeaking  = selectedSection === 'speaking';
+
   const timerSec = (isWriting||isSpeaking) ? 20*60 : isListening ? 20*60 : 36*60;
   const questions = isWriting  ? buildWritingQuestions()
     : isSpeaking ? SPEAKING_DATA.map(d=>({type:d.type,data:d}))
     : isListening ? buildListeningQuestions(M1_L) : buildQuestions(M1);
+
   state = {module:1, path:null, questions, qi:0, answers:{},
            timerSec, timerInterval:null, m1Score:0, m1Total:0,
            mode:selectedMode, section:selectedSection};
+  streak = 0;
   document.getElementById('topbarSectionLabel').textContent =
     isWriting ? 'Writing Section' : isSpeaking ? 'Speaking Section' :
     isListening ? 'Listening Section' : 'Reading Section';
+
   if (isWriting) {
     document.getElementById('introTitle').textContent = 'Writing Section';
     document.getElementById('introDesc').textContent = '12 questions · Build a Sentence, Write an Email, and Academic Discussion. You have 30 minutes.';
@@ -1129,18 +1339,17 @@ function finishModule() {
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
-// Count each CTW blank as one question; listen_choose and listen_passage each = 1
+function itemQuestionCount(item) {
+  if (item.type === 'ctw')           return getBlanks(item.data).length;
+  if (item.type === 'listen_passage') return item.data.questions.length;
+  return 1;
+}
 function displayTotal(questions) {
-  return questions.reduce((sum, item) => {
-    return sum + (item.type === 'ctw' ? getBlanks(item.data).length : 1);
-  }, 0);
+  return questions.reduce((sum, item) => sum + itemQuestionCount(item), 0);
 }
 function displayIndex(questions, qi) {
-  // 1-based "question number" for item at index qi
   let n = 0;
-  for (let i = 0; i < qi; i++) {
-    n += questions[i].type === 'ctw' ? getBlanks(questions[i].data).length : 1;
-  }
+  for (let i = 0; i < qi; i++) n += itemQuestionCount(questions[i]);
   return n + 1;
 }
 
@@ -1155,7 +1364,7 @@ function renderQuestion() {
   hideFeedback();
   document.getElementById('qSection').textContent=item.data.sectionLabel;
   if (item.type==='ctw') renderCTW(item.data, qi);
-  else if (item.type==='mcq') renderMCQ(item.data, qi);
+  else if (item.type==='mcq'||item.type==='email'||item.type==='academic') renderMCQ(item.data, qi);
   else if (item.type==='listen_choose') renderListenChoose(item.data, qi);
   else if (item.type==='listen_passage') renderListenPassage(item.data, qi);
   else if (item.type==='build_sentence') renderBuildSentence(item.data, qi);
@@ -1285,125 +1494,111 @@ function selectOption(qi, sel) {
   updateNav();
 }
 
-// ── TTS ENGINE ────────────────────────────────────────────────────────────────
-let ttsPlaying = false;
-let ttsQueue = [];      // array of utterances waiting to be spoken
-let ttsAborted = false;
+// ── TTS ENGINE — Google Cloud Neural2 ────────────────────────────────────────
+// Voices: Neural2-F (female), Neural2-D (male), Neural2-C (narrator)
+// Set your Google API key here (must have Cloud Text-to-Speech API enabled)
+const GOOGLE_TTS_KEY = 'AIzaSyBvi1FwjdZ1zTfuISPvBmbNjz0VKmxduIQ';
+
+const TTS_VOICES = {
+  female:   { name: 'en-US-Neural2-F', ssmlGender: 'FEMALE' },
+  male:     { name: 'en-US-Neural2-D', ssmlGender: 'MALE'   },
+  narrator: { name: 'en-US-Neural2-C', ssmlGender: 'FEMALE' },
+};
+
+let ttsAborted  = false;
+let ttsQueue    = [];   // [{text, voiceKey, onEnd}]
+let ttsPlaying  = false;
+let _currentAudio = null;
 
 function stopSpeech() {
   ttsAborted = true;
-  ttsQueue = [];
-  _stopKeepalive();
-  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  ttsQueue   = [];
+  ttsPlaying = false;
+  if (_currentAudio) { _currentAudio.pause(); _currentAudio.src = ''; _currentAudio = null; }
+}
+
+// Fetch audio from Google Cloud TTS, return blob URL
+async function fetchTTSAudio(text, voiceKey) {
+  const key   = window._runtimeTTSKey || GOOGLE_TTS_KEY;
+  const voice = TTS_VOICES[voiceKey] || TTS_VOICES.narrator;
+  const body  = {
+    input:       { text },
+    voice:       { languageCode: 'en-US', name: voice.name, ssmlGender: voice.ssmlGender },
+    audioConfig: { audioEncoding: 'MP3', speakingRate: 0.92, pitch: 0 },
+  };
+  const res  = await fetch(
+    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${key}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || res.statusText);
+  }
+  const { audioContent } = await res.json();
+  // audioContent is base64 MP3 — decode to blob URL
+  const binary = atob(audioContent);
+  const bytes  = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const blob = new Blob([bytes], { type: 'audio/mpeg' });
+  return URL.createObjectURL(blob);
+}
+
+// Play a single audio blob URL, call onEnd when done
+function playAudioURL(url, onEnd) {
+  const audio = new Audio(url);
+  _currentAudio = audio;
+  audio.onended = () => { URL.revokeObjectURL(url); _currentAudio = null; if (onEnd) onEnd(); };
+  audio.onerror = () => { URL.revokeObjectURL(url); _currentAudio = null; if (onEnd) onEnd(); };
+  audio.play().catch(() => { if (onEnd) onEnd(); });
+}
+
+// Process the ttsQueue sequentially
+async function processTTSQueue() {
+  while (ttsQueue.length > 0 && !ttsAborted) {
+    const { text, voiceKey, onEnd } = ttsQueue.shift();
+    try {
+      const url = await fetchTTSAudio(text, voiceKey);
+      if (ttsAborted) { URL.revokeObjectURL(url); break; }
+      await new Promise(resolve => playAudioURL(url, resolve));
+      if (onEnd) onEnd();
+    } catch (e) {
+      console.error('TTS error:', e.message);
+      if (onEnd) onEnd();
+    }
+  }
   ttsPlaying = false;
 }
 
-// Pick best available voices for male/female
-function getVoices() {
-  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-  const enVoices = voices.filter(v => v.lang.startsWith('en'));
-  const base = enVoices.length ? enVoices : voices;
-
-  // Prefer named voices that are clearly gendered; fall back to index-based split
-  const femaleKeywords = /female|woman|zira|samantha|victoria|karen|moira|fiona|tessa|allison|ava|susan|kate|lisa/i;
-  const maleKeywords   = /male|man|daniel|david|alex|fred|tom|rishi|oliver|george|arthur|aaron|noel|liam/i;
-
-  let female = base.find(v => femaleKeywords.test(v.name));
-  let male   = base.find(v => maleKeywords.test(v.name));
-
-  // Fallback: use first two distinct voices
-  if (!female && base.length > 0) female = base[0];
-  if (!male   && base.length > 1) male   = base[1];
-  if (!male)                       male   = female; // last resort
-
-  return { female, male };
-}
-
-// Map speaker name → gender using conversation data hints
-// By default: first unique speaker = female, second = male (or override with speakerGenders map)
-function assignSpeakerVoices(transcript) {
-  const { female, male } = getVoices();
-  const seen = [];
-  const map = {};
-  transcript.forEach(line => {
-    if (line.speaker && !map[line.speaker]) {
-      if (seen.length === 0) { map[line.speaker] = female; seen.push(line.speaker); }
-      else if (seen.length === 1) { map[line.speaker] = male; seen.push(line.speaker); }
-      else { map[line.speaker] = seen.length % 2 === 0 ? female : male; seen.push(line.speaker); }
-    }
-  });
-  return map;
-}
-
-// Chrome pauses speechSynthesis after ~15s — keep it alive
-let _ttsKeepalive = null;
-function _startKeepalive() {
-  _stopKeepalive();
-  _ttsKeepalive = setInterval(() => {
-    if (window.speechSynthesis && window.speechSynthesis.speaking) {
-      window.speechSynthesis.pause();
-      window.speechSynthesis.resume();
-    }
-  }, 10000);
-}
-function _stopKeepalive() {
-  if (_ttsKeepalive) { clearInterval(_ttsKeepalive); _ttsKeepalive = null; }
-}
-
-// Speak a plain string with a single voice
-function speakSimple(text, voice, rate, onEnd) {
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.rate = rate || 0.92;
-  utt.pitch = 1;
-  if (voice) utt.voice = voice;
-  utt.onend = () => { _stopKeepalive(); if(onEnd) onEnd(); };
-  utt.onerror = (e) => { _stopKeepalive(); if(onEnd) onEnd(); };
-  _startKeepalive();
-  window.speechSynthesis.speak(utt);
-}
-
-// Main entry point. text = string | transcript array
+// Main entry point. text = string | transcript array [{speaker, text}]
+// speaker roles: first unique speaker → female, second → male, none → narrator
 function speakText(text, onEnd) {
   stopSpeech();
   ttsAborted = false;
-  if (!window.speechSynthesis) { if(onEnd) onEnd(); return; }
 
-  function doSpeak() {
-    if (ttsAborted) return;
-
-    // Plain string or array without speaker tags → single voice
-    if (typeof text === 'string' || !Array.isArray(text) || !text.some(t => t.speaker)) {
-      const flat = typeof text === 'string' ? text : text.map(t => t.text).join(' ');
-      ttsPlaying = true;
-      speakSimple(flat, null, 0.92, () => { ttsPlaying = false; if(onEnd) onEnd(); });
-      return;
-    }
-
-    // Conversation with multiple speakers → queue turns
-    const voiceMap = assignSpeakerVoices(text);
-    ttsQueue = [...text];
-    ttsPlaying = true;
-
-    function speakNext() {
-      if (ttsAborted || ttsQueue.length === 0) {
-        ttsPlaying = false;
-        if (!ttsAborted && onEnd) onEnd();
-        return;
+  // Flatten to queue items
+  if (typeof text === 'string' || !Array.isArray(text) || !text.some(t => t.speaker)) {
+    const flat = typeof text === 'string' ? text : text.map(t => t.text).join(' ');
+    ttsQueue = [{ text: flat, voiceKey: 'narrator', onEnd: null }];
+  } else {
+    // Assign speaker → voice key
+    const seen = {};
+    const order = ['female', 'male'];
+    let idx = 0;
+    ttsQueue = text.map(line => {
+      let voiceKey = 'narrator';
+      if (line.speaker) {
+        if (!(line.speaker in seen)) { seen[line.speaker] = order[idx++ % order.length]; }
+        voiceKey = seen[line.speaker];
       }
-      const line = ttsQueue.shift();
-      const voice = line.speaker ? voiceMap[line.speaker] : null;
-      speakSimple(line.text, voice, 0.92, speakNext);
-    }
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; speakNext(); };
-    } else {
-      speakNext();
-    }
+      return { text: line.text, voiceKey, onEnd: null };
+    });
   }
 
-  // Chrome bug: after cancel(), need one tick before speak() works reliably
-  setTimeout(doSpeak, 50);
+  // Attach onEnd to the last item
+  if (ttsQueue.length > 0) ttsQueue[ttsQueue.length - 1].onEnd = onEnd;
+
+  ttsPlaying = true;
+  processTTSQueue();
 }
 
 function updateAudioStatus(status, btnId) {
@@ -1472,51 +1667,53 @@ function selectListenOption(qi, sel) {
 
 // ── LISTEN PASSAGE RENDERER (conversation / announcement / lecture) ────────────
 function renderListenPassage(data, qi) {
-  const saved = state.answers[qi];
-  const showResult = saved && state.mode==='practice';
+  const saved        = state.answers[qi] || {};   // {qi: {selected, correct}, ...} keyed by question index
+  const allAnswered  = data.questions.every((_, i) => saved[i] !== undefined);
+  const subtypeLabel = {conversation:'Conversation',announcement:'Announcement',lecture:'Lecture'}[data.subtype] || 'Audio';
 
-  // Build transcript HTML
+  // Transcript — shown once all questions are answered
   const txHtml = data.transcript.map(line =>
     line.speaker
       ? `<div><span class="speaker">${line.speaker}:</span> ${line.text}</div>`
       : `<div>${line.text}</div>`
   ).join('');
-
-  // Show transcript: always after answering in practice; always after answering in test
-  const transcriptHtml = saved
+  const transcriptHtml = allAnswered
     ? `<div class="transcript-box"><div class="transcript-label">Transcript — ${data.title}</div>${txHtml}</div>`
-    : `<div class="transcript-box" style="background:#f0f0ee;color:#999;"><div class="transcript-label">Transcript</div><div class="locked-msg">Transcript will appear after you answer.</div></div>`;
+    : `<div class="transcript-box" style="background:#f0f0ee;color:#999;"><div class="transcript-label">Transcript</div><div class="locked-msg">Transcript appears after all questions are answered.</div></div>`;
 
-  const opts = data.options.map((opt,i)=>{
-    let cls = 'option-btn';
-    const dis = saved ? 'disabled' : '';
-    if(showResult){
-      if(i===data.answer) cls+=' correct';
-      else if(saved.selected===i) cls+=' wrong';
-    } else if(saved){
-      if(saved.selected===i) cls+=' selected-only';
-    }
-    return `<button class="${cls}" ${dis} onclick="selectPassageOption(${qi},${i})">${String.fromCharCode(65+i)}. ${opt}</button>`;
-  }).join('');
-
-  const expHtml = showResult && data.explanation
-    ? `<div class="explanation-box"><strong>Explanation</strong>${data.explanation}</div>` : '';
-
-  const subtypeLabel = {conversation:'Conversation',announcement:'Announcement',lecture:'Lecture'}[data.subtype] || 'Audio';
+  // Render each question
+  const questionsHtml = data.questions.map((q, i) => {
+    const ans      = saved[i];
+    const answered = ans !== undefined;
+    const showRes  = answered && state.mode === 'practice';
+    const opts     = q.options.map((opt, oi) => {
+      let cls = 'option-btn';
+      const dis = answered ? 'disabled' : '';
+      if (showRes) {
+        if (oi === q.answer)       cls += ' correct';
+        else if (ans.selected===oi) cls += ' wrong';
+      } else if (answered && ans.selected===oi) {
+        cls += ' selected-only';
+      }
+      return `<button class="${cls}" ${dis} onclick="selectPassageOption(${qi},${i},${oi})">${String.fromCharCode(65+oi)}. ${opt}</button>`;
+    }).join('');
+    const expHtml = showRes && q.explanation
+      ? `<div class="explanation-box"><strong>Explanation</strong>${q.explanation}</div>` : '';
+    const qNum = data.questions.length > 1 ? `<div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;font-weight:600;">Question ${i+1} of ${data.questions.length}</div>` : '';
+    return `<div style="margin-bottom:20px">${qNum}<div class="q-text">${q.q}</div><div class="options">${opts}</div>${expHtml}</div>`;
+  }).join('<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">');
 
   document.getElementById('qBody').innerHTML = `
     <div class="audio-player">
       <button class="audio-play-btn" id="audioPlayBtn" onclick="playPassage(${qi})">▶</button>
       <div class="audio-info">
         <div class="audio-title">${data.title}</div>
-        <div class="audio-subtitle">${subtypeLabel} · Answer questions after listening</div>
+        <div class="audio-subtitle">${subtypeLabel} · ${data.questions.length} question${data.questions.length>1?'s':''}</div>
       </div>
       <div class="audio-status" id="audioStatus">Ready</div>
     </div>
     ${transcriptHtml}
-    <div class="q-text">${data.q}</div>
-    <div class="options">${opts}</div>
-    ${expHtml}`;
+    ${questionsHtml}`;
 }
 
 function playPassage(qi) {
@@ -1525,16 +1722,21 @@ function playPassage(qi) {
   speakText(data.transcript, () => updateAudioStatus('Replay ▶', 'audioPlayBtn'));
 }
 
-function selectPassageOption(qi, sel) {
-  const item = state.questions[qi];
-  const correct = sel === item.data.answer;
-  state.answers[qi] = {selected:sel, correct};
+function selectPassageOption(qi, qIdx, sel) {
+  const item    = state.questions[qi];
+  const q       = item.data.questions[qIdx];
+  const correct = sel === q.answer;
+  const saved   = state.answers[qi] || {};
+  saved[qIdx]   = {selected:sel, correct};
+  state.answers[qi] = saved;
   stopSpeech();
   renderListenPassage(item.data, qi);
-  if(state.mode==='practice'){
-    showFeedback(correct?'correct':'wrong', correct?'Correct!' : `Incorrect — the answer is ${String.fromCharCode(65+item.data.answer)}.`);
+  // Mark passage as fully answered for nav purposes when all done
+  const allAnswered = item.data.questions.every((_, i) => saved[i] !== undefined);
+  if (state.mode==='practice') {
+    showFeedback(correct?'correct':'wrong', correct?'Correct!' : `Incorrect — the answer is ${String.fromCharCode(65+q.answer)}.`);
   }
-  updateNav();
+  if (allAnswered) updateNav();
 }
 
 // ── BUILD A SENTENCE ──────────────────────────────────────────────────────────
@@ -1656,25 +1858,68 @@ function submitBuildSentence(qi) {
 // ── WRITE AN EMAIL ────────────────────────────────────────────────────────────
 function renderWriteEmail(data, qi) {
   const saved = state.answers[qi] || {text:'', scored:false, band:null, feedback:''};
-
-  const bulletsHtml = data.bullets.map(b=>`<li>${b}</li>`).join('');
+  const bulletsHtml = data.bullets.map(b=>`<li style="margin-bottom:4px">${b}</li>`).join('');
   const wc = countWords(saved.text);
   const feedbackHtml = saved.scored
     ? `<div class="ai-feedback-box"><h4>AI Scoring</h4><div class="band-display">${saved.band}/5 <span>band</span></div><div class="ai-feedback-text">${saved.feedback}</div></div>` : '';
 
   document.getElementById('qBody').innerHTML = `
-    <div class="email-scenario">
+    <div class="email-scenario" style="margin-bottom:16px;">
       <p>${data.scenario}</p>
       <p style="margin-top:10px;font-weight:600;">In your email, do the following:</p>
-      <ul class="email-bullets">${bulletsHtml}</ul>
+      <ul class="email-bullets" style="margin-top:6px;">${bulletsHtml}</ul>
       <p style="margin-top:8px;color:var(--muted);font-size:0.88rem;">${data.instruction}</p>
     </div>
-    <div class="email-header"><span>To:</span>${data.to} &nbsp;&nbsp; <span>Subject:</span>${data.subject}</div>
-    <textarea class="writing-area" id="emailArea" placeholder="Write your email here..."
-      oninput="onWritingInput(${qi},'email')">${saved.text}</textarea>
+
+    <!-- Gmail-style compose window -->
+    <div style="background:#f2f2f2;border-radius:10px;padding:10px;max-width:700px;margin:0 auto 16px;">
+      <!-- Gmail logo row -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <svg width="22" height="16" viewBox="0 0 22 16" style="display:block"><path d="M1 0h20a1 1 0 011 1v14a1 1 0 01-1 1H1a1 1 0 01-1-1V1a1 1 0 011-1z" fill="#fff"/><path d="M0 1.5L11 10 22 1.5" stroke="#EA4335" stroke-width="1.5" fill="none"/><path d="M0 1L11 9.5 22 1" stroke="#4285F4" stroke-width="0" fill="none"/></svg>
+        <span style="font-size:1.1rem;font-weight:500;color:#444;letter-spacing:-0.3px;">Gmail</span>
+      </div>
+
+      <!-- Compose window -->
+      <div style="background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);overflow:hidden;">
+        <!-- Title bar -->
+        <div style="background:#404040;color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-size:0.85rem;font-weight:500;">
+          <span>Compose Email</span>
+          <div style="display:flex;gap:12px;opacity:0.8;font-size:0.9rem;">
+            <span style="cursor:pointer">—</span>
+            <span style="cursor:pointer">⤢</span>
+            <span style="cursor:pointer">✕</span>
+          </div>
+        </div>
+        <!-- To / Subject -->
+        <div style="border-bottom:1px solid #e8e8e8;padding:8px 14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:0.82rem;color:#666;min-width:38px;">To:</span>
+          <div style="flex:1;font-size:0.9rem;color:#222;background:#f8f8f8;border:1px solid #ddd;border-radius:4px;padding:5px 10px;">${data.to}</div>
+        </div>
+        <div style="border-bottom:1px solid #e8e8e8;padding:8px 14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:0.82rem;color:#666;min-width:38px;">Subject:</span>
+          <div style="flex:1;font-size:0.9rem;color:#222;background:#f8f8f8;border:1px solid #ddd;border-radius:4px;padding:5px 10px;">${data.subject}</div>
+        </div>
+        <!-- Formatting toolbar -->
+        <div style="border-bottom:1px solid #e8e8e8;padding:6px 14px;display:flex;gap:14px;align-items:center;">
+          <button onclick="document.execCommand('bold')" style="font-weight:800;font-size:0.9rem;background:none;border:none;color:#444;cursor:pointer;padding:2px 5px;border-radius:3px;" title="Bold"><b>B</b></button>
+          <button onclick="document.execCommand('italic')" style="font-style:italic;font-size:0.9rem;background:none;border:none;color:#444;cursor:pointer;padding:2px 5px;border-radius:3px;" title="Italic"><i>I</i></button>
+          <button onclick="document.execCommand('insertUnorderedList')" style="font-size:0.85rem;background:none;border:none;color:#444;cursor:pointer;padding:2px 5px;border-radius:3px;" title="Bullet list">☰</button>
+          <button onclick="document.execCommand('insertOrderedList')" style="font-size:0.85rem;background:none;border:none;color:#444;cursor:pointer;padding:2px 5px;border-radius:3px;" title="Numbered list">≡</button>
+        </div>
+        <!-- Body -->
+        <div id="emailArea" contenteditable="true"
+          style="min-height:180px;padding:12px 14px;font-size:0.93rem;color:#222;outline:none;line-height:1.6;"
+          oninput="onWritingInputDiv(${qi},'email')">${saved.text ? saved.text.replace(/\n/g,'<br>') : ''}</div>
+        <!-- If empty, show placeholder via CSS trick -->
+      </div>
+    </div>
+
     <div class="wc-bar">Word count: <span id="wcDisplay">${wc}</span></div>
     ${!saved.scored ? `<button class="scoring-btn" id="scoreBtn" onclick="scoreWriting(${qi},'email')" ${wc<10?'disabled':''}>Get AI Feedback</button>` : ''}
     ${feedbackHtml}`;
+  // Set placeholder after render
+  const ea = document.getElementById('emailArea');
+  if (ea) ea.setAttribute('data-placeholder','Write your response here...');
 }
 
 // ── ACADEMIC DISCUSSION ───────────────────────────────────────────────────────
@@ -1712,6 +1957,20 @@ function renderAcademicDisc(data, qi) {
 
 function countWords(text) {
   return text.trim() ? text.trim().split(/\s+/).length : 0;
+}
+
+function onWritingInputDiv(qi, type) {
+  // For contenteditable email compose box
+  const el = document.getElementById('emailArea');
+  if (!el) return;
+  const text = el.innerText || '';
+  const wc = countWords(text);
+  const wcEl = document.getElementById('wcDisplay');
+  if (wcEl) wcEl.textContent = wc;
+  if (!state.answers[qi]) state.answers[qi] = {text:'', scored:false, band:null, feedback:''};
+  state.answers[qi].text = text;
+  const btn = document.getElementById('scoreBtn');
+  if (btn) btn.disabled = wc < 10;
 }
 
 function onWritingInput(qi, type) {
@@ -1787,7 +2046,7 @@ Feedback: [your feedback]`;
   else renderAcademicDisc(data, qi);
 }
 
-// ── WRITING RESULTS ───────────────────────────────────────────────────────────
+
 function showWritingResults() {
   clearInterval(state.timerInterval);
   document.getElementById('navBar').classList.remove('shown');
@@ -1830,25 +2089,41 @@ function showWritingResults() {
     ${discAns.text ? `<div class="ri-answer">Band: <strong>${discBand}/5</strong></div><div style="margin-top:8px;font-size:0.88rem;background:#f8f8f8;padding:10px;border-radius:6px;">${discAns.text}</div>` : '<div class="ri-answer" style="color:var(--muted)">Not attempted</div>'}
     ${discAns.feedback ? `<div class="explanation-box" style="margin-top:8px"><strong>Feedback</strong>${discAns.feedback}</div>` : ''}</div>`;
 
+  const writingPersonality = getPersonalityLabel(typeof overall === 'number' ? Math.round(overall) : 3);
+  const writingBreakdown = buildBreakdownBars(state.questions, state.answers, 'writing');
+
   document.getElementById('resultsScreen').innerHTML = `
-    <h2>Writing Section Complete</h2>
+    <h2>Writing Section Complete ✍️</h2>
+    <div style="text-align:center;font-size:1.1rem;font-weight:700;color:var(--orange);margin-bottom:16px;">${writingPersonality}</div>
     <div class="writing-results-grid">
       <div class="wr-card"><div class="big">${overall}/5</div><div class="label">Overall Band</div></div>
       <div class="wr-card"><div class="big">${basCorrect}/${basTotal}</div><div class="label">Build a Sentence</div></div>
       <div class="wr-card"><div class="big">${emailBand}${emailAns.band?'/5':''} · ${discBand}${discAns.band?'/5':''}</div><div class="label">Email · Discussion</div></div>
     </div>
-    <button class="btn" onclick="restartTest()">Restart</button>
+    ${writingBreakdown}
+    <button class="btn" onclick="restartTest()">Try Again →</button>
     <h3 style="margin-top:28px;color:var(--navy);">Answer Review</h3>
     <div class="review-list">${basReview}${emailReview}${discReview}</div>`;
 
   document.getElementById('progressfill').style.width='100%';
+  if (fullTest.active) {
+    const reviewHtml = `<div class="review-list">${basReview}${emailReview}${discReview}</div>`;
+    _fullTestSectionDone('writing', typeof overall === 'number' ? overall : null, reviewHtml);
+    return;
+  }
   showScreen('resultsScreen');
 }
 
 // ── FEEDBACK ──────────────────────────────────────────────────────────────────
 function showFeedback(type, msg) {
   const bar=document.getElementById('feedbackBar');
-  bar.textContent=msg; bar.className=type; bar.style.display='block';
+  // Inject fun reaction prefix for correct/wrong in practice mode
+  let display = msg;
+  if (state.mode === 'practice') {
+    if (type === 'correct') { display = getRightReaction() + '  ' + msg; updateStreak(true); }
+    else if (type === 'wrong') { display = getWrongReaction() + '  ' + msg; updateStreak(false); }
+  }
+  bar.textContent=display; bar.className=type; bar.style.display='block';
 }
 function hideFeedback() {
   const bar=document.getElementById('feedbackBar');
@@ -1867,6 +2142,17 @@ function updateNav() {
   } else {
     nb.textContent='Next →'; nb.style.background='';
   }
+  // For listen_passage: disable Next until all sub-questions answered
+  const item = state.questions[qi];
+  if (item && item.type==='listen_passage') {
+    const saved = state.answers[qi] || {};
+    const allDone = item.data.questions.every((_, i) => saved[i] !== undefined);
+    nb.disabled = !allDone;
+    nb.style.opacity = allDone ? '1' : '0.4';
+  } else {
+    nb.disabled = false;
+    nb.style.opacity = '1';
+  }
 }
 function goNext() {
   stopSpeech();
@@ -1878,7 +2164,86 @@ function goBack() {
   if(state.qi>0){ state.qi--; renderQuestion(); }
 }
 
-// ── TRANSITION ────────────────────────────────────────────────────────────────
+// ── SPEEDOMETER GAUGE ─────────────────────────────────────────────────────────
+function drawGauge(score) {
+  // score: 1–6
+  const svg = document.getElementById('gaugesvg');
+  if (!svg) return;
+  const cx = 120, cy = 128, R = 100, r = 68;
+  // Arc spans from 210° to 330° (left to right, opening downward)
+  // That's 120° total = bands 1–6 in 5 equal steps
+  const startDeg = 210, endDeg = 330;
+  const totalDeg = endDeg - startDeg; // 120
+  const bandDeg = totalDeg / 5; // 24 degrees per unit
+
+  function polar(deg, radius) {
+    const rad = (deg - 90) * Math.PI / 180;
+    return [cx + radius * Math.cos(rad), cy + radius * Math.sin(rad)];
+  }
+  function arcPath(d1, d2, outer, inner) {
+    const [x1,y1] = polar(d1, outer), [x2,y2] = polar(d2, outer);
+    const [x3,y3] = polar(d2, inner), [x4,y4] = polar(d1, inner);
+    const large = (d2-d1) > 180 ? 1 : 0;
+    return `M${x1},${y1} A${outer},${outer} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${inner},${inner} 0 ${large},0 ${x4},${y4} Z`;
+  }
+
+  // Band zone colors and labels matching ETS screenshot
+  const zones = [
+    {d1:210, d2:234, color:'#aaa', cefr:'A2', label:'A2', cx_:195, cy_:108},
+    {d1:234, d2:258, color:'#f5a623', cefr:'B1', label:'B1', cx_:175, cy_:80},
+    {d1:258, d2:282, color:'#f9d423', cefr:'B2', label:'B2', cx_:120, cy_:58},
+    {d1:282, d2:306, color:'#7ed321', cefr:'C1', label:'C1', cx_:65, cy_:80},
+    {d1:306, d2:330, color:'#2ecc71', cefr:'C2', label:'C2', cx_:45, cy_:108},
+  ];
+
+  // Band labels on scale: 1.0 at 210°, 2.0 at 234°...
+  const scaleLabels = [1,2,3,4,5,6];
+
+  // Needle angle: band 1 → 210°, band 6 → 330°
+  const needleDeg = startDeg + ((score - 1) / 5) * totalDeg;
+  const [nx, ny] = polar(needleDeg, R - 10);
+
+  let paths = '';
+  // Draw zones
+  zones.forEach(z => {
+    paths += `<path d="${arcPath(z.d1, z.d2, R, r)}" fill="${z.color}" opacity="0.85"/>`;
+  });
+  // Inner fill
+  paths += `<path d="${arcPath(startDeg, endDeg, r, 40)}" fill="#e8eaed"/>`;
+  // Track outline
+  paths += `<path d="${arcPath(startDeg, endDeg, R+3, r-3)}" fill="none" stroke="#ccc" stroke-width="1"/>`;
+
+  // Scale tick labels
+  scaleLabels.forEach((v,i) => {
+    const deg = startDeg + (i/5)*totalDeg;
+    const [tx,ty] = polar(deg, r - 18);
+    paths += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" fill="#555">${v}.0</text>`;
+  });
+
+  // CEFR zone labels (only for zones 3–5: B1, B2, C1)
+  [
+    {deg:246, label:'B1', color:'#f5a623'},
+    {deg:270, label:'B2', color:'#f9d423'},
+    {deg:294, label:'C1', color:'#2ecc71'},
+  ].forEach(({deg, label, color}) => {
+    const [tx,ty] = polar(deg, R + 20);
+    paths += `<circle cx="${tx}" cy="${ty}" r="12" fill="${color}"/>`;
+    paths += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" font-size="9" font-weight="800" fill="#fff">${label}</text>`;
+  });
+
+  // Needle
+  const [bx1,by1] = polar(needleDeg-90, 8), [bx2,by2] = polar(needleDeg+90, 8);
+  paths += `<path d="M${bx1},${by1} L${nx},${ny} L${bx2},${by2} Z" fill="#1a1a3e"/>`;
+  paths += `<circle cx="${cx}" cy="${cy}" r="10" fill="#1a1a3e"/>`;
+  paths += `<circle cx="${cx}" cy="${cy}" r="5" fill="#fff"/>`;
+
+  // Score label in center
+  paths += `<text x="${cx}" y="${cy-22}" text-anchor="middle" font-size="22" font-weight="800" fill="#1a1a3e">${score}.0</text>`;
+
+  svg.innerHTML = paths;
+}
+
+
 function showTransition() {
   let correct=0, total=0;
   state.questions.forEach((item,qi)=>{
@@ -1887,6 +2252,12 @@ function showTransition() {
       const blanks = getBlanks(item.data);
       total+=blanks.length;
       if(a&&a.submitted) correct+=a.score;
+    } else if(item.type==='listen_passage'){
+      item.data.questions.forEach((q,i)=>{
+        total++;
+        const a=state.answers[qi];
+        if(a&&a[i]&&a[i].correct) correct++;
+      });
     } else {
       total++;
       const a=state.answers[qi];
@@ -1896,11 +2267,17 @@ function showTransition() {
   state.m1Score=correct; state.m1Total=total;
   const pct=total>0?Math.round((correct/total)*100):0;
   const isHard=pct>=70;
-  document.getElementById('transitionScore').textContent=`You answered ${correct} of ${total} correctly (${pct}%)`;
-  document.getElementById('pathBadge').innerHTML=`<span class="path-badge ${isHard?'path-hard':'path-standard'}">${isHard?'🔴 Advanced Path assigned':'🟢 Standard Path assigned'}</span>`;
-  document.getElementById('transitionMsg').textContent=isHard
-    ?'Great work! Module 2 will feature more challenging material.'
-    :'Module 2 will be at standard difficulty. Keep going!';
+  const transEmoji = pct>=80 ? '🔥' : pct>=60 ? '💪' : pct>=40 ? '😤' : '😅';
+  document.getElementById('transitionEmoji').textContent = transEmoji;
+  document.getElementById('transitionTitle').textContent = pct>=70 ? 'Module 1 — Crushed it! 🎉' : 'Module 1 — Done!';
+  document.getElementById('transitionScore').textContent=`You got ${correct} of ${total} right (${pct}%)`;
+  document.getElementById('pathBadge').innerHTML=`<span class="path-badge ${isHard?'path-hard':'path-standard'}">${isHard?'🔴 Advanced Path — bring it':'🟢 Standard Path assigned'}</span>`;
+  document.getElementById('transitionMsg').textContent = getTransitionMsg(isHard);
+  // Gauge: estimate interim band from M1 pct
+  const interimBand = isHard
+    ? (pct>=85?6:pct>=70?5:pct>=55?4:pct>=40?3:2)
+    : (pct>=75?4:pct>=50?3:pct>=30?2:1);
+  setTimeout(() => drawGauge(interimBand), 80);
   document.getElementById('navBar').classList.remove('shown');
   document.getElementById('topbar').classList.remove('shown');
   showScreen('transitionScreen');
@@ -1963,6 +2340,8 @@ function showResults() {
   document.getElementById('bandNote').textContent=isHard
     ?'Advanced path: full band range (1–6) available.'
     :'Standard path: band capped at 4. A score of 5–6 requires the Advanced path.';
+  document.getElementById('personalityLabel').textContent = getPersonalityLabel(band);
+  document.getElementById('breakdownBars').innerHTML = buildBreakdownBars(state.questions, state.answers, state.section);
   document.getElementById('progressfill').style.width='100%';
 
   const rev=state.questions.map((item,qi)=>{
@@ -1977,18 +2356,31 @@ function showResults() {
       const txHtml = `<div class="transcript-box" style="margin-top:8px"><div class="transcript-label">Audio</div>${item.data.text}</div>`;
       const expHtml = item.data.explanation ? `<div class="explanation-box" style="margin-top:8px"><strong>Explanation</strong>${item.data.explanation}</div>` : '';
       return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.sectionLabel} — Choose a Response</span></div>${a?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+a.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+item.data.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}${txHtml}${expHtml}</div>`;
+    } else if (item.type==='listen_passage') {
+      // Each passage has multiple questions — review them all
+      const txHtml = item.data.transcript
+        ? `<div class="transcript-box" style="margin-top:8px"><div class="transcript-label">Transcript — ${item.data.title}</div>${item.data.transcript.map(l=>l.speaker?`<div><span class="speaker">${l.speaker}:</span> ${l.text}</div>`:`<div>${l.text}</div>`).join('')}</div>` : '';
+      const qsHtml = item.data.questions.map((q, i) => {
+        const ans = a && a[i];
+        const ok  = ans && ans.correct;
+        const expHtml = q.explanation ? `<div class="explanation-box" style="margin-top:6px"><strong>Explanation</strong>${q.explanation}</div>` : '';
+        return `<div style="margin-bottom:12px"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${q.q}</span></div>${ans?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+ans.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+q.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}${expHtml}</div>`;
+      }).join('');
+      return `<div class="review-item"><div style="font-weight:700;color:var(--navy);margin-bottom:10px">${item.data.sectionLabel} — ${item.data.title}</div>${qsHtml}${txHtml}</div>`;
     } else {
-      // mcq and listen_passage share same shape
+      // mcq
       const ok=a&&a.correct;
       const expHtml = item.data.explanation
         ? `<div class="explanation-box" style="margin-top:8px"><strong>Explanation</strong>${item.data.explanation}</div>` : '';
-      // For listen_passage, also show transcript in review
-      const txHtml = item.type==='listen_passage' && item.data.transcript
-        ? `<div class="transcript-box" style="margin-top:8px"><div class="transcript-label">Transcript</div>${item.data.transcript.map(l=>l.speaker?`<div><span class="speaker">${l.speaker}:</span> ${l.text}</div>`:`<div>${l.text}</div>`).join('')}</div>` : '';
-      return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.q}</span></div>${a?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+a.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+item.data.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}${txHtml}${expHtml}</div>`;
+      return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.q}</span></div>${a?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+a.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+item.data.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}${expHtml}</div>`;
     }
   }).join('');
   document.getElementById('reviewList').innerHTML=rev;
+  if (fullTest.active) {
+    const band = document.getElementById('totalScore').textContent;
+    _fullTestSectionDone(state.section, parseFloat(band)||null, rev);
+    return;
+  }
   showScreen('resultsScreen');
 }
 
@@ -2006,11 +2398,113 @@ function togglePause() {
 }
 
 
+// ══════════════════════════════════════════════════════════════════════════════
+// FULL TEST MODE
+// ══════════════════════════════════════════════════════════════════════════════
+const FULL_TEST_SECTIONS = ['reading','listening','writing','speaking'];
+let fullTest = {
+  active: false,
+  sectionIdx: 0,  // which section we're on (0–3)
+  results: {},    // {reading: {band, reviewHtml}, ...}
+};
+
+function startFullTest() {
+  fullTest = { active: true, sectionIdx: 0, results: {} };
+  selectedMode = 'test';
+  _launchFullTestSection(0);
+}
+
+function _launchFullTestSection(idx) {
+  fullTest.sectionIdx = idx;
+  selectedSection = FULL_TEST_SECTIONS[idx];
+  startTest();
+}
+
+// Called after each section's results are computed — store result, show inter-section screen
+function _fullTestSectionDone(section, band, reviewHtml) {
+  fullTest.results[section] = { band, reviewHtml };
+  const isLast = fullTest.sectionIdx === FULL_TEST_SECTIONS.length - 1;
+  const sectionLabels = { reading:'Reading', listening:'Listening', writing:'Writing', speaking:'Speaking' };
+  const icons = { reading:'📖', listening:'🎧', writing:'✍️', speaking:'🎤' };
+  document.getElementById('ftTransIcon').textContent = icons[section];
+  document.getElementById('ftTransTitle').textContent = `${sectionLabels[section]} Section Complete`;
+  document.getElementById('ftTransMsg').textContent = isLast
+    ? 'You have completed all four sections of the TOEFL iBT® Practice Test.'
+    : `Next: ${sectionLabels[FULL_TEST_SECTIONS[fullTest.sectionIdx+1]]} Section`;
+  document.getElementById('ftTransBand').textContent = band !== null && band !== undefined ? band : '—';
+  const btn = document.getElementById('ftTransBtn');
+  btn.textContent = isLast ? 'See Full Results →' : `Continue to ${sectionLabels[FULL_TEST_SECTIONS[fullTest.sectionIdx+1]]} →`;
+  document.getElementById('topbar').classList.remove('shown');
+  document.getElementById('navBar').classList.remove('shown');
+  showScreen('fullTestTransitionScreen');
+}
+
+function advanceFullTest() {
+  const isLast = fullTest.sectionIdx === FULL_TEST_SECTIONS.length - 1;
+  if (isLast) {
+    _showFullTestResults();
+  } else {
+    _launchFullTestSection(fullTest.sectionIdx + 1);
+  }
+}
+
+function _showFullTestResults() {
+  const r = fullTest.results;
+  const bands = ['reading','listening','writing','speaking'].map(s => r[s]?.band).filter(b => b !== null && b !== undefined && !isNaN(b));
+  const overall = bands.length ? Math.round(bands.reduce((a,b)=>a+b,0)/bands.length * 2)/2 : null;
+  const cefrMap = { 1:'A1', 1.5:'A1–A2', 2:'A2', 2.5:'A2–B1', 3:'B1', 3.5:'B1–B2', 4:'B2', 4.5:'B2–C1', 5:'C1', 5.5:'C1–C2', 6:'C2' };
+  document.getElementById('ftOverallBand').textContent = overall !== null ? overall : '—';
+  document.getElementById('ftCefrLabel').textContent = overall ? (cefrMap[overall] || '') : '';
+  const fmt = (s) => { const b = r[s]?.band; return b !== undefined && b !== null ? b : '—'; };
+  document.getElementById('ftReadingBand').textContent   = fmt('reading');
+  document.getElementById('ftListeningBand').textContent = fmt('listening');
+  document.getElementById('ftWritingBand').textContent   = fmt('writing');
+  document.getElementById('ftSpeakingBand').textContent  = fmt('speaking');
+  // Build accordion with review HTML for each section
+  const labels = { reading:'📖 Reading', listening:'🎧 Listening', writing:'✍️ Writing', speaking:'🎤 Speaking' };
+  document.getElementById('ftReviewAccordion').innerHTML = ['reading','listening','writing','speaking'].map(s => {
+    const html = r[s]?.reviewHtml || '<p style="color:var(--muted);font-size:0.9rem;padding:8px 0">No review available.</p>';
+    return `<details style="background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+      <summary style="padding:14px 18px;font-weight:700;color:var(--navy);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+        <span>${labels[s]}</span>
+        <span style="font-size:1.1rem;font-weight:800;color:var(--blue)">${fmt(s)}</span>
+      </summary>
+      <div style="padding:12px 18px 18px;border-top:1px solid var(--border);" class="review-list">${html}</div>
+    </details>`;
+  }).join('');
+  showScreen('fullTestResultsScreen');
+}
+
+// Helper: extract review HTML from the current state (for reading/listening sections)
+function _buildReadingListeningReviewHtml() {
+  return state.questions.map((item,qi)=>{
+    const a=state.answers[qi];
+    if(item.type==='ctw'){
+      const sc=a&&a.submitted?a.score:0, tot=getBlanks(item.data).length, ok=sc===tot&&a&&a.submitted;
+      return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.sectionLabel}</span></div><div class="ri-answer">Score: <span class="${ok?'corr':'wrong2'}">${sc} / ${tot}</span></div></div>`;
+    } else if(item.type==='listen_choose') {
+      const ok=a&&a.correct;
+      return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.sectionLabel} — Choose a Response</span></div>${a?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+a.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+item.data.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}</div>`;
+    } else if (item.type==='listen_passage') {
+      const txHtml = item.data.transcript ? `<div class="transcript-box" style="margin-top:8px"><div class="transcript-label">Transcript — ${item.data.title}</div>${item.data.transcript.map(l=>l.speaker?`<div><span class="speaker">${l.speaker}:</span> ${l.text}</div>`:`<div>${l.text}</div>`).join('')}</div>` : '';
+      const qsHtml = item.data.questions.map((q, i) => {
+        const ans = a && a[i]; const ok = ans && ans.correct;
+        return `<div style="margin-bottom:12px"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${q.q}</span></div>${ans?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+ans.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+q.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}</div>`;
+      }).join('');
+      return `<div class="review-item"><div style="font-weight:700;color:var(--navy);margin-bottom:10px">${item.data.sectionLabel} — ${item.data.title}</div>${qsHtml}${txHtml}</div>`;
+    } else {
+      const ok=a&&a.correct;
+      return `<div class="review-item"><div class="ri-top"><span class="ri-badge ${ok?'ok':'miss'}">${ok?'✓':'✗'}</span><span class="ri-q">${item.data.q}</span></div>${a?`<div class="ri-answer">Your answer: <span class="${ok?'corr':'wrong2'}">${String.fromCharCode(65+a.selected)}</span>${!ok?` · Correct: <span class="corr">${String.fromCharCode(65+item.data.answer)}</span>`:''}</div>`:'<div class="ri-answer" style="color:var(--muted)">Not answered</div>'}</div>`;
+    }
+  }).join('');
+}
+
 function restartTest() {
   clearInterval(state.timerInterval);
   stopSpeech();
   state={module:1,path:null,questions:[],qi:0,answers:{},timerSec:36*60,timerInterval:null,m1Score:0,m1Total:0,paused:false,mode:'practice',section:'reading'};
   selectedMode='practice'; selectedSection='reading';
+  fullTest={ active:false, sectionIdx:0, results:{} };
   document.getElementById('progressfill').style.width='0%';
   document.getElementById('topbar').classList.remove('shown');
   document.getElementById('navBar').classList.remove('shown');
@@ -2144,39 +2638,12 @@ function renderListenRepeat(data, qi) {
 }
 
 function lrPlay(qi) {
-  const data = state.questions[qi].data;
+  const data  = state.questions[qi].data;
   const saved = state.answers[qi] || {phase:'idle'};
   saved.phase = 'played';
   state.answers[qi] = saved;
   renderListenRepeat(data, qi);
-
-  if (!window.speechSynthesis) return;
-
-  function doSpeak() {
-    window.speechSynthesis.cancel();
-    setTimeout(() => {
-      const utt = new SpeechSynthesisUtterance(data.text);
-      utt.rate  = 0.88;
-      utt.pitch = 1;
-      utt.lang  = 'en-US';
-      const allVoices = window.speechSynthesis.getVoices();
-      const enVoice = allVoices.find(v => v.lang.startsWith('en'));
-      if (enVoice) utt.voice = enVoice;
-      utt.onend   = () => renderListenRepeat(state.questions[qi].data, qi);
-      utt.onerror = () => renderListenRepeat(state.questions[qi].data, qi);
-      window.speechSynthesis.speak(utt);
-    }, 100);
-  }
-
-  const voices = window.speechSynthesis.getVoices();
-  if (voices.length > 0) {
-    doSpeak();
-  } else {
-    window.speechSynthesis.onvoiceschanged = () => {
-      window.speechSynthesis.onvoiceschanged = null;
-      doSpeak();
-    };
-  }
+  speakText(data.text, () => renderListenRepeat(state.questions[qi].data, qi));
 }
 
 function lrRecord(qi) {
@@ -2200,34 +2667,110 @@ function lrRecord(qi) {
 }
 
 // ── TAKE AN INTERVIEW RENDERER ────────────────────────────────────────────────
+// Interviewer avatars — base64-free inline SVG portraits
+const INTERVIEWER_AVATARS = [
+  // Avatar 1: woman with dark hair
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="100%" height="100%">
+    <rect width="200" height="220" fill="#c8d8e8"/>
+    <!-- body/jacket -->
+    <ellipse cx="100" cy="195" rx="65" ry="50" fill="#5a6e8a"/>
+    <!-- shirt -->
+    <ellipse cx="100" cy="185" rx="38" ry="35" fill="#e8e0d5"/>
+    <!-- neck -->
+    <rect x="88" y="138" width="24" height="22" rx="8" fill="#c8956c"/>
+    <!-- head -->
+    <ellipse cx="100" cy="120" rx="42" ry="48" fill="#c8956c"/>
+    <!-- hair -->
+    <ellipse cx="100" cy="84" rx="44" ry="26" fill="#1a1008"/>
+    <ellipse cx="60" cy="112" rx="12" ry="24" fill="#1a1008"/>
+    <ellipse cx="140" cy="112" rx="12" ry="24" fill="#1a1008"/>
+    <!-- eyes -->
+    <ellipse cx="84" cy="118" rx="6" ry="6.5" fill="#fff"/>
+    <ellipse cx="116" cy="118" rx="6" ry="6.5" fill="#fff"/>
+    <ellipse cx="85" cy="118" rx="3.5" ry="4" fill="#3a2010"/>
+    <ellipse cx="117" cy="118" rx="3.5" ry="4" fill="#3a2010"/>
+    <!-- eyebrows -->
+    <path d="M78 110 Q85 106 92 110" stroke="#1a1008" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M108 110 Q115 106 122 110" stroke="#1a1008" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- nose -->
+    <path d="M98 128 Q100 134 102 128" stroke="#a87050" stroke-width="1.5" fill="none"/>
+    <!-- smile -->
+    <path d="M88 140 Q100 150 112 140" stroke="#a87050" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  // Avatar 2: man with short hair
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="100%" height="100%">
+    <rect width="200" height="220" fill="#d5cfc8"/>
+    <ellipse cx="100" cy="195" rx="65" ry="50" fill="#2c3e50"/>
+    <rect x="85" y="168" width="30" height="12" fill="#e8e0d5"/>
+    <rect x="88" y="140" width="24" height="20" rx="8" fill="#d4a574"/>
+    <ellipse cx="100" cy="118" rx="40" ry="46" fill="#d4a574"/>
+    <ellipse cx="100" cy="80" rx="42" ry="20" fill="#4a3018"/>
+    <ellipse cx="60" cy="100" rx="10" ry="18" fill="#4a3018"/>
+    <ellipse cx="140" cy="100" rx="10" ry="18" fill="#4a3018"/>
+    <ellipse cx="84" cy="116" rx="6" ry="6.5" fill="#fff"/>
+    <ellipse cx="116" cy="116" rx="6" ry="6.5" fill="#fff"/>
+    <ellipse cx="85" cy="116" rx="3.5" ry="4" fill="#2a1a08"/>
+    <ellipse cx="117" cy="116" rx="3.5" ry="4" fill="#2a1a08"/>
+    <path d="M78 108 Q85 104 92 108" stroke="#4a3018" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M108 108 Q115 104 122 108" stroke="#4a3018" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M98 126 Q100 132 102 126" stroke="#b08060" stroke-width="1.5" fill="none"/>
+    <path d="M88 138 Q100 148 112 138" stroke="#b08060" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  // Avatar 3: woman with lighter skin
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="100%" height="100%">
+    <rect width="200" height="220" fill="#e0d8d0"/>
+    <ellipse cx="100" cy="195" rx="65" ry="50" fill="#6b4c7a"/>
+    <ellipse cx="100" cy="178" rx="35" ry="30" fill="#f0ebe5"/>
+    <rect x="88" y="138" width="24" height="22" rx="8" fill="#e8c4a0"/>
+    <ellipse cx="100" cy="116" rx="42" ry="48" fill="#e8c4a0"/>
+    <ellipse cx="100" cy="80" rx="44" ry="22" fill="#6b3a1f"/>
+    <ellipse cx="56" cy="118" rx="10" ry="26" fill="#6b3a1f"/>
+    <ellipse cx="144" cy="118" rx="10" ry="26" fill="#6b3a1f"/>
+    <ellipse cx="84" cy="114" rx="6" ry="6.5" fill="#fff"/>
+    <ellipse cx="116" cy="114" rx="6" ry="6.5" fill="#fff"/>
+    <ellipse cx="85" cy="114" rx="3.5" ry="4" fill="#3a1a08"/>
+    <ellipse cx="117" cy="114" rx="3.5" ry="4" fill="#3a1a08"/>
+    <path d="M78 106 Q85 102 92 106" stroke="#5a2a10" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M108 106 Q115 102 122 106" stroke="#5a2a10" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M97 126 Q100 132 103 126" stroke="#c09070" stroke-width="1.5" fill="none"/>
+    <path d="M88 138 Q100 148 112 138" stroke="#c09070" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`,
+];
+
+// Pick a stable avatar per question
+function getInterviewerAvatar(qi) {
+  return INTERVIEWER_AVATARS[qi % INTERVIEWER_AVATARS.length];
+}
+
 function renderTakeInterview(data, qi) {
   const saved = state.answers[qi];
   const phase = saved ? saved.phase : 'idle';
+  const avatar = getInterviewerAvatar(qi);
 
   let controlsHtml = '';
   if (phase === 'idle' || phase === 'played') {
     controlsHtml = `
-      <div class="spk-controls">
+      <div class="spk-controls" style="margin-top:14px;">
         <button class="spk-mic-btn idle" onclick="tiPlay(${qi})">▶</button>
         <div class="spk-status">${phase==='played' ? 'Listen again or record your answer' : 'Press ▶ to hear the question'}</div>
         ${phase==='played' ? `<button class="btn" onclick="tiRecord(${qi})">🎙 Record my answer</button>` : ''}
       </div>`;
   } else if (phase === 'recording') {
     controlsHtml = `
-      <div class="spk-controls">
+      <div class="spk-controls" style="margin-top:14px;">
         <button class="spk-mic-btn listening" disabled>🎙</button>
         <div class="spk-countdown" id="spkCountdown">${data.responseSec}</div>
         <div class="spk-status">Recording… speak now. Say as much as you can.</div>
       </div>`;
   } else if (phase === 'scoring') {
     controlsHtml = `
-      <div class="spk-controls">
+      <div class="spk-controls" style="margin-top:14px;">
         <div class="spk-status">⏳ AI is scoring your response…</div>
       </div>`;
   } else if (phase === 'done') {
     const fb = saved.feedback || {};
     controlsHtml = `
-      <div class="spk-controls" style="margin-bottom:0">
+      <div class="spk-controls" style="margin-bottom:0;margin-top:14px;">
         <button class="spk-mic-btn idle" style="width:48px;height:48px;font-size:1.2rem" onclick="tiPlay(${qi})">▶</button>
         <div class="spk-status">Replay question · <button class="btn" style="padding:6px 16px;font-size:0.82rem" onclick="tiRecord(${qi})">🎙 Try again</button></div>
       </div>
@@ -2246,47 +2789,49 @@ function renderTakeInterview(data, qi) {
   }
 
   document.getElementById('qBody').innerHTML = `
-    <div class="spk-scenario">${data.scenario}</div>
-    <div class="spk-interview-q">
-      <div class="interviewer">Interviewer</div>
-      <div class="question">${data.question}</div>
+    <div style="background:#f5f5f0;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:680px;margin:0 auto;">
+      <!-- Header bar -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:#fff;">
+        <svg width="60" height="22" viewBox="0 0 120 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="20" cy="22" rx="18" ry="18" fill="none" stroke="#003B7A" stroke-width="3"/>
+          <text x="10" y="28" font-family="serif" font-size="16" font-weight="bold" fill="#003B7A">ETS</text>
+          <text x="44" y="28" font-family="sans-serif" font-size="13" font-weight="500" fill="#555">Gmail</text>
+        </svg>
+        <div style="margin-left:8px;display:flex;align-items:center;gap:8px;">
+          <div style="background:#e53935;color:#fff;border-radius:4px;font-size:0.72rem;font-weight:700;padding:2px 7px;letter-spacing:0.5px;display:flex;align-items:center;gap:4px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:#ff8080;display:inline-block;"></span> LIVE
+          </div>
+        </div>
+        <div style="margin-left:auto;">
+          <div style="background:#e8e0f0;border-radius:20px;padding:5px 14px;font-size:0.82rem;font-weight:600;color:#5a3a8a;">Interview</div>
+        </div>
+      </div>
+
+      <!-- Interviewer photo area -->
+      <div style="position:relative;background:#c0c8d0;min-height:240px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <div style="width:280px;height:240px;overflow:hidden;border-radius:4px;">${avatar}</div>
+        <!-- LIVE badge overlay -->
+        <div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.6);color:#fff;border-radius:6px;font-size:0.72rem;font-weight:700;padding:3px 9px;display:flex;align-items:center;gap:5px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:#f44;display:inline-block;animation:blink 1.2s infinite;"></span> LIVE
+        </div>
+      </div>
+
+      <!-- Question caption -->
+      <div style="background:#fff;padding:14px 20px;font-size:0.95rem;color:#222;text-align:center;font-style:italic;border-top:1px solid #eee;">
+        ${data.question}
+      </div>
     </div>
+
     ${controlsHtml}`;
 }
 
 function tiPlay(qi) {
-  const data = state.questions[qi].data;
+  const data  = state.questions[qi].data;
   const saved = state.answers[qi] || {phase:'idle'};
   saved.phase = 'played';
   state.answers[qi] = saved;
   renderTakeInterview(data, qi);
-
-  if (!window.speechSynthesis) return;
-
-  function doSpeak() {
-    window.speechSynthesis.cancel();
-    setTimeout(() => {
-      const utt = new SpeechSynthesisUtterance(data.question);
-      utt.rate  = 0.88;
-      utt.pitch = 1;
-      utt.lang  = 'en-US';
-      const enVoice = window.speechSynthesis.getVoices().find(v => v.lang.startsWith('en'));
-      if (enVoice) utt.voice = enVoice;
-      utt.onend   = () => renderTakeInterview(state.questions[qi].data, qi);
-      utt.onerror = () => renderTakeInterview(state.questions[qi].data, qi);
-      window.speechSynthesis.speak(utt);
-    }, 100);
-  }
-
-  const voices = window.speechSynthesis.getVoices();
-  if (voices.length > 0) {
-    doSpeak();
-  } else {
-    window.speechSynthesis.onvoiceschanged = () => {
-      window.speechSynthesis.onvoiceschanged = null;
-      doSpeak();
-    };
-  }
+  speakText(data.question, () => renderTakeInterview(state.questions[qi].data, qi));
 }
 
 function tiRecord(qi) {
@@ -2383,20 +2928,30 @@ function showSpeakingResults() {
     </div>`;
   }).join('');
 
+  const speakingPersonality = getPersonalityLabel(typeof overall === 'number' ? Math.round(overall) : 3);
+  const speakingBreakdown = buildBreakdownBars(state.questions, state.answers, 'speaking');
+
   document.getElementById('resultsScreen').innerHTML = `
-    <h2>Speaking Section Complete</h2>
+    <h2>Speaking Section Complete 🎤</h2>
+    <div style="text-align:center;font-size:1.1rem;font-weight:700;color:var(--orange);margin-bottom:16px;">${speakingPersonality}</div>
     <div class="writing-results-grid">
       <div class="wr-card"><div class="big">${overall}/5</div><div class="label">Overall Band</div></div>
       <div class="wr-card"><div class="big">${lrAvg}%</div><div class="label">Listen & Repeat avg</div></div>
       <div class="wr-card"><div class="big">${tiAvg}${tiBands.length?'/5':''}</div><div class="label">Interview avg band</div></div>
     </div>
-    <button class="btn" onclick="restartTest()">Restart</button>
+    ${speakingBreakdown}
+    <button class="btn" onclick="restartTest()">Try Again →</button>
     <h3 style="margin-top:28px;color:var(--navy);">Listen & Repeat Review</h3>
     <div class="review-list">${lrReview}</div>
     <h3 style="margin-top:24px;color:var(--navy);">Interview Review</h3>
     <div class="review-list">${tiReview}</div>`;
 
   document.getElementById('progressfill').style.width='100%';
+  if (fullTest.active) {
+    const reviewHtml = `<div class="review-list">${lrReview}</div><h4 style="color:var(--navy);margin:12px 0 8px;">Interview</h4><div class="review-list">${tiReview}</div>`;
+    _fullTestSectionDone('speaking', typeof overall === 'number' ? overall : null, reviewHtml);
+    return;
+  }
   showScreen('resultsScreen');
 }
 
