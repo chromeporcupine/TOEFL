@@ -530,7 +530,7 @@
 // ── SUPABASE CLIENT (must be first) ───────────────────────────────────────────
 const SUPA_URL = 'https://bpvwjcbtuesmipkdrovw.supabase.co';
 const SUPA_KEY = 'sb_publishable_twDRomPjVGzX6r4gSpgVzw_b4JGIZdL';
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+var supa; // var so it's accessible before DOMContentLoaded fires
 
 let currentUser  = null;
 let currentRole  = null; // 'student' | 'teacher'
@@ -3559,6 +3559,8 @@ function showSpeakingResults() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  // Init Supabase client first
+  supa = supabase.createClient(SUPA_URL, SUPA_KEY);
   // Hide app screens until auth resolves
   document.getElementById('topbar').style.display = 'none';
   document.getElementById('progressbar').style.display = 'none';
