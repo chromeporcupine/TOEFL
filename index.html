@@ -353,7 +353,10 @@
 <div id="startScreen" class="screen active content-wrap">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0;">
     <h1 id="homeTitle" onclick="adminTap()" style="cursor:default;user-select:none;margin:0 0 8px;">TOEFL iBT® Practice</h1>
-    <button id="adminDashBtn" onclick="showTeacherDashboard({full_name: currentUser?.email})" style="display:none;padding:8px 16px;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;margin-top:4px;">⚙ Admin</button>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button id="adminDashBtn" onclick="showTeacherDashboard({full_name: currentUser?.email})" style="display:none;padding:8px 16px;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;">⚙ Admin</button>
+      <button onclick="doSignOut()" style="padding:8px 16px;background:transparent;border:1px solid #ddd;border-radius:8px;font-size:0.82rem;font-weight:600;color:#888;cursor:pointer;">Sign Out</button>
+    </div>
   </div>
   <p class="subtitle">Select a section to practise, or take a full test</p>
   <div class="full-test-card" onclick="startFullTest()">
