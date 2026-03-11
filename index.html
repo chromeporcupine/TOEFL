@@ -1400,6 +1400,8 @@ async function doResetPassword() {
   const err   = document.getElementById('authError');
   err.style.display = 'none';
 
+  console.log('Reset attempt for:', email);
+
   if (!email) {
     err.textContent = 'Enter your email address first.';
     err.style.display = 'block';
@@ -1409,6 +1411,8 @@ async function doResetPassword() {
   const { error } = await supa.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.href,
   });
+
+  console.log('Reset result — error:', error);
 
   if (error) {
     err.textContent = error.message;
