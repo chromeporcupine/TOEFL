@@ -257,19 +257,86 @@
 </div>
 
 <!-- TEACHER DASHBOARD SCREEN -->
-<div id="teacherScreen" style="display:none;min-height:100vh;background:var(--bg);padding:20px;box-sizing:border-box;">
-  <div style="max-width:700px;margin:0 auto;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-      <div>
-        <h2 style="margin:0;color:#1a1a3e;font-size:1.3rem;">👩‍🏫 Teacher Dashboard</h2>
-        <p id="teacherWelcome" style="margin:4px 0 0;color:#888;font-size:0.85rem;"></p>
-      </div>
-      <button onclick="doSignOut()" style="padding:8px 16px;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;color:#444;">Sign Out</button>
+<div id="teacherScreen" style="display:none;min-height:100vh;background:#f0f2f0;box-sizing:border-box;">
+
+  <!-- Top nav -->
+  <div style="background:#fff;border-bottom:1px solid #e0e4e0;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:0.8rem;font-weight:800;letter-spacing:2px;color:#1a1a3e;text-transform:uppercase;">TOEFL iBT® Admin</span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button onclick="showApp()" style="padding:6px 14px;background:transparent;border:1px solid #ddd;border-radius:20px;cursor:pointer;font-size:0.82rem;font-weight:600;color:#555;">← Home</button>
+      <span id="teacherWelcome" style="font-size:0.85rem;color:#888;"></span>
+      <button onclick="doSignOut()" style="padding:6px 14px;background:transparent;border:1px solid #ddd;border-radius:20px;cursor:pointer;font-size:0.82rem;font-weight:600;color:#555;">Sign Out</button>
     </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div style="background:#fff;border-bottom:1px solid #e0e4e0;padding:0 32px;display:flex;gap:0;">
+    <button id="tabAccess" onclick="switchTeacherTab('access')" style="padding:14px 20px;background:transparent;border:none;border-bottom:3px solid #2d7a4f;font-size:0.88rem;font-weight:700;color:#2d7a4f;cursor:pointer;">Student Access</button>
+    <button id="tabResults" onclick="switchTeacherTab('results')" style="padding:14px 20px;background:transparent;border:none;border-bottom:3px solid transparent;font-size:0.88rem;font-weight:700;color:#888;cursor:pointer;">Test Results</button>
+  </div>
+
+  <!-- Access tab -->
+  <div id="tabPanelAccess" style="max-width:860px;margin:0 auto;padding:32px 24px;">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <h2 style="margin:0 0 4px;color:#1a1a3e;font-size:1.5rem;font-weight:800;">Student Access</h2>
+        <p style="margin:0;color:#888;font-size:0.88rem;">Invite students and manage their access periods</p>
+      </div>
+    </div>
+
+    <!-- Invite form -->
+    <div style="background:#fff;border-radius:12px;padding:24px 28px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+      <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <label style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:1.2px;color:#888;text-transform:uppercase;margin-bottom:8px;">Student Email</label>
+          <div style="position:relative;">
+            <input id="inviteEmail" type="email" placeholder="student@example.com"
+              style="width:100%;box-sizing:border-box;padding:11px 40px 11px 14px;border:1px solid #d8e0d8;border-radius:8px;font-size:0.93rem;color:#1a1a3e;outline:none;"
+              onkeydown="if(event.key==='Enter')sendInvite()">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1rem;color:#aaa;">👤</span>
+          </div>
+        </div>
+        <div style="min-width:160px;">
+          <label style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:1.2px;color:#888;text-transform:uppercase;margin-bottom:8px;">Access Period</label>
+          <select id="invitePeriod" style="width:100%;padding:11px 14px;border:1px solid #d8e0d8;border-radius:8px;font-size:0.93rem;color:#1a1a3e;background:#fff;outline:none;cursor:pointer;">
+            <option value="7">1 week</option>
+            <option value="30" selected>1 month</option>
+            <option value="183">6 months</option>
+          </select>
+        </div>
+        <button onclick="sendInvite()" style="padding:11px 28px;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-size:0.93rem;font-weight:700;cursor:pointer;white-space:nowrap;">Send Invite</button>
+      </div>
+      <div id="inviteMsg" style="display:none;margin-top:12px;font-size:0.85rem;padding:8px 12px;border-radius:6px;"></div>
+    </div>
+
+    <!-- Student table -->
+    <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+      <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+        <thead>
+          <tr style="background:#f7f9f7;">
+            <th style="padding:12px 20px;text-align:left;font-size:0.72rem;font-weight:700;letter-spacing:1.2px;color:#888;text-transform:uppercase;">Student</th>
+            <th style="padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;letter-spacing:1.2px;color:#888;text-transform:uppercase;">Status</th>
+            <th style="padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;letter-spacing:1.2px;color:#888;text-transform:uppercase;">Expires</th>
+            <th style="padding:12px 20px;text-align:left;font-size:0.72rem;font-weight:700;letter-spacing:1.2px;color:#888;text-transform:uppercase;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="accessTableBody">
+          <tr><td colspan="4" style="padding:32px;text-align:center;color:#aaa;">Loading students...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="accessMsg" style="display:none;margin-top:12px;font-size:0.85rem;padding:8px 12px;border-radius:6px;"></div>
+  </div>
+
+  <!-- Results tab -->
+  <div id="tabPanelResults" style="display:none;max-width:860px;margin:0 auto;padding:32px 24px;">
+    <h2 style="margin:0 0 20px;color:#1a1a3e;font-size:1.5rem;font-weight:800;">Test Results</h2>
     <div id="teacherResults" style="display:flex;flex-direction:column;gap:12px;">
       <p style="color:#888;text-align:center;">Loading results...</p>
     </div>
   </div>
+
 </div>
 
 <div id="topbar">
@@ -285,7 +352,10 @@
 
 <!-- HOME: section picker only -->
 <div id="startScreen" class="screen active content-wrap">
-  <h1 id="homeTitle" onclick="adminTap()" style="cursor:default;user-select:none;">TOEFL iBT® Practice</h1>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0;">
+    <h1 id="homeTitle" onclick="adminTap()" style="cursor:default;user-select:none;margin:0 0 8px;">TOEFL iBT® Practice</h1>
+    <button id="adminDashBtn" onclick="showTeacherDashboard({full_name: currentUser?.email})" style="display:none;padding:8px 16px;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;margin-top:4px;">⚙ Admin</button>
+  </div>
   <p class="subtitle">Select a section to practise, or take a full test</p>
   <div class="full-test-card" onclick="startFullTest()">
     <div class="full-test-card-icon">🏆</div>
@@ -1231,6 +1301,9 @@ function showAuthScreen() {
 function showApp() {
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('teacherScreen').style.display = 'none';
+  // Show admin button for teachers
+  const adminBtn = document.getElementById('adminDashBtn');
+  if (adminBtn) adminBtn.style.display = currentRole === 'teacher' ? 'block' : 'none';
   // Add sign-out button to topbar
   addSignOutToTopbar();
   showScreen('startScreen');
@@ -1311,135 +1384,185 @@ async function saveResult(section, band, m1pct, m2pct, path) {
   });
 }
 
+function switchTeacherTab(tab) {
+  const isAccess = tab === 'access';
+  document.getElementById('tabPanelAccess').style.display  = isAccess ? 'block' : 'none';
+  document.getElementById('tabPanelResults').style.display = isAccess ? 'none'  : 'block';
+  document.getElementById('tabAccess').style.cssText  = `padding:14px 20px;background:transparent;border:none;border-bottom:3px solid ${isAccess?'#2d7a4f':'transparent'};font-size:0.88rem;font-weight:700;color:${isAccess?'#2d7a4f':'#888'};cursor:pointer;`;
+  document.getElementById('tabResults').style.cssText = `padding:14px 20px;background:transparent;border:none;border-bottom:3px solid ${!isAccess?'#2d7a4f':'transparent'};font-size:0.88rem;font-weight:700;color:${!isAccess?'#2d7a4f':'#888'};cursor:pointer;`;
+}
+
 // Teacher dashboard
 async function showTeacherDashboard(profile) {
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('teacherScreen').style.display = 'block';
   document.getElementById('teacherWelcome').textContent =
-    'Welcome, ' + (profile?.full_name || currentUser.email);
+    profile?.full_name || currentUser.email;
 
-  const container = document.getElementById('teacherResults');
-  container.innerHTML = '<p style="color:#888;text-align:center;">Loading...</p>';
+  await Promise.all([loadAccessTab(), loadResultsTab()]);
+}
 
-  // Load all profiles (students) + results in parallel
-  const [{ data: profiles }, { data: results }] = await Promise.all([
-    supa.from('profiles').select('id, full_name, email, role, expires_at').eq('role', 'student'),
-    supa.from('test_results').select('*, profiles(full_name, email)').order('created_at', { ascending: false })
-  ]);
+async function loadAccessTab() {
+  const { data: profiles } = await supa
+    .from('profiles')
+    .select('id, full_name, email, role, expires_at')
+    .eq('role', 'student')
+    .order('expires_at', { ascending: false, nullsFirst: false });
 
-  // ── User Management panel ─────────────────────────────────────────────────
+  renderAccessTable(profiles || []);
+}
+
+function renderAccessTable(profiles) {
   const now = new Date();
-  const tiers = [
-    { label: '1 Week',   days: 7   },
-    { label: '1 Month',  days: 30  },
-    { label: '6 Months', days: 183 },
-  ];
+  const tbody = document.getElementById('accessTableBody');
 
-  const userRows = (profiles || []).map(p => {
-    const expiry   = p.expires_at ? new Date(p.expires_at) : null;
-    const expired  = expiry && expiry < now;
-    const active   = expiry && !expired;
-    const noExpiry = !expiry;
-    const statusBadge = noExpiry
-      ? `<span style="background:#f0f0f0;color:#888;padding:2px 8px;border-radius:20px;font-size:0.78rem;">No limit</span>`
+  if (!profiles.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:32px;text-align:center;color:#aaa;">No students yet. Send an invite above.</td></tr>';
+    return;
+  }
+
+  const extendBtns = (userId) => {
+    const periods = [{label:'+1w',days:7},{label:'+1m',days:30},{label:'+6m',days:183}];
+    return periods.map(p =>
+      `<button onclick="extendStudent('${userId}',${p.days})" style="padding:5px 12px;font-size:0.78rem;font-weight:700;background:#fff;color:#2d7a4f;border:2px solid #2d7a4f;border-radius:20px;cursor:pointer;margin:2px;">${p.label}</button>`
+    ).join('') +
+    `<button onclick="revokeStudent('${userId}')" style="padding:5px 12px;font-size:0.78rem;font-weight:700;background:#fff;color:#d03030;border:2px solid #d03030;border-radius:20px;cursor:pointer;margin:2px;">Revoke</button>`;
+  };
+
+  tbody.innerHTML = profiles.map(p => {
+    const expiry  = p.expires_at ? new Date(p.expires_at) : null;
+    const expired = expiry && expiry < now;
+    const label   = p.full_name || p.email || p.id;
+    const planDays = expiry ? Math.round((expiry - now) / (1000*60*60*24)) : null;
+    const sublabel = expiry ? (expired ? 'revoked' : 'active plan') : 'no expiry set';
+
+    const statusHtml = !expiry
+      ? `<span style="font-size:0.78rem;font-weight:800;color:#2d7a4f;letter-spacing:0.5px;">ACTIVE</span>`
       : expired
-        ? `<span style="background:#fde8e8;color:#b53b3b;padding:2px 8px;border-radius:20px;font-size:0.78rem;">Expired ${expiry.toLocaleDateString()}</span>`
-        : `<span style="background:#e8f5ec;color:#2a7a4f;padding:2px 8px;border-radius:20px;font-size:0.78rem;">Until ${expiry.toLocaleDateString()}</span>`;
+      ? `<span style="font-size:0.78rem;font-weight:800;color:#d03030;letter-spacing:0.5px;">EXPIRED</span>`
+      : `<span style="font-size:0.78rem;font-weight:800;color:#2d7a4f;letter-spacing:0.5px;">ACTIVE</span>`;
 
-    const tierBtns = tiers.map(t =>
-      `<button onclick="setStudentTier('${p.id}','${t.label}',${t.days})" style="padding:4px 10px;font-size:0.78rem;font-weight:600;background:#eeeeff;color:#5356cc;border:1px solid #c0c2ff;border-radius:6px;cursor:pointer;margin-right:4px;">${t.label}</button>`
-    ).join('');
-
-    const clearBtn = `<button onclick="clearStudentTier('${p.id}')" style="padding:4px 10px;font-size:0.78rem;font-weight:600;background:#f5f5f5;color:#888;border:1px solid #ddd;border-radius:6px;cursor:pointer;">Clear</button>`;
+    const expiresHtml = expiry
+      ? `<span style="color:#1a1a3e;font-weight:500;">${expiry.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span>`
+      : `<span style="color:#aaa;">—</span>`;
 
     return `
-      <tr style="border-bottom:1px solid #f5f5f5;" id="tier-row-${p.id}">
-        <td style="padding:8px 8px;font-weight:600;color:#1a1a3e;">${p.full_name || p.email || p.id}</td>
-        <td style="padding:8px 8px;">${statusBadge}</td>
-        <td style="padding:8px 8px;">${tierBtns}${clearBtn}</td>
+      <tr id="arow-${p.id}" style="border-top:1px solid #f0f2f0;">
+        <td style="padding:16px 20px;">
+          <div style="font-weight:600;color:#1a1a3e;">${label}</div>
+          <div id="sublabel-${p.id}" style="font-size:0.78rem;color:#aaa;margin-top:2px;">${sublabel}</div>
+        </td>
+        <td style="padding:16px 16px;" id="status-${p.id}">${statusHtml}</td>
+        <td style="padding:16px 16px;" id="expiry-${p.id}">${expiresHtml}</td>
+        <td style="padding:16px 20px;"><div style="display:flex;flex-wrap:wrap;gap:4px;">${extendBtns(p.id)}</div></td>
       </tr>`;
   }).join('');
+}
 
-  // ── Results by student ────────────────────────────────────────────────────
+async function sendInvite() {
+  const email  = document.getElementById('inviteEmail').value.trim();
+  const days   = parseInt(document.getElementById('invitePeriod').value);
+  const msg    = document.getElementById('inviteMsg');
+
+  if (!email) { showMsg(msg, '❌ Enter a student email.', 'error'); return; }
+
+  const expiry = new Date();
+  expiry.setDate(expiry.getDate() + days);
+
+  // Check if user already exists in profiles
+  const { data: existing } = await supa.from('profiles').select('id').eq('email', email).single();
+
+  if (existing) {
+    const { error } = await supa.from('profiles').update({ expires_at: expiry.toISOString() }).eq('id', existing.id);
+    if (error) { showMsg(msg, '❌ ' + error.message, 'error'); return; }
+    showMsg(msg, `✅ Access updated for ${email} — expires ${expiry.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}.`, 'success');
+    document.getElementById('inviteEmail').value = '';
+    await loadAccessTab();
+  } else {
+    showMsg(msg, `⚠️ No account found for ${email}. Ask the student to register first, then set their access here.`, 'warn');
+  }
+}
+
+async function extendStudent(userId, days) {
+  const { data: p } = await supa.from('profiles').select('expires_at').eq('id', userId).single();
+  let base = new Date();
+  if (p?.expires_at) {
+    const cur = new Date(p.expires_at);
+    if (cur > base) base = cur;
+  }
+  base.setDate(base.getDate() + days);
+
+  const { error } = await supa.from('profiles').update({ expires_at: base.toISOString() }).eq('id', userId);
+  const msg = document.getElementById('accessMsg');
+  if (error) { showMsg(msg, '❌ ' + error.message, 'error'); return; }
+
+  document.getElementById('expiry-' + userId).innerHTML =
+    `<span style="color:#1a1a3e;font-weight:500;">${base.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span>`;
+  document.getElementById('status-' + userId).innerHTML =
+    `<span style="font-size:0.78rem;font-weight:800;color:#2d7a4f;letter-spacing:0.5px;">ACTIVE</span>`;
+  const daysLabel = days===7?'1w':days===30?'1m':days===183?'6m':days+'d';
+  document.getElementById('sublabel-' + userId).textContent = '+' + daysLabel + ' extended';
+  showMsg(msg, `✅ Extended — new expiry ${base.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}.`, 'success');
+}
+
+async function revokeStudent(userId) {
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const { error } = await supa.from('profiles').update({ expires_at: yesterday.toISOString() }).eq('id', userId);
+  const msg = document.getElementById('accessMsg');
+  if (error) { showMsg(msg, '❌ ' + error.message, 'error'); return; }
+
+  document.getElementById('expiry-' + userId).innerHTML =
+    `<span style="color:#d03030;font-weight:500;">${yesterday.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span>`;
+  document.getElementById('status-' + userId).innerHTML =
+    `<span style="font-size:0.78rem;font-weight:800;color:#d03030;letter-spacing:0.5px;">EXPIRED</span>`;
+  document.getElementById('sublabel-' + userId).textContent = 'revoked';
+  showMsg(msg, '✅ Access revoked.', 'success');
+}
+
+function showMsg(el, text, type) {
+  const colors = { success:{bg:'#e8f5ec',color:'#2d7a4f'}, error:{bg:'#fde8e8',color:'#b53b3b'}, warn:{bg:'#fff8e1',color:'#8a6000'} };
+  const c = colors[type] || colors.success;
+  el.textContent = text; el.style.background = c.bg; el.style.color = c.color; el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+async function loadResultsTab() {
+  const { data: results } = await supa
+    .from('test_results')
+    .select('*, profiles(full_name, email)')
+    .order('created_at', { ascending: false });
+
+  const container = document.getElementById('teacherResults');
+  if (!results?.length) { container.innerHTML = '<p style="color:#888;text-align:center;">No results yet.</p>'; return; }
+
   const byStudent = {};
-  (results || []).forEach(r => {
+  results.forEach(r => {
     const name = r.profiles?.full_name || r.profiles?.email || r.user_id;
     if (!byStudent[name]) byStudent[name] = [];
     byStudent[name].push(r);
   });
 
-  const resultCards = Object.entries(byStudent).map(([name, rows]) => `
+  container.innerHTML = Object.entries(byStudent).map(([name, rows]) => `
     <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,0.07);">
       <div style="font-weight:700;color:#1a1a3e;margin-bottom:10px;">👤 ${name}</div>
       <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
-        <thead>
-          <tr style="color:#888;text-align:left;border-bottom:1px solid #eee;">
-            <th style="padding:4px 8px;">Section</th><th style="padding:4px 8px;">Band</th>
-            <th style="padding:4px 8px;">M1%</th><th style="padding:4px 8px;">M2%</th>
-            <th style="padding:4px 8px;">Path</th><th style="padding:4px 8px;">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(r => `
-            <tr style="border-bottom:1px solid #f5f5f5;">
-              <td style="padding:5px 8px;text-transform:capitalize;">${r.section}</td>
-              <td style="padding:5px 8px;font-weight:700;color:#9196ff;">${r.band ?? '—'}</td>
-              <td style="padding:5px 8px;">${r.module1_pct != null ? r.module1_pct+'%' : '—'}</td>
-              <td style="padding:5px 8px;">${r.module2_pct != null ? r.module2_pct+'%' : '—'}</td>
-              <td style="padding:5px 8px;">${r.path || '—'}</td>
-              <td style="padding:5px 8px;color:#aaa;">${new Date(r.created_at).toLocaleDateString()}</td>
-            </tr>`).join('')}
+        <thead><tr style="color:#888;text-align:left;border-bottom:1px solid #eee;">
+          <th style="padding:4px 8px;">Section</th><th style="padding:4px 8px;">Band</th>
+          <th style="padding:4px 8px;">M1%</th><th style="padding:4px 8px;">M2%</th>
+          <th style="padding:4px 8px;">Path</th><th style="padding:4px 8px;">Date</th>
+        </tr></thead>
+        <tbody>${rows.map(r => `
+          <tr style="border-bottom:1px solid #f5f5f5;">
+            <td style="padding:5px 8px;text-transform:capitalize;">${r.section}</td>
+            <td style="padding:5px 8px;font-weight:700;color:#9196ff;">${r.band ?? '—'}</td>
+            <td style="padding:5px 8px;">${r.module1_pct != null ? r.module1_pct+'%' : '—'}</td>
+            <td style="padding:5px 8px;">${r.module2_pct != null ? r.module2_pct+'%' : '—'}</td>
+            <td style="padding:5px 8px;">${r.path || '—'}</td>
+            <td style="padding:5px 8px;color:#aaa;">${new Date(r.created_at).toLocaleDateString()}</td>
+          </tr>`).join('')}
         </tbody>
       </table>
     </div>`).join('');
-
-  container.innerHTML = `
-    <!-- User Access Management -->
-    <div style="background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 6px rgba(0,0,0,0.07);margin-bottom:8px;">
-      <h3 style="margin:0 0 14px;color:#1a1a3e;font-size:1rem;">🗓 Student Access</h3>
-      ${(profiles || []).length === 0
-        ? '<p style="color:#aaa;font-size:0.88rem;">No students yet.</p>'
-        : `<table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
-            <thead><tr style="color:#888;text-align:left;border-bottom:2px solid #eee;">
-              <th style="padding:6px 8px;">Student</th>
-              <th style="padding:6px 8px;">Status</th>
-              <th style="padding:6px 8px;">Set Access</th>
-            </tr></thead>
-            <tbody id="tierTableBody">${userRows}</tbody>
-           </table>`}
-      <div id="tierMsg" style="margin-top:10px;font-size:0.85rem;display:none;"></div>
-    </div>
-    <!-- Results -->
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      ${resultCards || '<p style="color:#888;text-align:center;padding:20px 0;">No results yet.</p>'}
-    </div>`;
-}
-
-async function setStudentTier(userId, label, days) {
-  const expiry = new Date();
-  expiry.setDate(expiry.getDate() + days);
-
-  const { error } = await supa
-    .from('profiles')
-    .update({ expires_at: expiry.toISOString() })
-    .eq('id', userId);
-
-  const msg = document.getElementById('tierMsg');
-  if (error) {
-    msg.textContent = '❌ Error: ' + error.message;
-    msg.style.color = '#b53b3b';
-  } else {
-    msg.textContent = `✅ Access set to ${label} — expires ${expiry.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}.`;
-    msg.style.color = '#2a7a4f';
-    // Update row badge inline
-    const row = document.getElementById('tier-row-' + userId);
-    if (row) {
-      const badge = row.querySelector('td:nth-child(2)');
-      if (badge) badge.innerHTML = `<span style="background:#e8f5ec;color:#2a7a4f;padding:2px 8px;border-radius:20px;font-size:0.78rem;">Until ${expiry.toLocaleDateString()}</span>`;
-    }
-  }
-  msg.style.display = 'block';
-  setTimeout(() => { msg.style.display = 'none'; }, 4000);
 }
 
 async function clearStudentTier(userId) {
