@@ -527,6 +527,14 @@
 </div>
 
 <script>
+// ── SUPABASE CLIENT (must be first) ───────────────────────────────────────────
+const SUPA_URL = 'https://bpvwjcbtuesmipkdrovw.supabase.co';
+const SUPA_KEY = 'sb_publishable_twDRomPjVGzX6r4gSpgVzw_b4JGIZdL';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser  = null;
+let currentRole  = null; // 'student' | 'teacher'
+
 // ── ADMIN ─────────────────────────────────────────────────────────────────────
 let _adminTaps = 0, _adminTimer = null;
 function adminTap() {
@@ -1217,12 +1225,6 @@ const TRANSITION_MSGS = {
 };
 
 // ── SUPABASE AUTH ─────────────────────────────────────────────────────────────
-const SUPA_URL = 'https://bpvwjcbtuesmipkdrovw.supabase.co';
-const SUPA_KEY = 'sb_publishable_twDRomPjVGzX6r4gSpgVzw_b4JGIZdL';
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-let currentUser  = null;
-let currentRole  = null; // 'student' | 'teacher'
 
 // Called on page load — check for existing session
 async function initAuth() {
