@@ -220,7 +220,6 @@
   .listen-choose-options { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
   .locked-msg { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 12px; font-style: italic; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -526,11 +525,12 @@
   <button class="btn" id="nextBtn" onclick="goNext()">Next →</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── SUPABASE CLIENT (must be first) ───────────────────────────────────────────
 const SUPA_URL = 'https://bpvwjcbtuesmipkdrovw.supabase.co';
 const SUPA_KEY = 'sb_publishable_twDRomPjVGzX6r4gSpgVzw_b4JGIZdL';
-var supa; // var so it's accessible before DOMContentLoaded fires
+var supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 let currentUser  = null;
 let currentRole  = null; // 'student' | 'teacher'
@@ -1397,6 +1397,7 @@ async function doLogin() {
 }
 
 async function doResetPassword() {
+  if (!supa) return;
   const email = document.getElementById('authEmail').value.trim();
   const msg   = document.getElementById('resetMsg');
   const err   = document.getElementById('authError');
@@ -3559,8 +3560,6 @@ function showSpeakingResults() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // Init Supabase client first
-  supa = supabase.createClient(SUPA_URL, SUPA_KEY);
   // Hide app screens until auth resolves
   document.getElementById('topbar').style.display = 'none';
   document.getElementById('progressbar').style.display = 'none';
