@@ -220,8 +220,57 @@
   .listen-choose-options { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
   .locked-msg { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 12px; font-style: italic; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:24px;box-sizing:border-box;">
+  <div style="background:#fff;border-radius:16px;padding:36px 28px;max-width:380px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.10);border-top:5px solid #9196ff;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:2rem;margin-bottom:8px;">📝</div>
+      <h2 style="margin:0;color:#1a1a3e;font-size:1.3rem;">TOEFL iBT® Practice</h2>
+      <p style="color:#888;font-size:0.85rem;margin:6px 0 0;">Sign in to continue</p>
+    </div>
+    <div id="authError" style="display:none;background:#fde8e8;color:#b53b3b;padding:10px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:16px;"></div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:0.82rem;font-weight:600;color:#444;display:block;margin-bottom:5px;">Email</label>
+      <input id="authEmail" type="email" placeholder="your@email.com" autocomplete="email"
+        style="width:100%;box-sizing:border-box;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.95rem;outline:none;"
+        onkeydown="if(event.key==='Enter')document.getElementById('authPassword').focus()">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="font-size:0.82rem;font-weight:600;color:#444;display:block;margin-bottom:5px;">Password</label>
+      <input id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password"
+        style="width:100%;box-sizing:border-box;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.95rem;outline:none;"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button onclick="doLogin()" id="loginBtn"
+      style="width:100%;padding:13px;background:#9196ff;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:0.3px;">
+      Sign In
+    </button>
+    <div style="text-align:center;margin-top:16px;">
+      <a href="#" onclick="doResetPassword();return false;" style="font-size:0.83rem;color:#9196ff;text-decoration:none;">Forgot password?</a>
+    </div>
+    <div id="resetMsg" style="display:none;margin-top:12px;background:#e8f5e9;color:#2a7a4f;padding:10px 14px;border-radius:8px;font-size:0.84rem;text-align:center;"></div>
+  </div>
+</div>
+
+<!-- TEACHER DASHBOARD SCREEN -->
+<div id="teacherScreen" style="display:none;min-height:100vh;background:var(--bg);padding:20px;box-sizing:border-box;">
+  <div style="max-width:700px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <h2 style="margin:0;color:#1a1a3e;font-size:1.3rem;">👩‍🏫 Teacher Dashboard</h2>
+        <p id="teacherWelcome" style="margin:4px 0 0;color:#888;font-size:0.85rem;"></p>
+      </div>
+      <button onclick="doSignOut()" style="padding:8px 16px;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;color:#444;">Sign Out</button>
+    </div>
+    <div id="teacherResults" style="display:flex;flex-direction:column;gap:12px;">
+      <p style="color:#888;text-align:center;">Loading results...</p>
+    </div>
+  </div>
+</div>
 
 <div id="topbar">
   <div class="logo">TOEFL iBT®</div>
@@ -267,10 +316,14 @@
     </div>
   </div>
   <div id="adminPanel" style="display:none;margin-top:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
-    <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;font-weight:600;">⚙️ Admin — Google TTS Key</p>
+    <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;font-weight:600;">⚙️ Admin — TTS Settings</p>
+    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;">Google TTS API Key</p>
     <input id="adminKeyInput" type="password" placeholder="AIza..." autocomplete="off"
       style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.9rem;font-family:monospace;background:#f9f9f7;margin-bottom:10px;">
-    <button onclick="saveAdminKey()" style="background:var(--navy);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;">Save Key</button>
+    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;">Worker Proxy URL <span style="font-weight:400;opacity:0.7;">(paste your Cloudflare Worker URL)</span></p>
+    <input id="adminProxyInput" type="text" placeholder="https://tts-proxy.xxx.workers.dev" autocomplete="off"
+      style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.88rem;font-family:monospace;background:#f9f9f7;margin-bottom:10px;">
+    <button onclick="saveAdminKey()" style="background:var(--navy);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;">Save</button>
     <div id="adminKeyStatus" style="margin-top:8px;font-size:0.83rem;color:var(--muted);"></div>
   </div>
 </div>
@@ -417,11 +470,15 @@ function adminTap() {
   }
 }
 function saveAdminKey() {
-  const val = document.getElementById('adminKeyInput').value.trim();
-  if (!val) { document.getElementById('adminKeyStatus').textContent = 'Enter a key first.'; return; }
-  window._runtimeTTSKey = val;
-  document.getElementById('adminKeyStatus').textContent = '✅ Key saved for this session.';
+  const keyVal   = document.getElementById('adminKeyInput').value.trim();
+  const proxyVal = document.getElementById('adminProxyInput').value.trim();
+  if (!keyVal && !proxyVal) { document.getElementById('adminKeyStatus').textContent = 'Enter a key or proxy URL.'; return; }
+  if (keyVal)   window._runtimeTTSKey = keyVal;
+  if (proxyVal) window._ttsPROXY = proxyVal;
+  _ttsUsingFallback = false; // reset fallback — try Google TTS again
+  document.getElementById('adminKeyStatus').textContent = '✅ Saved for this session.';
   document.getElementById('adminKeyInput').value = '';
+  document.getElementById('adminProxyInput').value = '';
   setTimeout(() => { document.getElementById('adminPanel').style.display = 'none'; }, 1500);
 }
 
@@ -1089,6 +1146,327 @@ const TRANSITION_MSGS = {
   ],
 };
 
+// ── SUPABASE AUTH ─────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://bpvwjcbtuesmipkdrovw.supabase.co';
+const SUPA_KEY = 'sb_publishable_twDRomPjVGzX6r4gSpgVzw_b4JGIZdL';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser  = null;
+let currentRole  = null; // 'student' | 'teacher'
+
+// Called on page load — check for existing session
+async function initAuth() {
+  const { data: { session } } = await supa.auth.getSession();
+  if (session) {
+    await onSignedIn(session.user);
+  } else {
+    showAuthScreen();
+  }
+  // Listen for auth state changes (e.g. after password reset redirect)
+  supa.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      await onSignedIn(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      showAuthScreen();
+    }
+  });
+}
+
+async function onSignedIn(user) {
+  currentUser = user;
+  // Fetch role + access expiry from profiles table
+  const { data: profile } = await supa
+    .from('profiles')
+    .select('role, full_name, expires_at')
+    .eq('id', user.id)
+    .single();
+
+  currentRole = profile?.role || 'student';
+
+  if (currentRole === 'teacher') {
+    showTeacherDashboard(profile);
+  } else {
+    // Check access expiry for students
+    if (profile?.expires_at) {
+      const expiry = new Date(profile.expires_at);
+      if (expiry < new Date()) {
+        showExpiredScreen(expiry);
+        return;
+      }
+    }
+    showApp();
+  }
+}
+
+function showExpiredScreen(expiryDate) {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('teacherScreen').style.display = 'none';
+  let el = document.getElementById('expiredScreen');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'expiredScreen';
+    el.style.cssText = 'display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:24px;box-sizing:border-box;';
+    el.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:420px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.1);text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
+        <h2 style="color:#1a1a3e;margin:0 0 8px;">Access Expired</h2>
+        <p style="color:#666;font-size:0.93rem;margin-bottom:6px;">Your access expired on <strong>${expiryDate.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}</strong>.</p>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:24px;">Please contact your teacher to renew your access.</p>
+        <button onclick="doSignOut()" style="padding:10px 24px;background:#9196ff;color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;">Sign Out</button>
+      </div>`;
+    document.body.appendChild(el);
+  }
+  el.style.display = 'flex';
+}
+
+function showAuthScreen() {
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('teacherScreen').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s => s.style.display = '');
+  document.getElementById('startScreen').classList.remove('active');
+  document.getElementById('topbar').style.display = '';
+  document.getElementById('progressbar').style.display = '';
+}
+
+function showApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('teacherScreen').style.display = 'none';
+  // Add sign-out button to topbar
+  addSignOutToTopbar();
+  showScreen('startScreen');
+}
+
+function addSignOutToTopbar() {
+  if (document.getElementById('signOutBtn')) return;
+  const btn = document.createElement('button');
+  btn.id = 'signOutBtn';
+  btn.textContent = 'Sign Out';
+  btn.onclick = doSignOut;
+  btn.style.cssText = 'padding:5px 12px;background:transparent;border:1px solid rgba(255,255,255,0.4);border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;font-weight:600;';
+  document.getElementById('topbar').appendChild(btn);
+}
+
+async function doLogin() {
+  const email    = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const btn      = document.getElementById('loginBtn');
+  const errDiv   = document.getElementById('authError');
+
+  errDiv.style.display = 'none';
+  btn.textContent = 'Signing in...';
+  btn.disabled = true;
+
+  const { error } = await supa.auth.signInWithPassword({ email, password });
+
+  btn.textContent = 'Sign In';
+  btn.disabled = false;
+
+  if (error) {
+    errDiv.textContent = error.message;
+    errDiv.style.display = 'block';
+  }
+}
+
+async function doResetPassword() {
+  const email = document.getElementById('authEmail').value.trim();
+  const msg   = document.getElementById('resetMsg');
+  const err   = document.getElementById('authError');
+  err.style.display = 'none';
+
+  if (!email) {
+    err.textContent = 'Enter your email address first.';
+    err.style.display = 'block';
+    return;
+  }
+
+  const { error } = await supa.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href,
+  });
+
+  if (error) {
+    err.textContent = error.message;
+    err.style.display = 'block';
+  } else {
+    msg.textContent = '✅ Password reset email sent! Check your inbox.';
+    msg.style.display = 'block';
+  }
+}
+
+async function doSignOut() {
+  await supa.auth.signOut();
+  currentUser = null;
+  currentRole = null;
+}
+
+// Save a completed section result to Supabase
+async function saveResult(section, band, m1pct, m2pct, path) {
+  if (!currentUser) return;
+  await supa.from('test_results').insert({
+    user_id:     currentUser.id,
+    section,
+    band,
+    module1_pct: m1pct ? Math.round(m1pct * 100) : null,
+    module2_pct: m2pct ? Math.round(m2pct * 100) : null,
+    path,
+  });
+}
+
+// Teacher dashboard
+async function showTeacherDashboard(profile) {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('teacherScreen').style.display = 'block';
+  document.getElementById('teacherWelcome').textContent =
+    'Welcome, ' + (profile?.full_name || currentUser.email);
+
+  const container = document.getElementById('teacherResults');
+  container.innerHTML = '<p style="color:#888;text-align:center;">Loading...</p>';
+
+  // Load all profiles (students) + results in parallel
+  const [{ data: profiles }, { data: results }] = await Promise.all([
+    supa.from('profiles').select('id, full_name, email, role, expires_at').eq('role', 'student'),
+    supa.from('test_results').select('*, profiles(full_name, email)').order('created_at', { ascending: false })
+  ]);
+
+  // ── User Management panel ─────────────────────────────────────────────────
+  const now = new Date();
+  const tiers = [
+    { label: '1 Week',   days: 7   },
+    { label: '1 Month',  days: 30  },
+    { label: '6 Months', days: 183 },
+  ];
+
+  const userRows = (profiles || []).map(p => {
+    const expiry   = p.expires_at ? new Date(p.expires_at) : null;
+    const expired  = expiry && expiry < now;
+    const active   = expiry && !expired;
+    const noExpiry = !expiry;
+    const statusBadge = noExpiry
+      ? `<span style="background:#f0f0f0;color:#888;padding:2px 8px;border-radius:20px;font-size:0.78rem;">No limit</span>`
+      : expired
+        ? `<span style="background:#fde8e8;color:#b53b3b;padding:2px 8px;border-radius:20px;font-size:0.78rem;">Expired ${expiry.toLocaleDateString()}</span>`
+        : `<span style="background:#e8f5ec;color:#2a7a4f;padding:2px 8px;border-radius:20px;font-size:0.78rem;">Until ${expiry.toLocaleDateString()}</span>`;
+
+    const tierBtns = tiers.map(t =>
+      `<button onclick="setStudentTier('${p.id}','${t.label}',${t.days})" style="padding:4px 10px;font-size:0.78rem;font-weight:600;background:#eeeeff;color:#5356cc;border:1px solid #c0c2ff;border-radius:6px;cursor:pointer;margin-right:4px;">${t.label}</button>`
+    ).join('');
+
+    const clearBtn = `<button onclick="clearStudentTier('${p.id}')" style="padding:4px 10px;font-size:0.78rem;font-weight:600;background:#f5f5f5;color:#888;border:1px solid #ddd;border-radius:6px;cursor:pointer;">Clear</button>`;
+
+    return `
+      <tr style="border-bottom:1px solid #f5f5f5;" id="tier-row-${p.id}">
+        <td style="padding:8px 8px;font-weight:600;color:#1a1a3e;">${p.full_name || p.email || p.id}</td>
+        <td style="padding:8px 8px;">${statusBadge}</td>
+        <td style="padding:8px 8px;">${tierBtns}${clearBtn}</td>
+      </tr>`;
+  }).join('');
+
+  // ── Results by student ────────────────────────────────────────────────────
+  const byStudent = {};
+  (results || []).forEach(r => {
+    const name = r.profiles?.full_name || r.profiles?.email || r.user_id;
+    if (!byStudent[name]) byStudent[name] = [];
+    byStudent[name].push(r);
+  });
+
+  const resultCards = Object.entries(byStudent).map(([name, rows]) => `
+    <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,0.07);">
+      <div style="font-weight:700;color:#1a1a3e;margin-bottom:10px;">👤 ${name}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+        <thead>
+          <tr style="color:#888;text-align:left;border-bottom:1px solid #eee;">
+            <th style="padding:4px 8px;">Section</th><th style="padding:4px 8px;">Band</th>
+            <th style="padding:4px 8px;">M1%</th><th style="padding:4px 8px;">M2%</th>
+            <th style="padding:4px 8px;">Path</th><th style="padding:4px 8px;">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr style="border-bottom:1px solid #f5f5f5;">
+              <td style="padding:5px 8px;text-transform:capitalize;">${r.section}</td>
+              <td style="padding:5px 8px;font-weight:700;color:#9196ff;">${r.band ?? '—'}</td>
+              <td style="padding:5px 8px;">${r.module1_pct != null ? r.module1_pct+'%' : '—'}</td>
+              <td style="padding:5px 8px;">${r.module2_pct != null ? r.module2_pct+'%' : '—'}</td>
+              <td style="padding:5px 8px;">${r.path || '—'}</td>
+              <td style="padding:5px 8px;color:#aaa;">${new Date(r.created_at).toLocaleDateString()}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`).join('');
+
+  container.innerHTML = `
+    <!-- User Access Management -->
+    <div style="background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 6px rgba(0,0,0,0.07);margin-bottom:8px;">
+      <h3 style="margin:0 0 14px;color:#1a1a3e;font-size:1rem;">🗓 Student Access</h3>
+      ${(profiles || []).length === 0
+        ? '<p style="color:#aaa;font-size:0.88rem;">No students yet.</p>'
+        : `<table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+            <thead><tr style="color:#888;text-align:left;border-bottom:2px solid #eee;">
+              <th style="padding:6px 8px;">Student</th>
+              <th style="padding:6px 8px;">Status</th>
+              <th style="padding:6px 8px;">Set Access</th>
+            </tr></thead>
+            <tbody id="tierTableBody">${userRows}</tbody>
+           </table>`}
+      <div id="tierMsg" style="margin-top:10px;font-size:0.85rem;display:none;"></div>
+    </div>
+    <!-- Results -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      ${resultCards || '<p style="color:#888;text-align:center;padding:20px 0;">No results yet.</p>'}
+    </div>`;
+}
+
+async function setStudentTier(userId, label, days) {
+  const expiry = new Date();
+  expiry.setDate(expiry.getDate() + days);
+
+  const { error } = await supa
+    .from('profiles')
+    .update({ expires_at: expiry.toISOString() })
+    .eq('id', userId);
+
+  const msg = document.getElementById('tierMsg');
+  if (error) {
+    msg.textContent = '❌ Error: ' + error.message;
+    msg.style.color = '#b53b3b';
+  } else {
+    msg.textContent = `✅ Access set to ${label} — expires ${expiry.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}.`;
+    msg.style.color = '#2a7a4f';
+    // Update row badge inline
+    const row = document.getElementById('tier-row-' + userId);
+    if (row) {
+      const badge = row.querySelector('td:nth-child(2)');
+      if (badge) badge.innerHTML = `<span style="background:#e8f5ec;color:#2a7a4f;padding:2px 8px;border-radius:20px;font-size:0.78rem;">Until ${expiry.toLocaleDateString()}</span>`;
+    }
+  }
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 4000);
+}
+
+async function clearStudentTier(userId) {
+  const { error } = await supa
+    .from('profiles')
+    .update({ expires_at: null })
+    .eq('id', userId);
+
+  const msg = document.getElementById('tierMsg');
+  if (error) {
+    msg.textContent = '❌ Error: ' + error.message;
+    msg.style.color = '#b53b3b';
+  } else {
+    msg.textContent = '✅ Access limit cleared — student has unlimited access.';
+    msg.style.color = '#666';
+    const row = document.getElementById('tier-row-' + userId);
+    if (row) {
+      const badge = row.querySelector('td:nth-child(2)');
+      if (badge) badge.innerHTML = `<span style="background:#f0f0f0;color:#888;padding:2px 8px;border-radius:20px;font-size:0.78rem;">No limit</span>`;
+    }
+  }
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 4000);
+}
+
+// ── END SUPABASE AUTH ──────────────────────────────────────────────────────────
+
 let streak = 0;
 
 function getPersonalityLabel(band) {
@@ -1519,6 +1897,11 @@ function stopSpeech() {
 }
 
 // Fetch audio from Google Cloud TTS, return blob URL
+// TTS_PROXY_URL: set this to your Cloudflare Worker URL after deploying tts-worker.js
+// e.g. 'https://tts-proxy.YOUR-SUBDOMAIN.workers.dev'
+// Leave empty to call Google TTS directly (requires CORS to be open)
+const TTS_PROXY_URL = window._ttsPROXY || 'https://yulzari.net/tts-proxy';
+
 async function fetchTTSAudio(text, voiceKey) {
   const key   = window._runtimeTTSKey || GOOGLE_TTS_KEY;
   const voice = TTS_VOICES[voiceKey] || TTS_VOICES.narrator;
@@ -1527,21 +1910,51 @@ async function fetchTTSAudio(text, voiceKey) {
     voice:       { languageCode: 'en-US', name: voice.name, ssmlGender: voice.ssmlGender },
     audioConfig: { audioEncoding: 'MP3', speakingRate: 0.92, pitch: 0 },
   };
-  const res  = await fetch(
-    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${key}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
+
+  // Use proxy if set, otherwise call Google directly
+  const endpoint = TTS_PROXY_URL
+    ? TTS_PROXY_URL
+    : `https://texttospeech.googleapis.com/v1/text:synthesize?key=${key}`;
+
+  let res;
+  try {
+    res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch(netErr) {
+    console.warn('Google TTS fetch blocked, falling back to Web Speech API:', netErr.message);
+    return null;
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err?.error?.message || res.statusText);
   }
   const { audioContent } = await res.json();
-  // audioContent is base64 MP3 — decode to blob URL
   const binary = atob(audioContent);
   const bytes  = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   const blob = new Blob([bytes], { type: 'audio/mpeg' });
   return URL.createObjectURL(blob);
+}
+
+// Web Speech API fallback
+function speakWithWebSpeech(text, onEnd) {
+  if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US';
+  utt.rate = 0.92;
+  // Try to pick a good English voice
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'))
+    || voices.find(v => v.lang === 'en-US')
+    || voices.find(v => v.lang.startsWith('en'));
+  if (preferred) utt.voice = preferred;
+  utt.onend  = () => { if (onEnd) onEnd(); };
+  utt.onerror = () => { if (onEnd) onEnd(); };
+  window.speechSynthesis.speak(utt);
 }
 
 // Play a single audio blob URL, call onEnd when done
@@ -1554,20 +1967,49 @@ function playAudioURL(url, onEnd) {
 }
 
 // Process the ttsQueue sequentially
+let _ttsUsingFallback = false; // once we know Google TTS is blocked, skip straight to Web Speech
 async function processTTSQueue() {
   while (ttsQueue.length > 0 && !ttsAborted) {
     const { text, voiceKey, onEnd } = ttsQueue.shift();
     try {
+      if (_ttsUsingFallback) {
+        // Already know Google is blocked — go straight to Web Speech
+        await new Promise(resolve => speakWithWebSpeech(text, resolve));
+        if (onEnd) onEnd();
+        continue;
+      }
       const url = await fetchTTSAudio(text, voiceKey);
+      if (url === null) {
+        // Network blocked — switch to Web Speech for this and all future items
+        _ttsUsingFallback = true;
+        await new Promise(resolve => speakWithWebSpeech(text, resolve));
+        if (onEnd) onEnd();
+        continue;
+      }
       if (ttsAborted) { URL.revokeObjectURL(url); break; }
       await new Promise(resolve => playAudioURL(url, resolve));
       if (onEnd) onEnd();
     } catch (e) {
       console.error('TTS error:', e.message);
+      showTTSError(e.message);
       if (onEnd) onEnd();
     }
   }
   ttsPlaying = false;
+}
+
+function showTTSError(msg) {
+  let toast = document.getElementById('ttsErrorToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'ttsErrorToast';
+    toast.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#b53b3b;color:#fff;padding:10px 18px;border-radius:8px;font-size:0.82rem;max-width:90vw;z-index:9999;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.3)';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = '🔇 TTS error: ' + msg;
+  toast.style.display = 'block';
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => { toast.style.display = 'none'; }, 8000);
 }
 
 // Main entry point. text = string | transcript array [{speaker, text}]
@@ -2369,6 +2811,9 @@ function showResults() {
     }
   }).join('');
   document.getElementById('reviewList').innerHTML=rev;
+  // Save result to Supabase
+  saveResult(state.section, band, state.m1Score/Math.max(state.m1Total,1), m2t>0?m2c/m2t:null, state.path || 'standard');
+
   if (fullTest.active) {
     const band = document.getElementById('totalScore').textContent;
     _fullTestSectionDone(state.section, parseFloat(band)||null, rev);
@@ -2926,6 +3371,37 @@ function showSpeakingResults() {
     return;
   }
   showScreen('resultsScreen');
+}
+
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Hide app screens until auth resolves
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('progressbar').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  initAuth();
+});
+
+// Override showScreen to also manage visibility
+const _origShowScreen = showScreen;
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  if (el) { el.style.display = ''; el.classList.add('active'); }
+  // Show/hide topbar and progressbar based on screen
+  const hideTopbar = ['startScreen','detailScreen','introScreen','resultsScreen',
+                      'fullTestTransitionScreen','fullTestResultsScreen'];
+  document.getElementById('topbar').style.display =
+    hideTopbar.includes(id) ? 'none' : '';
+  document.getElementById('progressbar').style.display =
+    hideTopbar.includes(id) ? 'none' : '';
 }
 
 </script>
