@@ -351,13 +351,7 @@
 
 <!-- HOME: section picker only -->
 <div id="startScreen" class="screen active content-wrap">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0;">
-    <h1 id="homeTitle" onclick="adminTap()" style="cursor:default;user-select:none;margin:0 0 8px;">TOEFL iBT® Practice</h1>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button id="adminDashBtn" onclick="showTeacherDashboard({full_name: currentUser?.email})" style="display:none;padding:8px 16px;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;">⚙ Admin</button>
-      <button onclick="doSignOut()" style="padding:8px 16px;background:transparent;border:1px solid #ddd;border-radius:8px;font-size:0.82rem;font-weight:600;color:#888;cursor:pointer;">Sign Out</button>
-    </div>
-  </div>
+  <h1 id="homeTitle" onclick="adminTap()" style="cursor:default;user-select:none;margin:0 0 8px;">TOEFL iBT® Practice</h1>
   <p class="subtitle">Select a section to practise, or take a full test</p>
   <div class="full-test-card" onclick="startFullTest()">
     <div class="full-test-card-icon">🏆</div>
@@ -387,6 +381,22 @@
       <div class="section-card-sub">11 questions · 20 min</div>
     </div>
   </div>
+
+  <!-- Vocabulary Flashcards card -->
+  <div onclick="showScreen('vocabScreen')" style="margin-top:16px;background:var(--navy);color:#fff;border-radius:12px;padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:16px;">
+    <div style="font-size:1.6rem;">📚</div>
+    <div>
+      <div style="font-weight:700;font-size:1rem;margin-bottom:2px;">Vocabulary Flashcards</div>
+      <div style="font-size:0.82rem;opacity:0.7;">High-frequency TOEFL words · spaced repetition</div>
+    </div>
+  </div>
+
+  <!-- Bottom pill buttons -->
+  <div style="display:flex;justify-content:center;gap:10px;margin-top:28px;padding-bottom:8px;">
+    <button id="adminDashBtn" onclick="showTeacherDashboard({full_name: currentUser?.email})" style="display:none;padding:9px 20px;background:#2d7a4f;color:#fff;border:none;border-radius:30px;font-size:0.82rem;font-weight:700;cursor:pointer;">⚙ Student Access</button>
+    <button onclick="doSignOut()" style="padding:9px 20px;background:transparent;border:1.5px solid #ccc;border-radius:30px;font-size:0.82rem;font-weight:600;color:#888;cursor:pointer;">Sign Out</button>
+  </div>
+
   <div id="adminPanel" style="display:none;margin-top:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
     <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;font-weight:600;">⚙️ Admin — TTS Settings</p>
     <p style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;">Google TTS API Key</p>
@@ -398,6 +408,35 @@
     <button onclick="saveAdminKey()" style="background:var(--navy);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;">Save</button>
     <div id="adminKeyStatus" style="margin-top:8px;font-size:0.83rem;color:var(--muted);"></div>
   </div>
+</div>
+
+<!-- VOCAB FLASHCARDS -->
+<div id="vocabScreen" class="screen content-wrap">
+  <button class="back-link" onclick="showScreen('startScreen')">← Home</button>
+  <h2 style="color:var(--navy);margin:12px 0 4px;">📚 Vocabulary Flashcards</h2>
+  <p style="color:var(--muted);font-size:0.9rem;margin-bottom:24px;">High-frequency TOEFL words with definitions</p>
+
+  <!-- Flashcard -->
+  <div id="vocabCard" onclick="vocabFlip()" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px 32px;text-align:center;cursor:pointer;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:16px;user-select:none;">
+    <div id="vocabWord" style="font-size:2rem;font-weight:800;color:var(--navy);margin-bottom:8px;"></div>
+    <div id="vocabPos" style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;"></div>
+    <div id="vocabDef" style="font-size:1rem;color:var(--text);line-height:1.6;display:none;max-width:480px;"></div>
+    <div id="vocabHint" style="font-size:0.82rem;color:var(--muted);margin-top:12px;">Tap to reveal definition</div>
+  </div>
+
+  <!-- Controls -->
+  <div style="display:flex;gap:12px;justify-content:center;margin-bottom:24px;">
+    <button onclick="vocabNav(-1)" style="padding:10px 24px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;color:var(--text);">← Prev</button>
+    <div id="vocabCounter" style="padding:10px 16px;font-size:0.88rem;color:var(--muted);display:flex;align-items:center;"></div>
+    <button onclick="vocabNav(1)" style="padding:10px 24px;background:var(--navy);border:none;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;color:#fff;">Next →</button>
+  </div>
+
+  <!-- Know / Don't know -->
+  <div style="display:flex;gap:12px;justify-content:center;">
+    <button onclick="vocabMark('known')" style="flex:1;max-width:180px;padding:12px;background:#e8f5ec;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;color:#2a7a4f;">✓ Know it</button>
+    <button onclick="vocabMark('unknown')" style="flex:1;max-width:180px;padding:12px;background:#fde8e8;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;color:#b53b3b;">✗ Still learning</button>
+  </div>
+  <div id="vocabProgress" style="margin-top:20px;font-size:0.85rem;color:var(--muted);text-align:center;"></div>
 </div>
 
 <!-- DETAIL: info + mode + begin -->
@@ -1671,6 +1710,104 @@ async function clearStudentTier(userId) {
 }
 
 // ── END SUPABASE AUTH ──────────────────────────────────────────────────────────
+
+// ── VOCABULARY FLASHCARDS ──────────────────────────────────────────────────────
+const VOCAB_WORDS = [
+  {word:'aberrant',pos:'adj',def:'Departing from an accepted standard; abnormal or deviant.'},
+  {word:'abate',pos:'v',def:'To reduce in amount, degree, or intensity; to lessen.'},
+  {word:'ambiguous',pos:'adj',def:'Open to more than one interpretation; not having one obvious meaning.'},
+  {word:'ameliorate',pos:'v',def:'To make something bad or unsatisfactory better; to improve.'},
+  {word:'anachronism',pos:'n',def:'Something belonging to a period other than the one in which it exists.'},
+  {word:'analogous',pos:'adj',def:'Comparable in certain respects; similar in function but different in origin.'},
+  {word:'antipathy',pos:'n',def:'A deep-seated feeling of dislike; strong aversion.'},
+  {word:'arbitrary',pos:'adj',def:'Based on random choice or personal whim, rather than reason or system.'},
+  {word:'arduous',pos:'adj',def:'Involving or requiring strenuous effort; difficult and tiring.'},
+  {word:'articulate',pos:'adj/v',def:'(adj) Having or showing the ability to speak fluently. (v) To express an idea clearly.'},
+  {word:'assert',pos:'v',def:'To state a fact or belief confidently and forcefully.'},
+  {word:'astute',pos:'adj',def:'Having an ability to accurately assess situations; shrewd.'},
+  {word:'attenuate',pos:'v',def:'To reduce the force, effect, or value of something; to weaken.'},
+  {word:'audacious',pos:'adj',def:'Showing a willingness to take surprisingly bold risks; daring.'},
+  {word:'austere',pos:'adj',def:'Severe or strict in manner; having no comforts or luxuries.'},
+  {word:'banal',pos:'adj',def:'So lacking in originality as to be obvious and boring; trite.'},
+  {word:'benevolent',pos:'adj',def:'Well-meaning and kindly; charitable and generous.'},
+  {word:'bolster',pos:'v',def:'To support or strengthen; to prop up.'},
+  {word:'candid',pos:'adj',def:'Truthful and straightforward; frank.'},
+  {word:'catalyst',pos:'n',def:'A person or thing that precipitates an event or change; an agent of change.'},
+  {word:'caustic',pos:'adj',def:'Sarcastic in a scathing way; capable of burning or corroding.'},
+  {word:'chicanery',pos:'n',def:'The use of trickery to achieve one\'s purpose; deception.'},
+  {word:'circumspect',pos:'adj',def:'Wary and unwilling to take risks; cautious.'},
+  {word:'coalesce',pos:'v',def:'To come together to form one mass or whole; to merge.'},
+  {word:'cogent',pos:'adj',def:'Clear, logical, and convincing; compelling.'},
+  {word:'commensurate',pos:'adj',def:'Corresponding in size or degree; in proportion.'},
+  {word:'compel',pos:'v',def:'To force or oblige someone to do something.'},
+  {word:'concede',pos:'v',def:'To admit that something is true or valid after first denying it.'},
+  {word:'convoluted',pos:'adj',def:'Extremely complex and difficult to follow; intricate.'},
+  {word:'copious',pos:'adj',def:'Abundant in supply or quantity; plentiful.'},
+  {word:'corroborate',pos:'v',def:'To confirm or give support to a statement or theory.'},
+  {word:'credulous',pos:'adj',def:'Having or showing too great a readiness to believe things; gullible.'},
+  {word:'cryptic',pos:'adj',def:'Having a meaning that is mysterious or obscure.'},
+  {word:'curtail',pos:'v',def:'To reduce in extent or quantity; to impose a restriction on.'},
+  {word:'debunk',pos:'v',def:'To expose the falseness or hollowness of a myth or belief.'},
+  {word:'decry',pos:'v',def:'To publicly denounce; to express strong disapproval of.'},
+  {word:'deference',pos:'n',def:'Humble submission and respect toward another.'},
+  {word:'deleterious',pos:'adj',def:'Causing harm or damage; injurious.'},
+  {word:'denounce',pos:'v',def:'To publicly declare to be wrong or evil; to condemn.'},
+  {word:'deplete',pos:'v',def:'To reduce severely in quantity, quality, or force; to exhaust.'},
+  {word:'derivative',pos:'adj',def:'Imitative of the work of another person; not original.'},
+  {word:'desiccate',pos:'v',def:'To remove moisture from; to cause to become completely dry.'},
+  {word:'didactic',pos:'adj',def:'Intended to teach, particularly in a moralistic way.'},
+  {word:'diffuse',pos:'v/adj',def:'(v) To spread over a wide area. (adj) Not concentrated; spread out.'},
+  {word:'digress',pos:'v',def:'To leave the main subject temporarily in speech or writing.'},
+  {word:'discern',pos:'v',def:'To recognize or find out; to perceive with the mind or senses.'},
+  {word:'disparate',pos:'adj',def:'Essentially different in kind; not allowing comparison.'},
+  {word:'dissonance',pos:'n',def:'Lack of harmony; tension or clash between ideas or values.'},
+  {word:'diverge',pos:'v',def:'To develop in a different direction; to depart from a set course.'},
+  {word:'dogmatic',pos:'adj',def:'Inclined to lay down principles as incontrovertibly true; dictatorial.'},
+];
+
+let vocabIndex = 0;
+let vocabFlipped = false;
+let vocabKnown = new Set();
+let vocabUnknown = new Set();
+
+function vocabShow() {
+  const w = VOCAB_WORDS[vocabIndex];
+  vocabFlipped = false;
+  document.getElementById('vocabWord').textContent = w.word;
+  document.getElementById('vocabPos').textContent = w.pos;
+  document.getElementById('vocabDef').style.display = 'none';
+  document.getElementById('vocabHint').style.display = 'block';
+  document.getElementById('vocabHint').textContent = 'Tap to reveal definition';
+  document.getElementById('vocabCounter').textContent = `${vocabIndex + 1} / ${VOCAB_WORDS.length}`;
+  updateVocabProgress();
+}
+
+function vocabFlip() {
+  if (vocabFlipped) return;
+  vocabFlipped = true;
+  const w = VOCAB_WORDS[vocabIndex];
+  document.getElementById('vocabDef').textContent = w.def;
+  document.getElementById('vocabDef').style.display = 'block';
+  document.getElementById('vocabHint').textContent = '← Swipe or use buttons below';
+}
+
+function vocabNav(dir) {
+  vocabIndex = (vocabIndex + dir + VOCAB_WORDS.length) % VOCAB_WORDS.length;
+  vocabShow();
+}
+
+function vocabMark(status) {
+  const word = VOCAB_WORDS[vocabIndex].word;
+  if (status === 'known') { vocabKnown.add(word); vocabUnknown.delete(word); }
+  else { vocabUnknown.add(word); vocabKnown.delete(word); }
+  vocabNav(1);
+}
+
+function updateVocabProgress() {
+  const el = document.getElementById('vocabProgress');
+  if (vocabKnown.size + vocabUnknown.size === 0) { el.textContent = ''; return; }
+  el.textContent = `✓ ${vocabKnown.size} known · ✗ ${vocabUnknown.size} still learning`;
+}
 
 let streak = 0;
 
@@ -3581,6 +3718,11 @@ function showSpeakingResults() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  // Shuffle vocab words
+  for (let i = VOCAB_WORDS.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [VOCAB_WORDS[i], VOCAB_WORDS[j]] = [VOCAB_WORDS[j], VOCAB_WORDS[i]];
+  }
   // Hide app screens until auth resolves
   document.getElementById('topbar').style.display = 'none';
   document.getElementById('progressbar').style.display = 'none';
@@ -3602,11 +3744,13 @@ function showScreen(id) {
   if (el) { el.style.display = ''; el.classList.add('active'); }
   // Show/hide topbar and progressbar based on screen
   const hideTopbar = ['startScreen','detailScreen','introScreen','resultsScreen',
-                      'fullTestTransitionScreen','fullTestResultsScreen'];
+                      'fullTestTransitionScreen','fullTestResultsScreen','vocabScreen'];
   document.getElementById('topbar').style.display =
     hideTopbar.includes(id) ? 'none' : '';
   document.getElementById('progressbar').style.display =
     hideTopbar.includes(id) ? 'none' : '';
+  // Init vocab flashcards when navigating to vocab screen
+  if (id === 'vocabScreen') vocabShow();
 }
 
 </script>
