@@ -414,7 +414,15 @@
 <div id="vocabScreen" class="screen content-wrap">
   <button class="back-link" onclick="showScreen('startScreen')">← Home</button>
   <h2 style="color:var(--navy);margin:12px 0 4px;">📚 Vocabulary Flashcards</h2>
-  <p style="color:var(--muted);font-size:0.9rem;margin-bottom:24px;">High-frequency TOEFL words with definitions</p>
+  <p style="color:var(--muted);font-size:0.9rem;margin-bottom:16px;">High-frequency TOEFL words with definitions</p>
+
+  <!-- Level selector -->
+  <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+    <button onclick="setVocabLevel(0)" id="vocabLvlAll" style="padding:7px 16px;border-radius:20px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-size:0.82rem;font-weight:700;cursor:pointer;">All</button>
+    <button onclick="setVocabLevel(1)" id="vocabLvl1" style="padding:7px 16px;border-radius:20px;border:2px solid #2a7a4f;background:#e8f5ec;color:#2a7a4f;font-size:0.82rem;font-weight:700;cursor:pointer;">Level 1</button>
+    <button onclick="setVocabLevel(2)" id="vocabLvl2" style="padding:7px 16px;border-radius:20px;border:2px solid #b07d00;background:#fff8e6;color:#b07d00;font-size:0.82rem;font-weight:700;cursor:pointer;">Level 2</button>
+    <button onclick="setVocabLevel(3)" id="vocabLvl3" style="padding:7px 16px;border-radius:20px;border:2px solid #b53b3b;background:#fde8e8;color:#b53b3b;font-size:0.82rem;font-weight:700;cursor:pointer;">Level 3</button>
+  </div>
 
   <!-- Flashcard -->
   <div id="vocabCard" onclick="vocabFlip()" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px 32px;text-align:center;cursor:pointer;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:16px;user-select:none;">
@@ -1769,35 +1777,79 @@ let vocabIndex = 0;
 let vocabFlipped = false;
 let vocabKnown = new Set();
 let vocabUnknown = new Set();
+let vocabLevel = 0; // 0=all, 1/2/3=filtered
+let vocabActive = []; // current filtered+shuffled list
+
+function getVocabActive() {
+  if (vocabLevel === 0) return VOCAB_WORDS;
+  return VOCAB_WORDS.filter(w => w.level === vocabLevel);
+}
+
+function setVocabLevel(level) {
+  vocabLevel = level;
+  vocabIndex = 0;
+  vocabKnown = new Set();
+  vocabUnknown = new Set();
+  // Update button styles
+  const btns = {0:'vocabLvlAll',1:'vocabLvl1',2:'vocabLvl2',3:'vocabLvl3'};
+  const colors = {0:['var(--navy)','#fff'],1:['#2a7a4f','#e8f5ec'],2:['#b07d00','#fff8e6'],3:['#b53b3b','#fde8e8']};
+  Object.entries(btns).forEach(([k,id]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const [border, bg] = colors[k];
+    if (parseInt(k) === level) {
+      el.style.background = border;
+      el.style.color = '#fff';
+      el.style.borderColor = border;
+    } else {
+      el.style.background = colors[k][1];
+      el.style.color = colors[k][0];
+      el.style.borderColor = colors[k][0];
+    }
+  });
+  vocabShow();
+}
 
 function vocabShow() {
-  const w = VOCAB_WORDS[vocabIndex];
+  const list = getVocabActive();
+  if (list.length === 0) {
+    document.getElementById('vocabWord').textContent = 'No words';
+    document.getElementById('vocabPos').textContent = '';
+    document.getElementById('vocabDef').style.display = 'none';
+    document.getElementById('vocabHint').textContent = 'Words load after first visit';
+    document.getElementById('vocabCounter').textContent = '0 / 0';
+    return;
+  }
+  const w = list[vocabIndex % list.length];
   vocabFlipped = false;
   document.getElementById('vocabWord').textContent = w.word;
-  document.getElementById('vocabPos').textContent = w.pos;
+  document.getElementById('vocabPos').textContent = w.pos || '';
   document.getElementById('vocabDef').style.display = 'none';
   document.getElementById('vocabHint').style.display = 'block';
   document.getElementById('vocabHint').textContent = 'Tap to reveal definition';
-  document.getElementById('vocabCounter').textContent = `${vocabIndex + 1} / ${VOCAB_WORDS.length}`;
+  document.getElementById('vocabCounter').textContent = `${(vocabIndex % list.length) + 1} / ${list.length}`;
   updateVocabProgress();
 }
 
 function vocabFlip() {
   if (vocabFlipped) return;
   vocabFlipped = true;
-  const w = VOCAB_WORDS[vocabIndex];
+  const list = getVocabActive();
+  const w = list[vocabIndex % list.length];
   document.getElementById('vocabDef').textContent = w.def;
   document.getElementById('vocabDef').style.display = 'block';
   document.getElementById('vocabHint').textContent = '← Swipe or use buttons below';
 }
 
 function vocabNav(dir) {
-  vocabIndex = (vocabIndex + dir + VOCAB_WORDS.length) % VOCAB_WORDS.length;
+  const list = getVocabActive();
+  vocabIndex = (vocabIndex + dir + list.length) % list.length;
   vocabShow();
 }
 
 function vocabMark(status) {
-  const word = VOCAB_WORDS[vocabIndex].word;
+  const list = getVocabActive();
+  const word = list[vocabIndex % list.length].word;
   if (status === 'known') { vocabKnown.add(word); vocabUnknown.delete(word); }
   else { vocabUnknown.add(word); vocabKnown.delete(word); }
   vocabNav(1);
@@ -3724,20 +3776,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
   async function loadVocabWords() {
     try {
-      // Use JSONP-style gviz endpoint — avoids CORS issues
-      const jsonpUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-      const res = await fetch(jsonpUrl);
-      if (!res.ok) throw new Error('Sheet fetch failed');
-      const raw = await res.text();
-      // Google wraps the JSON in: google.visualization.Query.setResponse({...});
-      const jsonStr = raw.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
-      const data = JSON.parse(jsonStr);
-      const rows = data.table.rows;
-      const parsed = rows.map(r => ({
-        word: r.c[0]?.v || '',
-        def:  r.c[1]?.v || '',
-        pos:  r.c[2]?.v || ''
-      })).filter(r => r.word && r.def);
+      // export?format=csv fetches the entire sheet with no row limit
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+      const res = await fetch(csvUrl);
+      if (!res.ok) throw new Error('Sheet fetch failed: ' + res.status);
+      const text = await res.text();
+      const lines = text.trim().split('\n');
+      // Skip header if first cell is "word" (case-insensitive)
+      const startIdx = lines[0].toLowerCase().replace(/"/g,'').startsWith('word') ? 1 : 0;
+      const parsed = [];
+      for (let i = startIdx; i < lines.length; i++) {
+        const cols = lines[i].match(/("(?:[^"]|"")*"|[^,]*)/g) || [];
+        const clean = cols.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+        if (clean[0] && clean[1]) parsed.push({ word: clean[0], def: clean[1], pos: '', level: parseInt(clean[2]) || 0 });
+      }
       if (parsed.length > 0) {
         VOCAB_WORDS = parsed;
         console.log(`Loaded ${parsed.length} vocab words from Google Sheets.`);
