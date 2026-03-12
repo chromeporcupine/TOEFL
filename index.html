@@ -1230,21 +1230,36 @@ const TRANSITION_MSGS = {
 // ── SUPABASE AUTH ─────────────────────────────────────────────────────────────
 
 // Called on page load — check for existing session
+let isPasswordRecovery = false;
+
 async function initAuth() {
+  // Check URL for recovery token before anything else
+  const hash = window.location.hash;
+  const search = window.location.search;
+  if (hash.includes('type=recovery') || search.includes('type=recovery')) {
+    isPasswordRecovery = true;
+  }
+
   const { data: { session } } = await supa.auth.getSession();
   if (session) {
-    await onSignedIn(session.user);
+    if (isPasswordRecovery) {
+      showSetPasswordScreen();
+    } else {
+      await onSignedIn(session.user);
+    }
   } else {
     showAuthScreen();
   }
+
   supa.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
+      isPasswordRecovery = true;
       showSetPasswordScreen();
     } else if (event === 'SIGNED_IN' && session) {
-      // Don't redirect if we're in password recovery flow
-      if (window.location.hash.includes('type=recovery')) return;
+      if (isPasswordRecovery) return;
       await onSignedIn(session.user);
     } else if (event === 'SIGNED_OUT') {
+      isPasswordRecovery = false;
       showAuthScreen();
     }
   });
@@ -1296,6 +1311,7 @@ async function doSetNewPassword() {
   } else {
     msg.textContent = '✅ Password updated! Signing you in...';
     msg.style.background = '#e8f5ec'; msg.style.color = '#2a7a4f';
+    isPasswordRecovery = false;
     setTimeout(() => {
       document.getElementById('setPasswordScreen').style.display = 'none';
     }, 1500);
