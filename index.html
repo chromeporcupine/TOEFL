@@ -2294,7 +2294,7 @@ function stopSpeech() {
 // TTS_PROXY_URL: set this to your Cloudflare Worker URL after deploying tts-worker.js
 // e.g. 'https://tts-proxy.YOUR-SUBDOMAIN.workers.dev'
 // Leave empty to call Google TTS directly (requires CORS to be open)
-const TTS_PROXY_URL = window._ttsPROXY || 'https://yulzari.net/tts-proxy';
+const TTS_PROXY_URL = window._ttsPROXY || '';
 
 async function fetchTTSAudio(text, voiceKey) {
   const key   = window._runtimeTTSKey || GOOGLE_TTS_KEY;
