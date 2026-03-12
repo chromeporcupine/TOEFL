@@ -1712,7 +1712,7 @@ async function clearStudentTier(userId) {
 // ── END SUPABASE AUTH ──────────────────────────────────────────────────────────
 
 // ── VOCABULARY FLASHCARDS ──────────────────────────────────────────────────────
-const VOCAB_WORDS = [
+let VOCAB_WORDS = [
   {word:'aberrant',pos:'adj',def:'Departing from an accepted standard; abnormal or deviant.'},
   {word:'abate',pos:'v',def:'To reduce in amount, degree, or intensity; to lessen.'},
   {word:'ambiguous',pos:'adj',def:'Open to more than one interpretation; not having one obvious meaning.'},
@@ -3718,11 +3718,40 @@ function showSpeakingResults() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // Shuffle vocab words
-  for (let i = VOCAB_WORDS.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [VOCAB_WORDS[i], VOCAB_WORDS[j]] = [VOCAB_WORDS[j], VOCAB_WORDS[i]];
+  // Load vocab from Google Sheets, then shuffle
+  const SHEET_ID = '1P5pO4Li_vgx-jtBP9J-2a6qIRG76VZlAAfeXRX0S1lc';
+  const SHEET_NAME = 'Sheet1';
+
+  async function loadVocabWords() {
+    try {
+      // Use JSONP-style gviz endpoint — avoids CORS issues
+      const jsonpUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+      const res = await fetch(jsonpUrl);
+      if (!res.ok) throw new Error('Sheet fetch failed');
+      const raw = await res.text();
+      // Google wraps the JSON in: google.visualization.Query.setResponse({...});
+      const jsonStr = raw.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
+      const data = JSON.parse(jsonStr);
+      const rows = data.table.rows;
+      const parsed = rows.map(r => ({
+        word: r.c[0]?.v || '',
+        def:  r.c[1]?.v || '',
+        pos:  r.c[2]?.v || ''
+      })).filter(r => r.word && r.def);
+      if (parsed.length > 0) {
+        VOCAB_WORDS = parsed;
+        console.log(`Loaded ${parsed.length} vocab words from Google Sheets.`);
+      }
+    } catch (e) {
+      console.warn('Could not load vocab from Google Sheets, using built-in list.', e);
+    }
+    // Shuffle
+    for (let i = VOCAB_WORDS.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [VOCAB_WORDS[i], VOCAB_WORDS[j]] = [VOCAB_WORDS[j], VOCAB_WORDS[i]];
+    }
   }
+  loadVocabWords();
   // Hide app screens until auth resolves
   document.getElementById('topbar').style.display = 'none';
   document.getElementById('progressbar').style.display = 'none';
