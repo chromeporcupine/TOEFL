@@ -2795,9 +2795,9 @@ Feedback: [your feedback]`;
   }
 
   try {
-    const GEMINI_KEY = 'AIzaSyDY-Fj9DU4fm_xD-3kfOOHMMmHaK1nc3dU';
+    
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      `https://gemini-proxy.avi-yulzari.workers.dev/`,
       { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
     );
@@ -3611,9 +3611,9 @@ Format exactly:
 Band: [1-5]
 Feedback: [your feedback]`;
     try {
-      const GEMINI_KEY = 'AIzaSyDY-Fj9DU4fm_xD-3kfOOHMMmHaK1nc3dU';
+      
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+        `https://gemini-proxy.avi-yulzari.workers.dev/`,
         { method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
       );
