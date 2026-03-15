@@ -359,9 +359,9 @@
     <div class="full-test-card-sub">Reading · Listening · Writing · Speaking · ~85 min</div>
   </div>
   <!-- Test selector -->
-  <div style="margin-bottom:16px;">
+  <div style="margin-bottom:16px;overflow:hidden;">
     <span style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;display:block;margin-bottom:8px;">Test</span>
-    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;width:100%;">
       <button id="testBtn1" onclick="selectTest(0)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 1</button>
       <button id="testBtn2" onclick="selectTest(1)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 2</button>
       <button id="testBtn3" onclick="selectTest(2)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 3</button>
@@ -404,8 +404,9 @@
   </div>
 
   <!-- Bottom pill buttons -->
-  <div style="display:flex;justify-content:center;gap:10px;margin-top:28px;padding-bottom:8px;">
-    <button id="adminDashBtn" onclick="showTeacherDashboard({full_name: currentUser?.email})" style="display:none;padding:9px 20px;background:#2d7a4f;color:#fff;border:none;border-radius:30px;font-size:0.82rem;font-weight:700;cursor:pointer;">⚙ Student Access</button>
+  <div style="display:flex;justify-content:center;gap:10px;margin-top:28px;padding-bottom:8px;flex-wrap:wrap;">
+    <button id="adminDashBtn" onclick="showTeacherDashboard({full_name: currentUser?.email})" style="display:none;padding:9px 20px;background:#2d7a4f;color:#fff;border:none;border-radius:30px;font-size:0.82rem;font-weight:700;cursor:pointer;">👩‍🏫 Student Access</button>
+    <button onclick="adminTap(); adminTap(); adminTap(); adminTap(); adminTap();" style="padding:9px 20px;background:transparent;border:1.5px solid #ccc;border-radius:30px;font-size:0.82rem;font-weight:600;color:#888;cursor:pointer;">⚙ Settings</button>
     <button onclick="doSignOut()" style="padding:9px 20px;background:transparent;border:1.5px solid #ccc;border-radius:30px;font-size:0.82rem;font-weight:600;color:#888;cursor:pointer;">Sign Out</button>
   </div>
 
