@@ -3697,6 +3697,7 @@ const TRANSITION_MSGS = {
 
 // Called on page load — check for existing session
 let isPasswordRecovery = false;
+let isInvite = false;
 
 async function initAuth() {
   // Check URL for recovery token before anything else
@@ -3705,11 +3706,14 @@ async function initAuth() {
   if (hash.includes('type=recovery') || search.includes('type=recovery')) {
     isPasswordRecovery = true;
   }
+  if (hash.includes('type=invite') || search.includes('type=invite')) {
+    isInvite = true;
+  }
 
   const { data: { session } } = await supa.auth.getSession();
   if (session) {
-    if (isPasswordRecovery) {
-      showSetPasswordScreen();
+    if (isPasswordRecovery || isInvite) {
+      showSetPasswordScreen(isInvite);
     } else {
       await onSignedIn(session.user);
     }
@@ -3723,39 +3727,44 @@ async function initAuth() {
       showSetPasswordScreen();
     } else if (event === 'SIGNED_IN' && session) {
       if (isPasswordRecovery) return;
+      if (isInvite) { showSetPasswordScreen(true); return; }
       await onSignedIn(session.user);
     } else if (event === 'SIGNED_OUT') {
       isPasswordRecovery = false;
+      isInvite = false;
       showAuthScreen();
     }
   });
 }
 
-function showSetPasswordScreen() {
+function showSetPasswordScreen(forInvite = false) {
   // Hide everything else
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('teacherScreen').style.display = 'none';
 
   let el = document.getElementById('setPasswordScreen');
+  const title = forInvite ? 'Welcome! Set Your Password' : 'Set New Password';
+  const subtitle = forInvite ? 'Choose a password to activate your account.' : 'Enter your new password below.';
+  const btnText = forInvite ? 'Set Password & Continue' : 'Update Password';
   if (!el) {
     el = document.createElement('div');
     el.id = 'setPasswordScreen';
     el.style.cssText = 'display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:24px;box-sizing:border-box;';
-    el.innerHTML = `
-      <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.1);">
-        <h2 style="margin:0 0 6px;color:#1a1a3e;font-size:1.3rem;">Set New Password</h2>
-        <p style="margin:0 0 20px;color:#888;font-size:0.88rem;">Enter your new password below.</p>
-        <input id="newPasswordInput" type="password" placeholder="New password" autocomplete="new-password"
-          style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid #dde0f0;border-radius:8px;font-size:0.95rem;margin-bottom:12px;outline:none;"
-          onkeydown="if(event.key==='Enter')doSetNewPassword()">
-        <button onclick="doSetNewPassword()"
-          style="width:100%;padding:12px;background:#9196ff;color:#fff;border:none;border-radius:8px;font-size:0.95rem;font-weight:700;cursor:pointer;">
-          Update Password
-        </button>
-        <div id="setPasswordMsg" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:0.85rem;text-align:center;"></div>
-      </div>`;
     document.body.appendChild(el);
   }
+  el.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.1);">
+      <h2 style="margin:0 0 6px;color:#1a1a3e;font-size:1.3rem;">${title}</h2>
+      <p style="margin:0 0 20px;color:#888;font-size:0.88rem;">${subtitle}</p>
+      <input id="newPasswordInput" type="password" placeholder="New password" autocomplete="new-password"
+        style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid #dde0f0;border-radius:8px;font-size:0.95rem;margin-bottom:12px;outline:none;"
+        onkeydown="if(event.key==='Enter')doSetNewPassword()">
+      <button onclick="doSetNewPassword()"
+        style="width:100%;padding:12px;background:#9196ff;color:#fff;border:none;border-radius:8px;font-size:0.95rem;font-weight:700;cursor:pointer;">
+        ${btnText}
+      </button>
+      <div id="setPasswordMsg" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:0.85rem;text-align:center;"></div>
+    </div>`;
   el.style.display = 'flex';
 }
 
@@ -3778,8 +3787,11 @@ async function doSetNewPassword() {
     msg.textContent = '✅ Password updated! Signing you in...';
     msg.style.background = '#e8f5ec'; msg.style.color = '#2a7a4f';
     isPasswordRecovery = false;
-    setTimeout(() => {
+    isInvite = false;
+    setTimeout(async () => {
       document.getElementById('setPasswordScreen').style.display = 'none';
+      const { data: { user } } = await supa.auth.getUser();
+      if (user) await onSignedIn(user);
     }, 1500);
   }
   msg.style.display = 'block';
