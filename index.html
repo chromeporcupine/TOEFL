@@ -353,21 +353,22 @@
 <div id="startScreen" class="screen active content-wrap">
   <h1 id="homeTitle" onclick="adminTap()" style="cursor:default;user-select:none;margin:0 0 8px;">TOEFL iBT® Practice</h1>
   <p class="subtitle">Select a section to practise, or take a full test</p>
+  <p id="roleIndicator" style="font-size:0.72rem;color:var(--muted);margin:-20px 0 20px;opacity:0.6;"></p>
   <div class="full-test-card" onclick="startFullTest()">
     <div class="full-test-card-icon">🏆</div>
     <div class="full-test-card-title">Full Test</div>
     <div class="full-test-card-sub">Reading · Listening · Writing · Speaking · ~85 min</div>
   </div>
   <!-- Test selector -->
-  <div style="margin-bottom:16px;overflow:hidden;">
+  <div style="margin-bottom:16px;">
     <span style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;display:block;margin-bottom:8px;">Test</span>
-    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;width:100%;">
-      <button id="testBtn1" onclick="selectTest(0)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 1</button>
-      <button id="testBtn2" onclick="selectTest(1)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 2</button>
-      <button id="testBtn3" onclick="selectTest(2)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 3</button>
-      <button id="testBtn4" onclick="selectTest(3)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 4</button>
-      <button id="testBtn5" onclick="selectTest(4)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 5</button>
-      <button id="testBtn6" onclick="selectTest(5)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 6</button>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      <button id="testBtn1" onclick="selectTest(0)" style="padding:6px 8px;border-radius:20px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-size:0.82rem;font-weight:700;cursor:pointer;">Test 1</button>
+      <button id="testBtn2" onclick="selectTest(1)" style="padding:6px 8px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 2</button>
+      <button id="testBtn3" onclick="selectTest(2)" style="padding:6px 8px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 3</button>
+      <button id="testBtn4" onclick="selectTest(3)" style="padding:6px 8px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 4</button>
+      <button id="testBtn5" onclick="selectTest(4)" style="padding:6px 8px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 5</button>
+      <button id="testBtn6" onclick="selectTest(5)" style="padding:6px 8px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 6</button>
     </div>
   </div>
   <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;font-weight:600;">Section Practice</p>
@@ -406,21 +407,10 @@
   <!-- Bottom pill buttons -->
   <div style="display:flex;justify-content:center;gap:10px;margin-top:28px;padding-bottom:8px;flex-wrap:wrap;">
     <button id="adminDashBtn" onclick="showTeacherDashboard({full_name: currentUser?.email})" style="display:none;padding:9px 20px;background:#2d7a4f;color:#fff;border:none;border-radius:30px;font-size:0.82rem;font-weight:700;cursor:pointer;">👩‍🏫 Student Access</button>
-    <button onclick="adminTap(); adminTap(); adminTap(); adminTap(); adminTap();" style="padding:9px 20px;background:transparent;border:1.5px solid #ccc;border-radius:30px;font-size:0.82rem;font-weight:600;color:#888;cursor:pointer;">⚙ Settings</button>
     <button onclick="doSignOut()" style="padding:9px 20px;background:transparent;border:1.5px solid #ccc;border-radius:30px;font-size:0.82rem;font-weight:600;color:#888;cursor:pointer;">Sign Out</button>
   </div>
 
-  <div id="adminPanel" style="display:none;margin-top:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
-    <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;font-weight:600;">⚙️ Admin — TTS Settings</p>
-    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;">Google TTS API Key</p>
-    <input id="adminKeyInput" type="password" placeholder="AIza..." autocomplete="off"
-      style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.9rem;font-family:monospace;background:#f9f9f7;margin-bottom:10px;">
-    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;">Worker Proxy URL <span style="font-weight:400;opacity:0.7;">(paste your Cloudflare Worker URL)</span></p>
-    <input id="adminProxyInput" type="text" placeholder="https://tts-proxy.xxx.workers.dev" autocomplete="off"
-      style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.88rem;font-family:monospace;background:#f9f9f7;margin-bottom:10px;">
-    <button onclick="saveAdminKey()" style="background:var(--navy);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;">Save</button>
-    <div id="adminKeyStatus" style="margin-top:8px;font-size:0.83rem;color:var(--muted);"></div>
-  </div>
+
 </div>
 
 <!-- VOCAB FLASHCARDS -->
@@ -600,8 +590,7 @@ function adminTap() {
   _adminTimer = setTimeout(() => { _adminTaps = 0; }, 2000);
   if (_adminTaps >= 5) {
     _adminTaps = 0;
-    const panel = document.getElementById('adminPanel');
-    panel.style.display = panel.style.display === 'none' ? '' : 'none';
+    showTeacherDashboard({ full_name: currentUser?.email });
   }
 }
 function saveAdminKey() {
@@ -3855,9 +3844,12 @@ function showAuthScreen() {
 function showApp() {
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('teacherScreen').style.display = 'none';
+  // Show role indicator
+  const roleEl = document.getElementById('roleIndicator');
+  if (roleEl) roleEl.textContent = `Logged in as: ${currentUser?.email} · role: ${currentRole || 'student'}`;
   // Show admin button for teachers
   const adminBtn = document.getElementById('adminDashBtn');
-  if (adminBtn) adminBtn.style.display = currentRole === 'teacher' ? 'block' : 'none';
+  if (adminBtn) adminBtn.style.display = currentRole === 'teacher' ? 'inline-block' : 'none';
   // Add sign-out button to topbar
   addSignOutToTopbar();
   showScreen('startScreen');
@@ -3865,12 +3857,21 @@ function showApp() {
 
 function addSignOutToTopbar() {
   if (document.getElementById('signOutBtn')) return;
+  const container = document.getElementById('topbar');
+  if (currentRole === 'teacher') {
+    const dashBtn = document.createElement('button');
+    dashBtn.id = 'topbarDashBtn';
+    dashBtn.textContent = '👩‍🏫 Dashboard';
+    dashBtn.onclick = () => showTeacherDashboard({ full_name: currentUser?.email });
+    dashBtn.style.cssText = 'padding:5px 12px;background:#2d7a4f;border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;font-weight:700;margin-right:6px;';
+    container.appendChild(dashBtn);
+  }
   const btn = document.createElement('button');
   btn.id = 'signOutBtn';
   btn.textContent = 'Sign Out';
   btn.onclick = doSignOut;
   btn.style.cssText = 'padding:5px 12px;background:transparent;border:1px solid rgba(255,255,255,0.4);border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;font-weight:600;';
-  document.getElementById('topbar').appendChild(btn);
+  container.appendChild(btn);
 }
 
 async function doLogin() {
@@ -3957,7 +3958,7 @@ async function showTeacherDashboard(profile) {
   document.getElementById('teacherScreen').style.display = 'block';
   document.getElementById('teacherWelcome').textContent =
     profile?.full_name || currentUser.email;
-
+  addSignOutToTopbar();
   await Promise.all([loadAccessTab(), loadResultsTab()]);
 }
 
