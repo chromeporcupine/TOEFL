@@ -359,19 +359,19 @@
     <div class="full-test-card-sub">Reading · Listening · Writing · Speaking · ~85 min</div>
   </div>
   <!-- Test selector -->
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-    <span style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;">Test</span>
-    <div style="display:flex;gap:8px;">
-      <button id="testBtn1" onclick="selectTest(0)" style="padding:6px 18px;border-radius:20px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-size:0.82rem;font-weight:700;cursor:pointer;">Test 1</button>
-      <button id="testBtn2" onclick="selectTest(1)" style="padding:6px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 2</button>
-      <button id="testBtn3" onclick="selectTest(2)" style="padding:6px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 3</button>
-      <button id="testBtn4" onclick="selectTest(3)" style="padding:6px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 4</button>
-      <button id="testBtn5" onclick="selectTest(4)" style="padding:6px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 5</button>
-      <button id="testBtn6" onclick="selectTest(5)" style="padding:6px 18px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;">Test 6</button>
+  <div style="margin-bottom:16px;">
+    <span style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;display:block;margin-bottom:8px;">Test</span>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+      <button id="testBtn1" onclick="selectTest(0)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 1</button>
+      <button id="testBtn2" onclick="selectTest(1)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 2</button>
+      <button id="testBtn3" onclick="selectTest(2)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 3</button>
+      <button id="testBtn4" onclick="selectTest(3)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 4</button>
+      <button id="testBtn5" onclick="selectTest(4)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 5</button>
+      <button id="testBtn6" onclick="selectTest(5)" style="padding:6px 16px;border-radius:20px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Test 6</button>
     </div>
   </div>
   <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;font-weight:600;">Section Practice</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:0px;">
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:0px;">
     <div class="section-card" onclick="goToDetail('reading')" style="border-top:4px solid #9196ff;">
       <div class="section-card-icon">📖</div>
       <div class="section-card-title">Reading</div>
