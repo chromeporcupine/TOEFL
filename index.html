@@ -3967,6 +3967,7 @@ function switchTeacherTab(tab) {
 // Teacher dashboard
 async function showTeacherDashboard(profile) {
   document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'none';
   document.getElementById('teacherScreen').style.display = 'block';
   document.getElementById('teacherWelcome').textContent =
     profile?.full_name || currentUser.email;
