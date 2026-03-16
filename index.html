@@ -307,6 +307,16 @@
         <button onclick="sendInvite()" style="padding:11px 28px;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-size:0.93rem;font-weight:700;cursor:pointer;white-space:nowrap;">Send Invite</button>
       </div>
       <div id="inviteMsg" style="display:none;margin-top:12px;font-size:0.85rem;padding:8px 12px;border-radius:6px;"></div>
+      <!-- Service key prompt (shown only when needed) -->
+      <div id="serviceKeyBox" style="display:none;margin-top:16px;padding:16px;background:#f7f9f7;border-radius:8px;border:1px solid #d8e0d8;">
+        <p style="margin:0 0 10px;font-size:0.82rem;color:#555;">🔑 To send invite emails, enter your Supabase <strong>service_role</strong> key once. It stays in memory only — never saved or sent anywhere.</p>
+        <div style="display:flex;gap:8px;">
+          <input id="serviceKeyInput" type="password" placeholder="eyJhbGci..."
+            style="flex:1;padding:9px 12px;border:1px solid #d8e0d8;border-radius:6px;font-size:0.82rem;font-family:monospace;outline:none;"
+            onkeydown="if(event.key==='Enter')saveServiceKey()">
+          <button onclick="saveServiceKey()" style="padding:9px 18px;background:#2d7a4f;color:#fff;border:none;border-radius:6px;font-size:0.82rem;font-weight:700;cursor:pointer;">Save for session</button>
+        </div>
+      </div>
     </div>
 
     <!-- Student table -->
@@ -342,7 +352,7 @@
   <div class="logo">TOEFL iBT®</div>
   <div class="section-label" id="topbarSectionLabel">Reading Section</div>
   <div style="display:flex;align-items:center;gap:10px;">
-    <div id="timerDisplay" class="timer">36:00</div>
+    <div id="timerDisplay" class="timer">15:00</div>
     <button id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
   </div>
 </div>
@@ -354,10 +364,26 @@
   <h1 id="homeTitle" onclick="adminTap()" style="cursor:default;user-select:none;margin:0 0 8px;">TOEFL iBT® Practice</h1>
   <p class="subtitle">Select a section to practise, or take a full test</p>
   <p id="roleIndicator" style="font-size:0.72rem;color:var(--muted);margin:-20px 0 20px;opacity:0.6;"></p>
+
+  <!-- Resume banner — shown when an incomplete session exists -->
+  <div id="resumeBanner" style="display:none;background:#fff;border-radius:12px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.08);border-left:4px solid #2d7a4f;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2d7a4f;margin-bottom:3px;">▶ Resume Session</div>
+        <div id="resumeDesc" style="font-size:0.9rem;font-weight:600;color:#1a1a3e;"></div>
+        <div id="resumeSub" style="font-size:0.78rem;color:#888;margin-top:2px;"></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="resumeSession()" style="padding:8px 20px;background:#2d7a4f;color:#fff;border:none;border-radius:20px;font-size:0.82rem;font-weight:700;cursor:pointer;">Continue</button>
+        <button onclick="discardSession()" style="padding:8px 14px;background:transparent;border:1.5px solid #ddd;border-radius:20px;font-size:0.82rem;color:#888;cursor:pointer;">Discard</button>
+      </div>
+    </div>
+  </div>
+
   <div class="full-test-card" onclick="startFullTest()">
     <div class="full-test-card-icon">🏆</div>
     <div class="full-test-card-title">Full Test</div>
-    <div class="full-test-card-sub">Reading · Listening · Writing · Speaking · ~85 min</div>
+    <div class="full-test-card-sub">Reading · Listening · Writing · Speaking · ~90 min</div>
   </div>
   <!-- Test selector -->
   <div style="margin-bottom:16px;">
@@ -386,12 +412,12 @@
     <div class="section-card" onclick="goToDetail('writing')" style="border-top:4px solid #ff8f60;">
       <div class="section-card-icon">✍️</div>
       <div class="section-card-title">Writing</div>
-      <div class="section-card-sub">12 questions · 30 min</div>
+      <div class="section-card-sub">12 questions · 23 min</div>
     </div>
     <div class="section-card" onclick="goToDetail('speaking')" style="border-top:4px solid #9196ff;">
       <div class="section-card-icon">🎤</div>
       <div class="section-card-title">Speaking</div>
-      <div class="section-card-sub">11 questions · 20 min</div>
+      <div class="section-card-sub">11 questions · 8 min</div>
     </div>
   </div>
 
@@ -477,7 +503,7 @@
 <!-- INTRO -->
 <div id="introScreen" class="screen content-wrap">
   <h2 id="introTitle">Module 1</h2>
-  <p id="introDesc">Answer all questions. You have 36 minutes.</p>
+  <p id="introDesc">Answer all questions. You have 15 minutes.</p>
   <button class="btn" onclick="startModule()">Start Module</button>
 </div>
 
@@ -3697,6 +3723,7 @@ const TRANSITION_MSGS = {
 
 // Called on page load — check for existing session
 let isPasswordRecovery = false;
+let _serviceKey = null; // set at runtime by teacher, never hardcoded
 let isInvite = false;
 
 async function initAuth() {
@@ -3865,6 +3892,8 @@ function showApp() {
   // Add sign-out button to topbar
   addSignOutToTopbar();
   showScreen('startScreen');
+  // Check for incomplete session
+  loadPendingSession();
 }
 
 function addSignOutToTopbar() {
@@ -4032,6 +4061,16 @@ function renderAccessTable(profiles) {
   }).join('');
 }
 
+function saveServiceKey() {
+  const val = document.getElementById('serviceKeyInput').value.trim();
+  if (!val) return;
+  _serviceKey = val;
+  document.getElementById('serviceKeyInput').value = '';
+  document.getElementById('serviceKeyBox').style.display = 'none';
+  const msg = document.getElementById('inviteMsg');
+  showMsg(msg, '✅ Service key saved for this session. Try sending the invite again.', 'success');
+}
+
 async function sendInvite() {
   const email  = document.getElementById('inviteEmail').value.trim();
   const days   = parseInt(document.getElementById('invitePeriod').value);
@@ -4041,18 +4080,62 @@ async function sendInvite() {
 
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + days);
+  const expiryStr = expiry.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
 
   // Check if user already exists in profiles
-  const { data: existing } = await supa.from('profiles').select('id').eq('email', email).single();
+  const { data: existing } = await supa.from('profiles').select('id').eq('email', email).maybeSingle();
 
   if (existing) {
+    // Existing user — just update their expiry
     const { error } = await supa.from('profiles').update({ expires_at: expiry.toISOString() }).eq('id', existing.id);
     if (error) { showMsg(msg, '❌ ' + error.message, 'error'); return; }
-    showMsg(msg, `✅ Access updated for ${email} — expires ${expiry.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}.`, 'success');
+    showMsg(msg, `✅ Access updated for ${email} — expires ${expiryStr}.`, 'success');
     document.getElementById('inviteEmail').value = '';
     await loadAccessTab();
-  } else {
-    showMsg(msg, `⚠️ No account found for ${email}. Ask the student to register first, then set their access here.`, 'warn');
+    return;
+  }
+
+  // New user — need service key to send invite email
+  if (!_serviceKey) {
+    document.getElementById('serviceKeyBox').style.display = 'block';
+    showMsg(msg, '🔑 Service key needed to send invite emails. Enter it below.', 'warn');
+    return;
+  }
+
+  // Send Supabase invite via admin API
+  showMsg(msg, '⏳ Sending invite…', 'info');
+  try {
+    const res = await fetch(`https://bpvwjcbtuesmipkdrovw.supabase.co/auth/v1/admin/invite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': _serviceKey,
+        'Authorization': 'Bearer ' + _serviceKey
+      },
+      body: JSON.stringify({ email })
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      showMsg(msg, '❌ Invite failed: ' + (result.msg || result.message || JSON.stringify(result)), 'error');
+      return;
+    }
+
+    // Store pending access — will be claimed when student logs in
+    const userId = result.id;
+    if (userId) {
+      await supa.from('profiles').upsert({
+        id: userId,
+        email,
+        role: 'student',
+        expires_at: expiry.toISOString()
+      }, { onConflict: 'id' });
+    }
+
+    showMsg(msg, `✅ Invite sent to ${email} — access set until ${expiryStr}.`, 'success');
+    document.getElementById('inviteEmail').value = '';
+    await loadAccessTab();
+  } catch(e) {
+    showMsg(msg, '❌ ' + e.message, 'error');
   }
 }
 
@@ -4093,10 +4176,10 @@ async function revokeStudent(userId) {
 }
 
 function showMsg(el, text, type) {
-  const colors = { success:{bg:'#e8f5ec',color:'#2d7a4f'}, error:{bg:'#fde8e8',color:'#b53b3b'}, warn:{bg:'#fff8e1',color:'#8a6000'} };
+  const colors = { success:{bg:'#e8f5ec',color:'#2d7a4f'}, error:{bg:'#fde8e8',color:'#b53b3b'}, warn:{bg:'#fff8e1',color:'#8a6000'}, info:{bg:'#e8f0fe',color:'#1a4bbd'} };
   const c = colors[type] || colors.success;
   el.textContent = text; el.style.background = c.bg; el.style.color = c.color; el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 5000);
+  if (type === 'success' || type === 'error') setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 
 async function loadResultsTab() {
@@ -4356,10 +4439,10 @@ function selectTest(idx) {
 }
 
 const SECTION_META = {
-  reading:   { icon:'📖', title:'Reading',   sub:'2 Adaptive Modules · 36 min each', adaptive:true,
-    info:[{h:'Format',p:'2 Modules, Adaptive'},{h:'Questions',p:'~26 per module'},{h:'Time',p:'36 min per module'},{h:'Tasks',p:'CTW · Emails · Academic'}] },
-  listening: { icon:'🎧', title:'Listening',  sub:'2 Adaptive Modules · 20 min each', adaptive:true,
-    info:[{h:'Format',p:'2 Modules, Adaptive'},{h:'Questions',p:'~14 per module'},{h:'Time',p:'20 min per module'},{h:'Tasks',p:'Choose · Conversation · Lecture'}] },
+  reading:   { icon:'📖', title:'Reading',   sub:'2 Adaptive Modules · 15 min each', adaptive:true,
+    info:[{h:'Format',p:'2 Modules, Adaptive'},{h:'Questions',p:'~26 per module'},{h:'Time',p:'15 min per module'},{h:'Tasks',p:'CTW · Emails · Academic'}] },
+  listening: { icon:'🎧', title:'Listening',  sub:'2 Adaptive Modules · 15 min each', adaptive:true,
+    info:[{h:'Format',p:'2 Modules, Adaptive'},{h:'Questions',p:'~14 per module'},{h:'Time',p:'15 min per module'},{h:'Tasks',p:'Choose · Conversation · Lecture'}] },
   writing:   { icon:'✍️', title:'Writing',    sub:'1 Section · ~30 min', adaptive:false,
     info:[{h:'Format',p:'Linear'},{h:'Questions',p:'12 questions'},{h:'Time',p:'~30 min'},{h:'Tasks',p:'Build Sentence · Email · Discussion'}] },
   speaking:  { icon:'🎤', title:'Speaking',   sub:'1 Section · ~20 min', adaptive:false,
@@ -4389,7 +4472,7 @@ function selectMode(m) {
 
 let state = {
   module:1, path:null, questions:[], qi:0, answers:{},
-  timerSec:36*60, timerInterval:null,
+  timerSec:15*60, timerInterval:null,
   m1Score:0, m1Total:0, mode:'practice', section:'reading'
 };
 
@@ -4440,7 +4523,7 @@ function startTest() {
   const isWriting   = selectedSection === 'writing';
   const isSpeaking  = selectedSection === 'speaking';
 
-  const timerSec = (isWriting||isSpeaking) ? 20*60 : isListening ? 20*60 : 36*60;
+  const timerSec = isWriting ? 23*60 : isSpeaking ? 8*60 : isListening ? 15*60 : 15*60;
   const questions = isWriting  ? buildWritingQuestions()
     : isSpeaking ? selectedTest.speaking.map(d=>({type:d.type,data:d}))
     : isListening ? buildListeningQuestions(selectedTest.listening.M1_L) : buildQuestions(selectedTest.reading.M1);
@@ -4456,14 +4539,14 @@ function startTest() {
 
   if (isWriting) {
     document.getElementById('introTitle').textContent = 'Writing Section';
-    document.getElementById('introDesc').textContent = '12 questions · Build a Sentence, Write an Email, and Academic Discussion. You have 30 minutes.';
+    document.getElementById('introDesc').textContent = '12 questions · Build a Sentence, Write an Email, and Academic Discussion. You have 23 minutes.';
   } else if (isSpeaking) {
     document.getElementById('introTitle').textContent = 'Speaking Section';
-    document.getElementById('introDesc').textContent = '11 questions · Listen & Repeat and Take an Interview. You have 20 minutes. Microphone access is required.';
+    document.getElementById('introDesc').textContent = '11 questions · Listen & Repeat and Take an Interview. You have 8 minutes. Microphone access is required.';
   } else {
     document.getElementById('introTitle').textContent = 'Module 1 of 2';
     const tot = displayTotal(state.questions);
-    document.getElementById('introDesc').textContent = `This module is the same for all test-takers. ${tot} questions. You have ${isListening?'20':'36'} minutes.`;
+    document.getElementById('introDesc').textContent = `This module is the same for all test-takers. ${tot} questions. You have 15 minutes.`;
   }
   showScreen('introScreen');
 }
@@ -4472,15 +4555,17 @@ function startModule() {
   document.getElementById('topbar').classList.add('shown');
   document.getElementById('navBar').classList.add('shown');
   const sec = state.section;
-  state.timerSec = (sec==='writing'||sec==='speaking'||sec==='listening') ? 20*60 : 36*60;
+  state.timerSec = sec==='writing' ? 23*60 : sec==='speaking' ? 8*60 : sec==='listening' ? 15*60 : 15*60;
   clearInterval(state.timerInterval);
   state.timerInterval = setInterval(tickTimer, 1000);
   updateTimerDisplay();
   showScreen('questionScreen');
   renderQuestion();
+  saveSession(); // create session record immediately
 }
 
 function beginModule2() {
+  scheduleSave();
   const pct = state.m1Total > 0 ? state.m1Score/state.m1Total : 0;
   state.path = pct >= 0.70 ? 'hard' : 'standard';
   const isListening = state.section === 'listening';
@@ -4502,6 +4587,7 @@ function beginModule2() {
 // ── TIMER ─────────────────────────────────────────────────────────────────────
 function tickTimer() {
   state.timerSec--;
+  if (state.timerSec % 60 === 0) scheduleSave();
   updateTimerDisplay();
   if (state.timerSec <= 0) { clearInterval(state.timerInterval); finishModule(); }
 }
@@ -4623,6 +4709,7 @@ function submitCTW(qi) {
     if (ok) score++;
   });
   state.answers[qi] = {submitted:true, userAnswers, results, score, total:blanks.length};
+  scheduleSave();
   renderCTW(data, qi);
   if(state.mode==='practice'){
     showFeedback(score===blanks.length?'correct':'wrong', `${score} / ${blanks.length} correct`);
@@ -4665,6 +4752,7 @@ function selectOption(qi, sel) {
   const item=state.questions[qi];
   const correct=sel===item.data.answer;
   state.answers[qi]={selected:sel,correct};
+  scheduleSave();
   renderMCQ(item.data,qi);
   if(state.mode==='practice'){
     showFeedback(correct?'correct':'wrong', correct?'Correct!': `Incorrect — the answer is ${String.fromCharCode(65+item.data.answer)}.`);
@@ -4900,6 +4988,7 @@ function selectListenOption(qi, sel) {
   const item = state.questions[qi];
   const correct = sel === item.data.answer;
   state.answers[qi] = {selected:sel, correct};
+  scheduleSave();
   renderListenChoose(item.data, qi);
   if(state.mode==='practice'){
     showFeedback(correct?'correct':'wrong', correct?'Correct!' : `Incorrect — the answer is ${String.fromCharCode(65+item.data.answer)}.`);
@@ -5641,6 +5730,151 @@ let fullTest = {
   results: {},    // {reading: {band, reviewHtml}, ...}
 };
 
+// ── Session persistence ──────────────────────────────────────────────────────
+let _currentSessionId = null;
+let _saveSessionTimer = null;
+
+async function saveSession() {
+  if (!currentUser || !state.questions.length) return;
+  const testIdx = TESTS.indexOf(selectedTest);
+  const payload = {
+    user_id: currentUser.id,
+    test_idx: testIdx,
+    section: state.section,
+    mode: state.mode,
+    module: state.module,
+    path: state.path,
+    qi: state.qi,
+    answers: state.answers,
+    timer_sec: state.timerSec,
+    m1_score: state.m1Score,
+    m1_total: state.m1Total,
+    full_test: fullTest.active ? { active: true, sectionIdx: fullTest.sectionIdx, results: fullTest.results } : null,
+    completed: false,
+    updated_at: new Date().toISOString()
+  };
+  if (_currentSessionId) {
+    await supa.from('sessions').update(payload).eq('id', _currentSessionId);
+  } else {
+    const { data } = await supa.from('sessions').insert(payload).select('id').single();
+    if (data) _currentSessionId = data.id;
+  }
+}
+
+async function markSessionComplete() {
+  if (!_currentSessionId) return;
+  await supa.from('sessions').update({ completed: true, updated_at: new Date().toISOString() }).eq('id', _currentSessionId);
+  _currentSessionId = null;
+}
+
+function scheduleSave() {
+  clearTimeout(_saveSessionTimer);
+  _saveSessionTimer = setTimeout(saveSession, 2000);
+}
+
+async function loadPendingSession() {
+  if (!currentUser) return;
+  const { data } = await supa
+    .from('sessions')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .eq('completed', false)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) { document.getElementById('resumeBanner').style.display = 'none'; return; }
+
+  // Show the banner
+  const sectionLabel = { reading:'Reading', listening:'Listening', writing:'Writing', speaking:'Speaking' }[data.section] || data.section;
+  const testName = TESTS[data.test_idx] ? `Test ${data.test_idx + 1}` : 'Test';
+  const modeLabel = data.full_test?.active ? 'Full Test' : (data.mode === 'test' ? 'Test Mode' : 'Practice');
+  const mins = Math.ceil(data.timer_sec / 60);
+  const pct = data.qi && data.questions_total ? Math.round(data.qi / data.questions_total * 100) : null;
+
+  document.getElementById('resumeDesc').textContent =
+    data.full_test?.active
+      ? `Full Test — ${sectionLabel} Section (${testName})`
+      : `${sectionLabel} · ${testName} · ${modeLabel}`;
+  document.getElementById('resumeSub').textContent =
+    `Question ${data.qi + 1} · ${mins} min remaining · ${new Date(data.updated_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`;
+
+  // Store for resumeSession()
+  window._pendingSession = data;
+  document.getElementById('resumeBanner').style.display = 'block';
+}
+
+async function resumeSession() {
+  const s = window._pendingSession;
+  if (!s) return;
+  document.getElementById('resumeBanner').style.display = 'none';
+  _currentSessionId = s.id;
+
+  // Restore selected test & section
+  if (s.test_idx >= 0 && s.test_idx < TESTS.length) {
+    selectTest(s.test_idx);
+  }
+  selectedSection = s.section;
+  selectedMode = s.mode;
+
+  // Restore fullTest state if applicable
+  if (s.full_test?.active) {
+    fullTest = { active: true, sectionIdx: s.full_test.sectionIdx, results: s.full_test.results || {} };
+  }
+
+  // Rebuild questions
+  const isSpeaking  = s.section === 'speaking';
+  const isWriting   = s.section === 'writing';
+  const isListening = s.section === 'listening';
+
+  let questions;
+  if (isWriting)   questions = buildWritingQuestions();
+  else if (isSpeaking) questions = selectedTest.speaking.map(d=>({type:d.type,data:d}));
+  else if (s.module === 2) {
+    const path = s.path || 'standard';
+    const data = isListening
+      ? (path==='hard' ? selectedTest.listening.M2_HARD_L : selectedTest.listening.M2_EASY_L)
+      : (path==='hard' ? selectedTest.reading.M2_HARD : selectedTest.reading.M2_STANDARD);
+    questions = isListening ? buildListeningQuestions(data) : buildQuestions(data);
+  } else {
+    questions = isListening ? buildListeningQuestions(selectedTest.listening.M1_L) : buildQuestions(selectedTest.reading.M1);
+  }
+
+  state = {
+    module: s.module || 1,
+    path: s.path,
+    questions,
+    qi: s.qi || 0,
+    answers: s.answers || {},
+    timerSec: s.timer_sec || 15*60,
+    timerInterval: null,
+    m1Score: s.m1_score || 0,
+    m1Total: s.m1_total || 0,
+    mode: s.mode,
+    section: s.section
+  };
+
+  // Go straight into the question
+  document.getElementById('topbarSectionLabel').textContent =
+    isWriting ? 'Writing Section' : isSpeaking ? 'Speaking Section' :
+    isListening ? 'Listening Section' : 'Reading Section';
+  document.getElementById('topbar').classList.add('shown');
+  document.getElementById('navBar').classList.add('shown');
+  state.timerInterval = setInterval(tickTimer, 1000);
+  updateTimerDisplay();
+  showScreen('questionScreen');
+  renderQuestion();
+}
+
+async function discardSession() {
+  const s = window._pendingSession;
+  if (s) {
+    await supa.from('sessions').update({ completed: true }).eq('id', s.id);
+  }
+  window._pendingSession = null;
+  document.getElementById('resumeBanner').style.display = 'none';
+}
+
 function startFullTest() {
   fullTest = { active: true, sectionIdx: 0, results: {} };
   selectedMode = 'test';
@@ -5735,7 +5969,8 @@ function _buildReadingListeningReviewHtml() {
 function restartTest() {
   clearInterval(state.timerInterval);
   stopSpeech();
-  state={module:1,path:null,questions:[],qi:0,answers:{},timerSec:36*60,timerInterval:null,m1Score:0,m1Total:0,paused:false,mode:'practice',section:'reading'};
+  markSessionComplete();
+  state={module:1,path:null,questions:[],qi:0,answers:{},timerSec:15*60,timerInterval:null,m1Score:0,m1Total:0,paused:false,mode:'practice',section:'reading'};
   selectedMode='practice'; selectedSection='reading';
   fullTest={ active:false, sectionIdx:0, results:{} };
   document.getElementById('progressfill').style.width='0%';
