@@ -307,16 +307,7 @@
         <button onclick="sendInvite()" style="padding:11px 28px;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-size:0.93rem;font-weight:700;cursor:pointer;white-space:nowrap;">Send Invite</button>
       </div>
       <div id="inviteMsg" style="display:none;margin-top:12px;font-size:0.85rem;padding:8px 12px;border-radius:6px;"></div>
-      <!-- Service key prompt (shown only when needed) -->
-      <div id="serviceKeyBox" style="display:none;margin-top:16px;padding:16px;background:#f7f9f7;border-radius:8px;border:1px solid #d8e0d8;">
-        <p style="margin:0 0 10px;font-size:0.82rem;color:#555;">🔑 To send invite emails, enter your Supabase <strong>service_role</strong> key once. It stays in memory only — never saved or sent anywhere.</p>
-        <div style="display:flex;gap:8px;">
-          <input id="serviceKeyInput" type="password" placeholder="eyJhbGci..."
-            style="flex:1;padding:9px 12px;border:1px solid #d8e0d8;border-radius:6px;font-size:0.82rem;font-family:monospace;outline:none;"
-            onkeydown="if(event.key==='Enter')saveServiceKey()">
-          <button onclick="saveServiceKey()" style="padding:9px 18px;background:#2d7a4f;color:#fff;border:none;border-radius:6px;font-size:0.82rem;font-weight:700;cursor:pointer;">Save for session</button>
-        </div>
-      </div>
+
     </div>
 
     <!-- Student table -->
@@ -3828,7 +3819,7 @@ const TRANSITION_MSGS = {
 
 // Called on page load — check for existing session
 let isPasswordRecovery = false;
-let _serviceKey = null; // set at runtime by teacher, never hardcoded
+
 let isInvite = false;
 
 async function initAuth() {
@@ -4166,16 +4157,6 @@ function renderAccessTable(profiles) {
   }).join('');
 }
 
-function saveServiceKey() {
-  const val = document.getElementById('serviceKeyInput').value.trim();
-  if (!val) return;
-  _serviceKey = val;
-  document.getElementById('serviceKeyInput').value = '';
-  document.getElementById('serviceKeyBox').style.display = 'none';
-  const msg = document.getElementById('inviteMsg');
-  showMsg(msg, '✅ Service key saved for this session. Try sending the invite again.', 'success');
-}
-
 async function sendInvite() {
   const email  = document.getElementById('inviteEmail').value.trim();
   const days   = parseInt(document.getElementById('invitePeriod').value);
@@ -4200,23 +4181,12 @@ async function sendInvite() {
     return;
   }
 
-  // New user — need service key to send invite email
-  if (!_serviceKey) {
-    document.getElementById('serviceKeyBox').style.display = 'block';
-    showMsg(msg, '🔑 Service key needed to send invite emails. Enter it below.', 'warn');
-    return;
-  }
-
-  // Send Supabase invite via admin API
+  // New user — send invite via Cloudflare Worker
   showMsg(msg, '⏳ Sending invite…', 'info');
   try {
-    const res = await fetch(`https://bpvwjcbtuesmipkdrovw.supabase.co/auth/v1/admin/invite`, {
+    const res = await fetch('https://invite-toefl.avi-yulzari.workers.dev/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': _serviceKey,
-        'Authorization': 'Bearer ' + _serviceKey
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
     });
     const result = await res.json();
@@ -4225,7 +4195,7 @@ async function sendInvite() {
       return;
     }
 
-    // Store pending access — will be claimed when student logs in
+    // Store access in profiles so it's ready when student logs in
     const userId = result.id;
     if (userId) {
       await supa.from('profiles').upsert({
