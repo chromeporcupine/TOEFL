@@ -594,6 +594,7 @@
 // ── SUPABASE CLIENT (must be first) ───────────────────────────────────────────
 const SUPA_URL = 'https://bpvwjcbtuesmipkdrovw.supabase.co';
 const SUPA_KEY = 'sb_publishable_twDRomPjVGzX6r4gSpgVzw_b4JGIZdL';
+const SUPA_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwdndqY2J0dWVzbWlwa2Ryb3Z3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzIxNzI3NywiZXhwIjoyMDg4NzkzMjc3fQ.1vQKKkWiAmHE3vSSYqVikuA5FG6T7tqxT9xkT7p18DY';
 var supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 let currentUser  = null;
@@ -4181,16 +4182,20 @@ async function sendInvite() {
     return;
   }
 
-  // New user — send invite via Cloudflare Worker
+  // New user — send invite directly via Supabase admin API
   showMsg(msg, '⏳ Sending invite…', 'info');
   try {
-    const res = await fetch('https://invite-toefl.avi-yulzari.workers.dev/', {
+    const inviteRes = await fetch(SUPA_URL + '/auth/v1/invite', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_SERVICE_KEY,
+        'Authorization': 'Bearer ' + SUPA_SERVICE_KEY,
+      },
+      body: JSON.stringify({ email: email, data: {} })
     });
-    const result = await res.json();
-    if (!res.ok) {
+    const result = await inviteRes.json();
+    if (!inviteRes.ok) {
       showMsg(msg, '❌ Invite failed: ' + (result.msg || result.message || JSON.stringify(result)), 'error');
       return;
     }
